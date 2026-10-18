@@ -116,7 +116,7 @@ func BuildStatsTab(state *AppState) fyne.CanvasObject {
 
 
 	// PDF 1: Ceza Alan Öğrenciler Raporu
-	pdfRosterBtn := widget.NewButtonWithIcon("📄 PDF CEZA ALANLAR LİSTESİ", theme.DocumentIcon(), func() {
+	pdfRosterBtn := widget.NewButtonWithIcon("PDF CEZA ALANLAR LİSTESİ", theme.DocumentIcon(), func() {
 		if len(currentList) == 0 {
 			showError(state.Window, fmt.Errorf("Yazdırılacak ceza kaydı bulunamadı"))
 			return
@@ -148,7 +148,7 @@ func BuildStatsTab(state *AppState) fyne.CanvasObject {
 	pdfRosterBtn.Importance = widget.SuccessImportance
 
 	// PDF 2: Ceza İstatistik Raporu
-	pdfStatsBtn := widget.NewButtonWithIcon("📄 PDF DÖNEMLİK İSTATİSTİK RAPORU", theme.DocumentIcon(), func() {
+	pdfStatsBtn := widget.NewButtonWithIcon("PDF DÖNEMLİK İSTATİSTİK RAPORU", theme.DocumentIcon(), func() {
 		if len(semesterStats) == 0 {
 			showError(state.Window, fmt.Errorf("İstatistik verisi bulunamadı"))
 			return

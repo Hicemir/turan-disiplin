@@ -148,7 +148,7 @@ func LoadConfig() (*AppConfig, error) {
 	cfg := &AppConfig{
 		DefaultYear: "2026 - 2027",
 		UIMode:      "modern",
-		ThemeMode:   "light",
+		ThemeMode:   "", // empty indicates unconfigured -> auto-detect system theme
 		FontSize:    15.0,
 	}
 	data, err := os.ReadFile(cfgPath)
@@ -157,9 +157,6 @@ func LoadConfig() (*AppConfig, error) {
 	}
 	if cfg.UIMode == "" {
 		cfg.UIMode = "modern"
-	}
-	if cfg.ThemeMode == "" {
-		cfg.ThemeMode = "light"
 	}
 	if cfg.FontSize < 13 {
 		cfg.FontSize = 15.0

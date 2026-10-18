@@ -172,7 +172,7 @@ func BuildFormsTab(state *AppState) fyne.CanvasObject {
 
 
 	// Big Action Button: "PDF Oluştur ve Aç"
-	pdfBtn := widget.NewButtonWithIcon("📄 PDF OLUŞTUR VE AÇ", theme.DocumentIcon(), func() {
+	pdfBtn := widget.NewButtonWithIcon("PDF OLUŞTUR VE AÇ", theme.DocumentIcon(), func() {
 		if selectedStudent == nil {
 			showError(state.Window, fmt.Errorf("Lütfen listeden bir öğrenci seçiniz"))
 			return

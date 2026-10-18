@@ -76,7 +76,7 @@ func BuildMinutesTab(state *AppState) fyne.CanvasObject {
 		decisionsText.SetText(decisionsText.Text + sb.String())
 	})
 
-	pdfMeetingBtn := widget.NewButtonWithIcon("📄 PDF OLUŞTUR VE AÇ (TOPLANTI TUTANAĞI)", theme.DocumentIcon(), func() {
+	pdfMeetingBtn := widget.NewButtonWithIcon("PDF OLUŞTUR VE AÇ (TOPLANTI TUTANAĞI)", theme.DocumentIcon(), func() {
 		rawLines := strings.Split(decisionsText.Text, "\n")
 		var decs []string
 		for _, l := range rawLines {
@@ -118,7 +118,7 @@ func BuildMinutesTab(state *AppState) fyne.CanvasObject {
 			"8. Ceza Tebligat Belgeleri (Öğrenci ve Veli) | 2",
 	)
 
-	pdfDiziBtn := widget.NewButtonWithIcon("📄 PDF OLUŞTUR VE AÇ (DİZİ PUSULASI)", theme.DocumentIcon(), func() {
+	pdfDiziBtn := widget.NewButtonWithIcon("PDF OLUŞTUR VE AÇ (DİZİ PUSULASI)", theme.DocumentIcon(), func() {
 		lines := strings.Split(diziEntries.Text, "\n")
 		var items []model.DiziItem
 		for _, l := range lines {

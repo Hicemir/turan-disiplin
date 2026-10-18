@@ -113,7 +113,7 @@ func BuildNoticesTab(state *AppState) fyne.CanvasObject {
 
 
 	// Action 1: Öğrenci Karar Tebligat Pusulası PDF
-	pdfOgrenciTebligatBtn := widget.NewButtonWithIcon("📄 PDF OLUŞTUR VE AÇ (ÖĞRENCİ TEBLİGAT PUSULASI)", theme.DocumentIcon(), func() {
+	pdfOgrenciTebligatBtn := widget.NewButtonWithIcon("PDF OLUŞTUR VE AÇ (ÖĞRENCİ TEBLİGAT PUSULASI)", theme.DocumentIcon(), func() {
 		if selectedStudent == nil {
 			showError(state.Window, fmt.Errorf("Lütfen listeden bir öğrenci seçiniz"))
 			return
@@ -163,7 +163,7 @@ func BuildNoticesTab(state *AppState) fyne.CanvasObject {
 	pdfOgrenciTebligatBtn.Importance = widget.SuccessImportance
 
 	// Action 2: Veli Karar Tebligat Pusulası PDF
-	pdfVeliTebligatBtn := widget.NewButtonWithIcon("📄 PDF OLUŞTUR VE AÇ (VELİ TEBLİGAT PUSULASI)", theme.DocumentIcon(), func() {
+	pdfVeliTebligatBtn := widget.NewButtonWithIcon("PDF OLUŞTUR VE AÇ (VELİ TEBLİGAT PUSULASI)", theme.DocumentIcon(), func() {
 		if selectedStudent == nil {
 			showError(state.Window, fmt.Errorf("Lütfen listeden bir öğrenci seçiniz"))
 			return

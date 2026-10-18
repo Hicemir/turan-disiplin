@@ -8,7 +8,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
@@ -124,11 +123,8 @@ func buildLegacyHub(state *AppState) fyne.CanvasObject {
 	settingsBtn := leftBtn("Ayarlar & Tema", theme.SettingsIcon(), func() {
 		state.NavigateTo("settings")
 	})
-	aboutBtn := leftBtn("Hakkında", theme.InfoIcon(), func() {
-		dialog.ShowInformation("Hakkında", "OKUL EVRAK\nÖğrenci Disiplin ve Davranış Değerlendirme Sistemi\n(Go + Fyne)", state.Window)
-	})
-	helpBtn := leftBtn("Yardım Videoları", theme.MediaPlayIcon(), func() {
-		showInfo(state.Window, "Yardım", "Kullanım kılavuzu ve şablonlar 'Çıktı Klasörü' içinde yer almaktadır.")
+	helpBtn := leftBtn("Yardım", theme.HelpIcon(), func() {
+		ShowHelpDialog(state)
 	})
 
 	leftCol := container.NewVBox(
@@ -139,7 +135,6 @@ func buildLegacyHub(state *AppState) fyne.CanvasObject {
 		restoreBtn,
 		modernSwitchBtn,
 		settingsBtn,
-		aboutBtn,
 		helpBtn,
 	)
 
@@ -222,12 +217,14 @@ func buildLegacyHub(state *AppState) fyne.CanvasObject {
 		nil, nil,
 		widget.NewLabelWithStyle("OKUL EVRAK", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 		container.NewHBox(
-			widget.NewLabelWithStyle("Öğretim Yılı: "+state.AcademicYear, fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+			widget.NewButtonWithIcon("Öğretim Yılı: "+state.AcademicYear, theme.HistoryIcon(), func() {
+				ShowAcademicYearPicker(state)
+			}),
 			widget.NewSeparator(),
-			widget.NewButtonWithIcon("📁 Çıktılar", theme.FolderOpenIcon(), func() {
+			widget.NewButtonWithIcon("Çıktılar", theme.FolderOpenIcon(), func() {
 				_ = pdf.OpenPDF(".")
 			}),
-			widget.NewButtonWithIcon("⚙️ Modern Görünüm", theme.ViewRefreshIcon(), func() {
+			widget.NewButtonWithIcon("Modern Görünüm", theme.ViewRefreshIcon(), func() {
 				state.SetUIMode("modern")
 			}),
 		),

@@ -357,7 +357,7 @@ func BuildVerdictTab(state *AppState) fyne.CanvasObject {
 	saveVerdictBtn.Importance = widget.HighImportance
 
 	// Prominent "PDF Oluştur ve Aç" Button
-	pdfBtn := widget.NewButtonWithIcon("📄 PDF OLUŞTUR VE AÇ (EK-1 / EK-10)", theme.DocumentIcon(), func() {
+	pdfBtn := widget.NewButtonWithIcon("PDF OLUŞTUR VE AÇ (EK-1 / EK-10)", theme.DocumentIcon(), func() {
 		if selectedIncStudent == nil || selectedIncident == nil {
 			showError(state.Window, fmt.Errorf("Lütfen önce olay ve öğrenci seçiniz"))
 			return

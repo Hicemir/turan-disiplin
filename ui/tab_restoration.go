@@ -125,7 +125,7 @@ func BuildRestorationTab(state *AppState) fyne.CanvasObject {
 	applyBtn.Importance = widget.HighImportance
 
 	// Prominent PDF Generation Button
-	pdfBtn := widget.NewButtonWithIcon("📄 PDF OLUŞTUR VE AÇ (SENE SONU ÇİZELGESİ / RAPORU)", theme.DocumentIcon(), func() {
+	pdfBtn := widget.NewButtonWithIcon("PDF OLUŞTUR VE AÇ (SENE SONU ÇİZELGESİ / RAPORU)", theme.DocumentIcon(), func() {
 		if len(penalizedList) == 0 {
 			showError(state.Window, fmt.Errorf("Bu öğretim yılına ait ceza/yaptırım kaydı bulunmamaktadır"))
 			return

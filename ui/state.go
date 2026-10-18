@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/theme"
 
 	"okulevrak/config"
 	"okulevrak/model"
@@ -78,8 +79,15 @@ func InitState(a fyne.App, w fyne.Window) (*AppState, error) {
 	// Apply configured theme on startup
 	if a != nil {
 		tMode := cfg.ThemeMode
-		if cfg.UIMode == "legacy" && (tMode == "" || tMode == "light" || tMode == "cream") {
-			tMode = "cream" // default warm cream aesthetic
+		if tMode == "" {
+			// First run: detect OS system theme variant
+			if a.Settings().ThemeVariant() == theme.VariantDark {
+				tMode = "dark"
+			} else {
+				tMode = "light"
+			}
+			cfg.ThemeMode = tMode
+			_ = config.SaveConfig(cfg)
 		}
 		a.Settings().SetTheme(appTheme.NewTurkishTheme(tMode, cfg.FontSize))
 	}

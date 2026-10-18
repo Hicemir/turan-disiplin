@@ -8,7 +8,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
-	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
@@ -154,15 +153,9 @@ func BuildStudentsTab(state *AppState) fyne.CanvasObject {
 	}
 
 
-	// Excel Import Dialog
+	// Excel Import Dialog using native OS file dialog
 	excelBtn := widget.NewButtonWithIcon("Excel'den Öğrenci Yükle (.xlsx / .xls)", theme.DownloadIcon(), func() {
-		fd := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
-			if err != nil || reader == nil {
-				return
-			}
-			filePath := reader.URI().Path()
-			_ = reader.Close()
-
+		SelectExcelFile(state.Window, func(filePath string) {
 			// Prompt with the 3 import modes
 			modeRadio := widget.NewRadioGroup([]string{
 				"1. Sadece Yeni Öğrencileri Ekle (Var olanlara dokunma)",
@@ -213,10 +206,7 @@ func BuildStudentsTab(state *AppState) fyne.CanvasObject {
 				showInfo(state.Window, "İçe Aktarma Tamamlandı", fmt.Sprintf("%d öğrenci başarıyla işlendi.", len(parsed)))
 				state.NotifyChange()
 			}, state.Window)
-		}, state.Window)
-
-		fd.SetFilter(storage.NewExtensionFileFilter([]string{".xlsx", ".xls"}))
-		fd.Show()
+		})
 	})
 	excelBtn.Importance = widget.MediumImportance
 

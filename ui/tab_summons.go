@@ -105,7 +105,7 @@ func BuildSummonsTab(state *AppState) fyne.CanvasObject {
 		return res
 	}
 
-	pdfStudentSummonsBtn := widget.NewButtonWithIcon("📄 PDF OLUŞTUR VE AÇ (ÖĞRENCİ ÇAĞRI PUSULASI)", theme.DocumentIcon(), func() {
+	pdfStudentSummonsBtn := widget.NewButtonWithIcon("PDF OLUŞTUR VE AÇ (ÖĞRENCİ ÇAĞRI PUSULASI)", theme.DocumentIcon(), func() {
 		selectedList := getSelectedStudents()
 		if len(selectedList) == 0 {
 			showError(state.Window, fmt.Errorf("Lütfen en az bir öğrenci işaretleyiniz"))
@@ -134,7 +134,7 @@ func BuildSummonsTab(state *AppState) fyne.CanvasObject {
 	})
 	pdfStudentSummonsBtn.Importance = widget.SuccessImportance
 
-	pdfStudentListBtn := widget.NewButtonWithIcon("📄 PDF ÇAĞRI LİSTESİ OLUŞTUR", theme.DocumentPrintIcon(), func() {
+	pdfStudentListBtn := widget.NewButtonWithIcon("PDF ÇAĞRI LİSTESİ OLUŞTUR", theme.DocumentPrintIcon(), func() {
 		selectedList := getSelectedStudents()
 		if len(selectedList) == 0 {
 			showError(state.Window, fmt.Errorf("Lütfen en az bir öğrenci işaretleyiniz"))
@@ -172,7 +172,7 @@ func BuildSummonsTab(state *AppState) fyne.CanvasObject {
 	agendaText := widget.NewMultiLineEntry()
 	agendaText.SetText("1. Açılış ve yoklama\n2. Hakkında soruşturma açılan öğrencilerin durumlarının görüşülmesi\n3. Kararların alınması ve imzalanması\n4. Kapanış")
 
-	pdfMemberSummonsBtn := widget.NewButtonWithIcon("📄 PDF OLUŞTUR VE AÇ (ÜYE ÇAĞRI PUSULASI)", theme.DocumentIcon(), func() {
+	pdfMemberSummonsBtn := widget.NewButtonWithIcon("PDF OLUŞTUR VE AÇ (ÜYE ÇAĞRI PUSULASI)", theme.DocumentIcon(), func() {
 		lines := strings.Split(agendaText.Text, "\n")
 		var agenda []string
 		for _, l := range lines {

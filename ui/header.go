@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -12,6 +13,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 
 	"okulevrak/pdf"
+	"okulevrak/store"
 )
 
 // BuildHeader creates the persistent senior-friendly top bar
@@ -19,6 +21,7 @@ func BuildHeader(state *AppState) fyne.CanvasObject {
 	title := widget.NewLabelWithStyle("🏛️ OKUL EVRAK", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
 
 	// Academic Year Dropdown
+	state.AcademicYear = store.NormalizeAcademicYear(state.AcademicYear)
 	yearOptions := state.Store.GetAcademicYears()
 	foundCurrent := false
 	for _, y := range yearOptions {
@@ -41,11 +44,11 @@ func BuildHeader(state *AppState) fyne.CanvasObject {
 	// Add Custom Year Button
 	addYearBtn := widget.NewButtonWithIcon("Yeni Yıl", theme.ContentAddIcon(), func() {
 		entry := widget.NewEntry()
-		entry.SetPlaceHolder("Örn: 2027 - 2028")
+		entry.SetPlaceHolder("Örn: 2029 - 2030")
 		dialog.ShowCustomConfirm("Yeni Öğretim Yılı Ekle", "Ekle", "İptal", entry, func(ok bool) {
-			if ok && entry.Text != "" {
-				yearSelect.Options = append(yearSelect.Options, entry.Text)
-				yearSelect.SetSelected(entry.Text)
+			if ok && strings.TrimSpace(entry.Text) != "" {
+				norm := store.NormalizeAcademicYear(entry.Text)
+				state.SetAcademicYear(norm)
 			}
 		}, state.Window)
 	})

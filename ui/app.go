@@ -20,21 +20,23 @@ func BuildMainUI(state *AppState) fyne.CanvasObject {
 			return
 		}
 
-		// Subview Navigation: "KAPAT" in Legacy Mode, "Ana Menüye Dön" in Modern Mode
+		// Subview Navigation: "Geri Dön" in Legacy Mode, "Ana Menüye Dön" in Modern Mode
 		var backBtn *widget.Button
 		if state.Config.UIMode == "legacy" {
-			backBtn = widget.NewButtonWithIcon("❌ KAPAT", theme.CancelIcon(), func() {
+			backBtn = widget.NewButtonWithIcon("Geri Dön", theme.NavigateBackIcon(), func() {
 				state.NavigateTo("hub")
 			})
-			backBtn.Importance = widget.DangerImportance
+			backBtn.Importance = widget.HighImportance
 		} else {
-			backBtn = widget.NewButtonWithIcon("⬅️ Ana Menüye Dön", theme.NavigateBackIcon(), func() {
+			backBtn = widget.NewButtonWithIcon("Ana Menüye Dön", theme.NavigateBackIcon(), func() {
 				state.NavigateTo("hub")
 			})
 			backBtn.Importance = widget.HighImportance
 		}
 
-		yearLbl := widget.NewLabelWithStyle("Öğretim Yılı: "+state.AcademicYear, fyne.TextAlignTrailing, fyne.TextStyle{Bold: true})
+		yearBtn := widget.NewButtonWithIcon("Öğretim Yılı: "+state.AcademicYear, theme.HistoryIcon(), func() {
+			ShowAcademicYearPicker(state)
+		})
 
 		var subContent fyne.CanvasObject
 		var pageTitle string
@@ -87,7 +89,7 @@ func BuildMainUI(state *AppState) fyne.CanvasObject {
 		topBar := container.NewBorder(
 			nil, nil,
 			backBtn,
-			yearLbl,
+			yearBtn,
 			widget.NewLabelWithStyle(pageTitle, fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
 		)
 

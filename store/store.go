@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -305,22 +306,54 @@ func (s *Store) SaveSchoolInfo(info *model.SchoolInfo) error {
 	return err
 }
 
-// AcademicYears returns distinct academic years from students and school_info plus default common years
+// NormalizeAcademicYear standardizes a year string like "2027-2028", "2027 - 2028", "2027/2028" -> "2027 - 2028"
+func NormalizeAcademicYear(raw string) string {
+	raw = strings.TrimSpace(raw)
+	raw = strings.ReplaceAll(raw, "/", "-")
+	parts := strings.Split(raw, "-")
+	if len(parts) == 2 {
+		y1 := strings.TrimSpace(parts[0])
+		y2 := strings.TrimSpace(parts[1])
+		if len(y1) == 4 && len(y2) == 4 {
+			return y1 + " - " + y2
+		}
+	}
+	return raw
+}
+
+// ExtractStartYear parses the starting 4-digit year as an integer for chronological sorting
+func ExtractStartYear(yearStr string) int {
+	yearStr = strings.TrimSpace(yearStr)
+	var num int
+	for _, ch := range yearStr {
+		if ch >= '0' && ch <= '9' {
+			num = num*10 + int(ch-'0')
+			if num >= 1000 && num <= 9999 {
+				return num
+			}
+		} else if num > 0 {
+			break
+		}
+	}
+	return num
+}
+
+// GetAcademicYears returns distinct academic years sorted descending (newest first) with deduplication
 func (s *Store) GetAcademicYears() []string {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
 
 	yearMap := make(map[string]bool)
 	defaults := []string{
-		"2023 - 2024",
-		"2024 - 2025",
-		"2025 - 2026",
-		"2026 - 2027",
-		"2027 - 2028",
 		"2028 - 2029",
+		"2027 - 2028",
+		"2026 - 2027",
+		"2025 - 2026",
+		"2024 - 2025",
+		"2023 - 2024",
 	}
 	for _, y := range defaults {
-		yearMap[y] = true
+		yearMap[NormalizeAcademicYear(y)] = true
 	}
 
 	rows, err := s.db.Query("SELECT DISTINCT academic_year FROM students UNION SELECT DISTINCT academic_year FROM incidents UNION SELECT DISTINCT academic_year FROM school_info")
@@ -328,8 +361,11 @@ func (s *Store) GetAcademicYears() []string {
 		defer rows.Close()
 		for rows.Next() {
 			var y string
-			if err := rows.Scan(&y); err == nil && strings.TrimSpace(y) != "" {
-				yearMap[strings.TrimSpace(y)] = true
+			if err := rows.Scan(&y); err == nil {
+				norm := NormalizeAcademicYear(y)
+				if norm != "" {
+					yearMap[norm] = true
+				}
 			}
 		}
 	}
@@ -338,6 +374,17 @@ func (s *Store) GetAcademicYears() []string {
 	for y := range yearMap {
 		res = append(res, y)
 	}
+
+	// Sort cleanly descending (newest year first: 2028 - 2029, 2027 - 2028, 2026 - 2027...)
+	sort.Slice(res, func(i, j int) bool {
+		yi := ExtractStartYear(res[i])
+		yj := ExtractStartYear(res[j])
+		if yi != yj {
+			return yi > yj
+		}
+		return res[i] > res[j]
+	})
+
 	return res
 }
 
