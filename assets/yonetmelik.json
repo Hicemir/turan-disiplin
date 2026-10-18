@@ -1,0 +1,1170 @@
+{
+  "metadata": {
+    "application": "OkulEvrak - MEB Öğrenci Disiplin ve Davranış Değerlendirme Sistemi",
+    "author": "Hicemir",
+    "version": "1.0.0",
+    "regulation": "Milli Eğitim Bakanlığı Mevzuatı"
+  },
+  "school_types": {
+    "LİSE": {
+      "code": "LİSE",
+      "board_name": "Ödül ve Disiplin",
+      "board_full_title": "ÖDÜL VE DİSİPLİN KURULU",
+      "regulation_name": "MEB Ortaöğretim Kurumları Yönetmeliği",
+      "offense_article_number": "164",
+      "board_establishment_article": {
+        "article": "MADDE 185",
+        "title": "MEB ORTAÖĞRETİM KURUMLARI YÖNETMELİĞİ - Okul öğrenci ödül ve disiplin kurulunun kuruluşu",
+        "text": "MADDE 185- (1) Okul öğrenci ödül ve disiplin kurulu;\n    a) (Değişik ibare:RG-22/2/2025-32821) Müdürün görevlendireceği müdür yardımcısı,\n    b) Her ders yılının ilk ayı içinde öğretmenler kurulunca gizli oyla seçilecek iki öğretmen,\n    c) Onur kurulu ikinci başkanı,\n    ç) Okul aile-birliğinin kendi üyeleri arasından seçeceği bir öğrenci velisinden\noluşturulur."
+      },
+      "offense_categories": [
+        "KINAMA CEZASINI GEREKTİREN DAVRANIŞ",
+        "OKULDAN KISA SÜRELİ UZAKLAŞTIRMA CEZASINI GEREKTİREN DAVRANIŞ",
+        "OKUL DEĞİŞTİRME CEZASINI GEREKTİREN DAVRANIŞ",
+        "ÖRGÜN EĞİTİM DIŞINA ÇIKARMA CEZASINI GEREKTİREN DAVRANIŞ"
+      ],
+      "board_opinions": [
+        "SUÇLU OLDUĞU YÖNÜNDE",
+        "SUÇSUZ OLDUĞU YÖNÜNDE"
+      ],
+      "penalties": [
+        {
+          "name": "SÖZLÜ OLARAK UYARMA",
+          "behavior_point_deduction": 0,
+          "requires_suspension_days": false,
+          "is_regulation_clause_category": false
+        },
+        {
+          "name": "YAZILI OLARAK UYARMA",
+          "behavior_point_deduction": 0,
+          "requires_suspension_days": false,
+          "is_regulation_clause_category": false
+        },
+        {
+          "name": "TOPLUM HİZMETİ",
+          "behavior_point_deduction": 0,
+          "requires_suspension_days": false,
+          "is_regulation_clause_category": false
+        },
+        {
+          "name": "KINAMA",
+          "behavior_point_deduction": 10,
+          "requires_suspension_days": false,
+          "is_regulation_clause_category": true
+        },
+        {
+          "name": "OKULDAN KISA SÜRELİ UZAKLAŞTIRMA",
+          "behavior_point_deduction": 20,
+          "requires_suspension_days": true,
+          "suspension_day_options": [
+            "1 GÜN",
+            "2 GÜN",
+            "3 GÜN",
+            "4 GÜN",
+            "5 GÜN"
+          ],
+          "is_regulation_clause_category": true
+        },
+        {
+          "name": "OKUL DEĞİŞTİRME",
+          "behavior_point_deduction": 40,
+          "requires_suspension_days": false,
+          "is_regulation_clause_category": true
+        },
+        {
+          "name": "ÖRGÜN EĞİTİM DIŞINA ÇIKARMA",
+          "behavior_point_deduction": 80,
+          "requires_suspension_days": false,
+          "is_regulation_clause_category": true
+        }
+      ],
+      "initial_behavior_points": 100
+    },
+    "ORTAOKUL": {
+      "code": "ORTAOKUL",
+      "board_name": "Öğrenci Davranışlarını Değerlendirme",
+      "board_full_title": "ÖĞRENCİ DAVRANIŞLARINI DEĞERLENDİRME KURULU",
+      "regulation_name": "MEB Okul Öncesi Eğitim ve İlköğretim Kurumları Yönetmeliği",
+      "legacy_regulation_name": "MEB İlköğretim Kurumları Yönetmeliği",
+      "offense_article_number": "55",
+      "board_establishment_article": {
+        "article": "MADDE 57",
+        "title": "MEB İLKÖĞRETİM KURUMLARI YÖNETMELİĞİ - Öğrenci davranışlarını değerlendirme kurulu",
+        "text": "MADDE 57 – (1) Ortaokul ve imam-hatip ortaokullarında öğrencilerin ilgi, istek, yetenek ve ihtiyaçlarını belirleyerek olumlu davranışlar kazanmaları ve olumsuz davranışların önlenmesi için öğrenci davranışlarını değerlendirme kurulu oluşturulur.\n(2) Öğrenci davranışlarını değerlendirme kurulu;\n    a) (Değişik:RG-23/10/2014-29154) (Değişik ibare:RG-17/1/2025-32785) Müdürün görevlendireceği müdür yardımcısının başkanlığında,\n    b) Her ders yılının ilk öğretmenler kurulu toplantısında öğretmenler kurulunca gizli oyla seçilecek üç öğretmen,\n    c) Okul-aile birliğinin kendi üyeleri arasından seçeceği bir öğrenci velisinden\noluşturulur."
+      },
+      "offense_categories": [
+        "UYARMA YAPTIRIMI GEREKTİREN DAVRANIŞ",
+        "KINAMA YAPTIRIMI GEREKTİREN DAVRANIŞ",
+        "OKUL DEĞİŞTİRME YAPTIRIMI GEREKTİREN DAVRANIŞ"
+      ],
+      "board_opinions": [
+        "DAVRANIŞIN HATALI OLDUĞU YÖNÜNDE",
+        "DAVRANIŞIN NORMAL OLDUĞU YÖNÜNDE"
+      ],
+      "penalties": [
+        {
+          "name": "UYARMA",
+          "behavior_point_deduction": 0,
+          "requires_suspension_days": false,
+          "is_regulation_clause_category": true
+        },
+        {
+          "name": "KINAMA",
+          "behavior_point_deduction": 0,
+          "requires_suspension_days": false,
+          "is_regulation_clause_category": true
+        },
+        {
+          "name": "OKUL DEĞİŞTİRME",
+          "behavior_point_deduction": 0,
+          "requires_suspension_days": false,
+          "is_regulation_clause_category": true
+        }
+      ],
+      "initial_behavior_points": 100
+    }
+  },
+  "rewards": [
+    "TEŞEKKÜR BELGESİ",
+    "TAKDİR BELGESİ",
+    "ÜSTÜN BAŞARI BELGESİ",
+    "ONUR BELGESİ"
+  ],
+  "student_profile_options": {
+    "olaydaki_durumu": [
+      "SUÇLANAN ÖĞRENCİ",
+      "MAĞDUR / ŞİKAYETÇİ ÖĞRENCİ",
+      "BİLGİSİNE BAŞVURULACAK ÖĞRENCİ"
+    ],
+    "cinsiyet": [
+      "KIZ",
+      "ERKEK"
+    ],
+    "yatililik_durumu": [
+      "GÜNDÜZLÜ",
+      "PANSİYON / YATILI"
+    ],
+    "basari_durumu": [
+      "İYİ",
+      "ORTA",
+      "ZAYIF"
+    ],
+    "saglik_durumu": [
+      "NORMAL",
+      "RUHSAL HASTALIĞI VAR",
+      "BEDENSEL HASTALIĞI VAR",
+      "SÜREĞEN HASTALIĞI VAR"
+    ],
+    "ekonomik_durum": [
+      "İYİ",
+      "NORMAL",
+      "ÇOK İYİ",
+      "ZAYIF",
+      "ÇOK ZAYIF"
+    ],
+    "nerede_kaliyor": [
+      "AİLESİNİN YANINDA KALIYOR",
+      "AKRABASININ YANINDA KALIYOR",
+      "DEVLET YURDUNDA KALIYOR",
+      "ÖZEL YURTTA KALIYOR",
+      "ARKADAŞLARIYLA EVDE KALIYOR",
+      "KENDİSİ AYRI EVDE KALIYOR"
+    ],
+    "anne_baba_sag": [
+      "ANNE BABA SAĞ",
+      "ANNE SAĞ BABA ÖLÜ",
+      "BABA SAĞ ANNE ÖLÜ",
+      "ANNE VE BABA ÖLÜ"
+    ],
+    "anne_baba_oz": [
+      "ANNE VE BABA ÖZ",
+      "ANNE ÖZ BABA ÜVEY",
+      "BABA ÖZ ANNE ÜVEY",
+      "ANNE VE BABA ÜVEY"
+    ],
+    "nerede_okuyor": [
+      "AİLESİNİN YANINDA OKUYOR",
+      "GÜNÜBİRLİK GELİP GİDİYOR",
+      "AKRABASININ YANINDA OKUYOR"
+    ],
+    "buyudugu_cevre": [
+      "ŞEHİR MERKEZİ",
+      "İLÇE MERKEZİ",
+      "KASABA",
+      "KÖY"
+    ],
+    "daha_once_ceza_aldimi": [
+      "CEZA ALMADI",
+      "CEZA ALDI"
+    ],
+    "daha_once_yaptirim_aldimi": [
+      "YAPTIRIM UYGULANMADI",
+      "YAPTIRIM UYGULANDI"
+    ],
+    "anne_baba_egitim": [
+      "İLKOKUL",
+      "ORTAOKUL",
+      "LİSE",
+      "ÜNİVERSİTE",
+      "YÜKSEK LİSANS",
+      "OKUMA YAZMA BİLMİYOR"
+    ],
+    "evet_hayir": [
+      "EVET",
+      "HAYIR"
+    ],
+    "oz_uvey": [
+      "ÖZ",
+      "ÜVEY"
+    ],
+    "default_olay_ozeti": "SUÇUNU KABUL EDİYOR"
+  },
+  "verdict_templates": {
+    "LİSE": {
+      "not_guilty": "{KURULADI} KURULUMUZCA YAPILAN İNCELEME, ARAŞTIRMA VE SORUŞTURMA NETİCESİNDE SUÇSUZ OLDUĞUNA KANAAT GETİRİLMİŞ, HERHANGİ BİR CEZAİ İŞLEM UYGULANMAMASINA OY BİRLİĞİ İLE KARAR VERİLMİŞTİR.",
+      "verbal_warning": "MEB ORTAÖĞRETİM KURUMLARI YÖNETMELİĞİNİN {yönmaddesi} ({yönaçıklama}) BENDİNE GÖRE {yönceza} CEZASINI GEREKTİREN FİİL VE DAVRANIŞLARDAN OLDUĞUNDAN  ANCAK {hafifletennedenlar} {siddetlendirennedenler} NEDENLERİ DİKKATE ALINARAK SÖZLÜ OLARAK UYARILMASINA OY BİRLİĞİ İLE KARAR VERİLMİŞTİR.",
+      "community_service": "MEB ORTAÖĞRETİM KURUMLARI YÖNETMELİĞİNİN {yönmaddesi} ({yönaçıklama}) BENDİNE GÖRE {yönceza} CEZASINI GEREKTİREN FİİL VE DAVRANIŞLARDAN OLDUĞUNDAN  ANCAK {hafifletennedenlar} {siddetlendirennedenler} NEDENLERİ DİKKATE ALINARAK BİR TOPLUM HİZMETİ VERİLMESİNE OY BİRLİĞİ İLE KARAR VERİLMİŞTİR.",
+      "same_penalty_without_suspension_days": "1. MEB ORTAÖĞRETİM KURUMLARI YÖNETMELİĞİNİN {yönmaddesi} ({yönaçıklama}) BENDİNE GÖRE {yönceza} CEZASINI GEREKTİREN FİİL VE DAVRANIŞLARDAN OLDUĞUNDAN {cezagünsayısı} {verilenceza} CEZASI VERİLMESİNE,\r\nOY BİRLİĞİ İLE KARAR VERİLMİŞTİR.",
+      "same_penalty_with_suspension_days": "1. MEB ORTAÖĞRETİM KURUMLARI YÖNETMELİĞİNİN {yönmaddesi} ({yönaçıklama}) BENDİNE GÖRE {yönceza} CEZASINI GEREKTİREN FİİL VE DAVRANIŞLARDAN OLDUĞUNDAN {cezagünsayısı} {verilenceza} CEZASI VERİLMESİNE,\r\n2. CEZANIN {cezauygulamatarihi} TARİHİNDE/TARİHLERİNDE UYGULANMASINA\r\nOY BİRLİĞİ İLE KARAR VERİLMİŞTİR.",
+      "modified_penalty_without_suspension_days": "1. MEB ORTAÖĞRETİM KURUMLARI YÖNETMELİĞİNİN {yönmaddesi} ({yönaçıklama}) BENDİNE GÖRE {yönceza} CEZASINI GEREKTİREN FİİL VE DAVRANIŞLARDAN OLDUĞUNDAN  ANCAK {hafifletennedenlar} {siddetlendirennedenler} NEDENLERİ DİKKATE ALINARAK {cezagünsayısı} {verilenceza} CEZASI VERİLMESİNE,\r\nOY BİRLİĞİ İLE KARAR VERİLMİŞTİR.",
+      "modified_penalty_with_suspension_days": "1. MEB ORTAÖĞRETİM KURUMLARI YÖNETMELİĞİNİN {yönmaddesi} ({yönaçıklama}) BENDİNE GÖRE {yönceza} CEZASINI GEREKTİREN FİİL VE DAVRANIŞLARDAN OLDUĞUNDAN  ANCAK {hafifletennedenlar} {siddetlendirennedenler} NEDENLERİ DİKKATE ALINARAK {cezagünsayısı} {verilenceza} CEZASI VERİLMESİNE,\r\n2. CEZANIN {cezauygulamatarihi} TARİHİNDE/TARİHLERİNDE UYGULANMASINA,\r\nOY BİRLİĞİ İLE KARAR VERİLMİŞTİR.",
+      "prior_penalty_item": "{ögretimyılı} Öğretim Yılı {verilenceza} Cezası ",
+      "default_evidence": "{kişi} nın {tarihsayı} tarih ve sayılı dilekçesi"
+    },
+    "ORTAOKUL": {
+      "normal_behavior": "ÖĞRENCİ DAVRANIŞLARINI DEĞERLENDİRME KURULUMUZCA YAPILAN İNCELEME, ARAŞTIRMA VE SORUŞTURMA NETİCESİNDE ÖĞRENCİNİN DAVRANIŞININ HATALI OLMADIĞINA KANAAT GETİRİLMİŞ, HERHANGİ BİR YAPTIRIM UYGULANMAMASINA OY BİRLİĞİ İLE KARAR VERİLMİŞTİR.",
+      "faulty_behavior": "MEB OKUL ÖNCESİ EĞİTİM VE İLKÖĞRETİM KURUMLARI YÖNETMELİĞİNİN {yönmaddesi} ({yönceza}) BENDİNE GÖRE {verilenceza} YAPTIRIMINI GEREKTİREN FİİL VE DAVRANIŞLARDAN OLDUĞUNDAN  ANCAK {hafifletennedenlar} {siddetlendirennedenler} NEDENLERİ DİKKATE ALINARAK {verilenceza} YAPTIRIMI UYGULANMASINA OY BİRLİĞİ İLE KARAR VERİLMİŞTİR.",
+      "prior_penalty_item": "{ögretimyılı} Öğretim Yılı {verilenceza} Cezası ",
+      "default_evidence": "{kişi} nın {tarihsayı} tarih ve sayılı dilekçesi"
+    }
+  },
+  "document_templates": {
+    "antet_example": "T.C.\nÇANKAYA KAYMAKAMLIĞI\nAtatürk Anadolu Lisesi Müdürlüğü",
+    "footer": "ADRES: {Adres}\r\nTEL NO: {TelNo}\r\nFAX NO: {FaxNo}",
+    "ifade_ve_bilgi_toplama_tutanaklari": {
+      "ifade_tutanagi": {
+        "title": "İFADE TUTANAĞI",
+        "event_prefix": "OLAY: \r\n{ifadeMetni}",
+        "ruled_lines": 35
+      },
+      "savunma_tutanagi": {
+        "title": "SAVUNMA TUTANAĞI",
+        "event_prefix": "OLAY: \r\n{ifadeMetni}",
+        "ruled_lines": 35
+      },
+      "bilgi_toplama_olay": {
+        "title": "{KURULADI} KURULU BİLGİ TOPLAMA FORMU - Olay",
+        "sections": [
+          {
+            "heading": "Olayla İlgili Bilgilerim:",
+            "ruled_lines": 16
+          },
+          {
+            "heading": "Arkadaşım Hakkındaki Görüşlerim:",
+            "ruled_lines": 16
+          }
+        ]
+      },
+      "bilgi_toplama_ogretmen": {
+        "title": "{KURULADI} KURULU BİLGİ TOPLAMA FORMU - Öğretmen",
+        "sections": [
+          {
+            "heading": "Dersimdeki Tutumu:",
+            "ruled_lines": 12
+          },
+          {
+            "heading": "Ders Dışı Faaliyetleri:",
+            "ruled_lines": 12
+          },
+          {
+            "heading": "Arkadaşları İle İlişkisi:",
+            "ruled_lines": 12
+          }
+        ]
+      },
+      "bilgi_toplama_sinif_rehber_ogretmen": {
+        "title": "{KURULADI} KURULU BİLGİ TOPLAMA FORMU - Sınıf Rehber Öğretmeni",
+        "sections": [
+          {
+            "heading": "Kişisel Özellikleri:",
+            "ruled_lines": 18
+          },
+          {
+            "heading": "Sosyal Özellikleri:",
+            "ruled_lines": 18
+          }
+        ]
+      },
+      "bilgi_toplama_veli": {
+        "title": "{KURULADI} KURULU VELİ BİLGİ TOPLAMA FORMU",
+        "sections": [
+          {
+            "heading": "Öğrenci Hakkındaki Görüşlerim:",
+            "ruled_lines": 34
+          }
+        ]
+      },
+      "bilgi_toplama_ogrenci": {
+        "title": "{KURULADI} KURULU BİLGİ TOPLAMA FORMU - Öğrenci",
+        "sections": [
+          {
+            "heading": "Dersteki Davranışları:",
+            "ruled_lines": 12
+          },
+          {
+            "heading": "Teneffüslerdeki Davranışları:",
+            "ruled_lines": 12
+          },
+          {
+            "heading": "Okul Dışındaki Davranışları:",
+            "ruled_lines": 12
+          }
+        ]
+      },
+      "ek_sure_talep_formu": {
+        "title": "{KURULADI} KURULU\r\nOLAY EK SÜRE TALEP FORMU",
+        "recipient": "{OKULADI} MÜDÜRLÜĞÜNE",
+        "body_lise": "            Yukarıda açıklanan olayla ilgili inceleme ve soruşturmanın tamamlanabilmesi için MEB Ortaöğretim Kurumları Yönetmeliğinin 188. maddesinin 3. fıkrası gereğince ek süreye ihtiyaç vardır.\r\n            Gereğini arz ederim.",
+        "body_ortaokul": "            Yukarıda açıklanan olayla ilgili inceleme ve soruşturmanın tamamlanabilmesi için ek süreye ihtiyaç vardır.\r\n            Gereğini arz ederim.",
+        "approval_block": "O L U R\r\n{Tarih}\r\n\r\n\r\n{Müdüradı}\r\nOkul Müdürü"
+      },
+      "sikayet_formu": {
+        "title": "Ş İ K A Y E T   F O R M U",
+        "referral_text": "            Yukarıda özeti yazılı şikayet konusunun Rehberlik ve Psikolojik Danışma Servisi / {KurulAdı} Kurulu tarafından incelenerek gereğinin yapılmasını rica ederim."
+      },
+      "sozlu_uyari_tutanagi": {
+        "title": "S Ö Z L Ü   U Y A R I   T U T A N A Ğ I",
+        "body": "            Yukarıda kimlik bilgileri yazılı öğrenciye okul kurallarına uyması, ders ve ders dışı etkinliklerin akışını bozmaması, arkadaşlarına ve öğretmenlerine karşı saygılı olması hususunda sözlü uyarıda bulunulmuştur.\r\n\r\n            İş bu tutanak tarafımızdan imza altına alınmıştır."
+      },
+      "ogrenci_sozlesmesi": {
+        "title": "Ö Ğ R E N C İ    S Ö Z L E Ş M E S İ",
+        "body": "            Okul içinde ve dışında, derslerde ve ders dışı eğitim faaliyetlerinde okul kurallarına ve mevzuat hükümlerine uyacağıma, öğretmenlerime, arkadaşlarıma ve okul çalışanlarına karşı saygılı davranacağıma, okul eşyalarına zarar vermeyeceğime, eğitim ve öğretim ortamını bozacak davranışlarda bulunmayacağıma söz veriyorum."
+      },
+      "veli_gorusme_tutanagi": {
+        "title": "V E L İ    G Ö R Ü Ş M E    T U T A N A Ğ I",
+        "body": "            Yukarıda kimlik bilgileri yazılı öğrencinin velisi ile öğrencinin okuldaki genel durumu, ders başarıları, devamsızlık durumu ve davranışları hakkında görüşme yapılmıştır."
+      },
+      "veli_gorusme_formu": {
+        "title": "V E L İ    G Ö R Ü Ş M E    F O R M U"
+      },
+      "rehber_ogretmen_gorus_formu": {
+        "recipient": "{OKULADI} MÜDÜRLÜĞÜNE\r\n({KurulAdı} Kurulu Başkanlığına)",
+        "intro": "            Okulumuz {Sınıf} sınıfı {OkulNo} numaralı öğrencisi {AdSoyad} hakkında Rehberlik ve Psikolojik Danışma Servisi görüş ve önerileri aşağıya çıkarılmıştır.\r\n            Bilgilerinize arz ederim.",
+        "sections": [
+          "1- Öğrencinin Ailevi Durumu:",
+          "2- Öğrencinin Psikolojik ve Sosyal Özellikleri:",
+          "3- Olayın Nedenleri Hakkındaki Görüşler:",
+          "4- Öğrenciye Uygulanabilecek Yaptırım / Ceza veya Rehberlik Önlemleri Hakkındaki Öneriler:"
+        ]
+      }
+    },
+    "cagri_pusulalari": {
+      "savunma_cagri_pusulasi": {
+        "title": "S A V U N M A     Ç A Ğ R I     P U S U L A S I",
+        "body_lise": "            Bir disiplin soruşturmasına esas olarak MEB Orta Öğretim Kurumları Yönetmeliğinin 190. maddesi gereğince Okulumuz Ödül ve Disiplin Kurulu tarafından savunmanıza başvurulacaktır. Yukarıda belirtilen yer, tarih ve saatte hazır bulunmanızı, savunmanızı yazılı veya sözlü olarak yapabileceğinizi, belirtilen gün ve saatte gelmediğiniz takdirde savunma hakkından vazgeçmiş sayılacağınızı tebliğ ederim.",
+        "body_ortaokul": "            Bir soruşturmaya esas olarak MEB İlköğretim Kurumları Yönetmeliğinin ilgili maddesi gereğince Okulumuz Öğrenci Davranışlarını Değerlendirme Kurulu tarafından savunmanıza başvurulacaktır. Yukarıda belirtilen yer, tarih ve saatte hazır bulunmanızı rica ederim."
+      },
+      "ifade_cagri_pusulasi": {
+        "title": "İ F A D E     Ç A Ğ R I     P U S U L A S I",
+        "body_lise": "            Bir disiplin soruşturmasına esas olarak MEB Orta Öğretim Kurumları Yönetmeliğinin 190. maddesi gereğince Okulumuz Ödül ve Disiplin Kurulu tarafından ifadenize başvurulacaktır. Yukarıda belirtilen yer, tarih ve saatte hazır bulunmanızı rica ederim.",
+        "body_ortaokul": "            Bir soruşturmaya esas olarak MEB İlköğretim Kurumları Yönetmeliğinin ilgili maddesi gereğince Okulumuz Öğrenci Davranışlarını Değerlendirme Kurulu tarafından ifadenize başvurulacaktır. Yukarıda belirtilen yer, tarih ve saatte hazır bulunmanızı rica ederim."
+      },
+      "uye_toplanti_cagri_pusulasi": {
+        "recipient": "{KURULADI} KURULU ÜYELERİNE",
+        "body": "            {ToplantıTarihi}  günü saat {Saat}' da {Yer}nda aşağıdaki gündem maddelerini görüşmek üzere {KurulAdı} Kurulu Toplantısı yapılacaktır. {KurulAdı} Kurulunda görevli arkadaşların belirtilen gün ve saatte hazır bulunmaları gerekmektedir.\r\n\r\n            Bilgilerinizi ve gereğini rica ederim"
+      },
+      "cagri_pusulasi_ogrenci_listesi": {
+        "title": "{OkulAdı}\r\nÇAĞRI PUSULASI ÖĞRENCİ LİSTESİ"
+      }
+    },
+    "yazili_uyari_tutanagi": {
+      "title": "ÖĞRENCİ YAZILI UYARI TUTANAĞI",
+      "body": "            {Davranış} davranışında bulunduğunuz tespit edilmiştir. Bu davranışınız MEB Ortaöğretim Kurumları Yönetmeliğinin Disiplin Cezasını Gerektiren Davranışlar ve Cezalar bölümünün {Madde} ({Açıklama}) maddesine göre {Ceza} cezasını gerektirmektedir.\r\n\r\n            Ancak okul yönetimince, davranışınızın düzeltilmesi ve tekrarlanmaması amacıyla aynı yönetmeliğin 163. maddesinin 2. fıkrası gereğince tarafınıza YAZILI UYARI verilmesi uygun görülmüştür. Aynı veya benzer olumsuz davranışları tekrar etmeniz halinde hakkınızda disiplin işlemi başlatılacaktır.\r\n\r\n            Bilgilerinizi ve gereğini rica ederim.",
+      "acknowledgement": "            Yukarıdaki yazılı uyarıyı okudum ve bir nüshasını elden teslim aldım. Bundan sonra okul kurallarına uyacağımı beyan ederim."
+    },
+    "ceza_tebligatlari": {
+      "ogrenci_tebligat": {
+        "title": "Ö Ğ R E N C İ   K A R A R   T E B L İ G A T   P U S U L A S I",
+        "body_lise": "            Yukarıda belirtilen davranışınızdan dolayı Okulumuz Ödül ve Disiplin Kurulunca, MEB Orta Öğretim Kurumları Yönetmeliğinin 169. maddesi gereğince yukarıda yazılı disiplin cezası ile cezalandırıldınız.\r\n            Bilgilerinizi ve aynı davranışları tekrar etmemenizi rica ederim.",
+        "body_ortaokul": "            Yukarıda belirtilen davranışınızdan dolayı Okulumuz Öğrenci Davranışlarını Değerlendirme Kurulunca, MEB İlköğretim Kurumları Yönetmeliğinin ilgili maddesi gereğince yukarıda yazılı yaptırım uygulanmasına karar verilmiştir.\r\n            Bilgilerinizi ve aynı davranışları tekrar etmemenizi rica ederim."
+      },
+      "veli_tebligat": {
+        "subject": "Ceza Bildirimi",
+        "salutation": "SAYIN; {VeliAdı}",
+        "body_lise": "            Velisi bulunduğunuz okulumuz {SınıfNo} sınıfı öğrencisi {AdSoyad}' ın  aşağıda özeti yazılı disiplin suçu nedeniyle Okul Ödül ve Disiplin Kurulumuzca verilen disiplin cezası aşağıya çıkarılmıştır.\r\n            Söz konusu cezanın tebliğ tarihinden itibaren 5 (Beş) iş günü içinde okul müdürlüğüne yazılı olarak itirazda bulunabilirsiniz.\r\n            MEB Orta Öğretim Kurumları Yönetmeliğinin 170 ve 160. maddeleri gereğince bilgilerinize rica ederim.",
+        "body_ortaokul": "            Velisi bulunduğunuz okulumuz {SınıfNo} sınıfı öğrencisi {AdSoyad}' ın  aşağıda özeti yazılı davranışı nedeniyle Okul Öğrenci Davranışlarını Değerlendirme Kurulumuzca uygulanan yaptırım aşağıya çıkarılmıştır.\r\n            Söz konusu yaptırımın tebliğ tarihinden itibaren 5 (Beş) iş günü içinde okul müdürlüğüne yazılı olarak itirazda bulunabilirsiniz.\r\n            MEB İlköğretim Kurumları Yönetmeliğinin 56/10. maddeleri gereğince bilgilerinize rica ederim."
+      }
+    },
+    "davranis_puani_ve_yaptirim_kaldirma": {
+      "davranis_puani_iade_cizelgesi": {
+        "title_lise": "MEB ORTAÖĞRETİM KURUMLARI YÖNETMELİĞİNİN 171/2 MADDESİ GEREĞİ SENE SONU DAVRANIŞ PUANI İADE ÇİZELGESİ",
+        "title_ortaokul": "MEB OKUL ÖNCESİ EĞİTİM VE İLKÖĞRETİM KURUMLARI YÖNETMELİĞİNİN 62/3 MADDESİ GEREĞİ SENE SONU DAVRANIŞ PUANI İADE ÇİZELGESİ"
+      },
+      "yaptirim_karari_kaldirma_raporu": {
+        "title": "MEB OKUL ÖNCESİ EĞİTİM VE İLKÖĞRETİM KURUMLARI YÖNETMELİĞİNİN 62/3 MADDESİ GEREĞİ YAPTIRIM KARARI KALDIRMA RAPORU"
+      }
+    },
+    "sene_basi_sonu_toplanti_tutanagi": {
+      "title": "{KURULADI} KURULU {ToplantıAdı} TOPLANTI TUTANAĞI",
+      "intro_lise": "            {KurulAdı} Kurulu üyeleri MEB Ortaöğretim Kurumları Yönetmeliğinin 189. Maddesi gereği yukarıdaki tarih ve saatte toplanarak aşağıdaki kararları almıştır.",
+      "intro_ortaokul": "            {KurulAdı} Kurulu üyeleri MEB Okul Öncesi Eğitim ve İlköğretim Kurumları Yönetmeliğinin 58. Maddesi gereği yukarıdaki tarih ve saatte toplanarak aşağıdaki kararları almıştır.",
+      "closing_sene_basi": "OY BİRLİĞİ İLE KARAR VERİLDİ.",
+      "closing_sene_sonu": "İŞ BU KURUL TUTANAĞININ SENE SONU ÖĞRETMENLER KURULUNDA OKUNMASI TALEBİYLE OKUL MÜDÜRLÜĞÜNÜN ONAYINA SUNULMASINA OY BİRLİĞİ İLE KARAR VERİLDİ.",
+      "auto_snippets": {
+        "olay_sayisi": "Okul Müdürlüğünce, {KurulAdı} Kurulumuza toplam {OlaySayısı} olay sevk edilmiştir.",
+        "odul_sayisi_intro": "Okul içinde ve dışında milli ve insani bakımdan erdem olarak kabul edilen iyi davranışlarda bulunan sportif ve sosyal etkinliklerde görev alan, derslerdeki gayret ve başarılarıyla üstünlük gösteren öğrencilerimizden belge ile ödüllendirilen öğrenci sayıları aşağıdaki gibidir. \r\n\r\n",
+        "ceza_sayisi_intro_lise": "Okul Müdürlüğünce kurulumuza sevk edilen olaylarda ceza alan öğrenci sayıları aşağıdaki gibidir. \r\n\r\n",
+        "ceza_sayisi_intro_ortaokul": "Okul Müdürlüğünce kurulumuza sevk edilen olaylarda yaptırım uygulanan öğrenci sayıları aşağıdaki gibidir. \r\n\r\n"
+      }
+    },
+    "dizi_pusulasi": {
+      "title": "{OKULADI} MÜDÜRLÜĞÜ\r\n{KURULADI} KURULU DİZİ PUSULASI",
+      "default_items": [
+        "Okul Müdürlüklerinin Yazışmaları",
+        "{KurulAdı} Kurulu Kararı",
+        "Dilekçe / Şikayet Formu",
+        "Olayla İlgili Hazırlanan Tutanak",
+        "Öğrenci Psikolojik Durum Raporu",
+        "Sözlü Uyarı Tutanağı",
+        "Öğrenci Sözleşmesi",
+        "Veli Görüşme Tutanağı",
+        "Tanık İfade Tutanağı",
+        "Öğrenci Bilgi Toplama Formu - Olayla ilgili",
+        "Öğrenci Bilgi Toplama Formu - Sınıf Öğretmeni",
+        "Öğrenci Bilgi Toplama Formu - Öğretmen",
+        "Öğrenci Bilgi Toplama Formu - Veli Görüşme Tutanağı",
+        "Öğrenci Bilgi Toplama Formu - Öğrenciler",
+        "İfadeye Çağrı Pusulası",
+        "İfade Tutanağı",
+        "{KurulAdı} Kurulu Toplantı Çağrı Pusulası",
+        "Savunma Tutanakları",
+        "Öğrenci Tebliğ-Tebellüğ Belgesi",
+        "Veli Tebliğ-Tebellüğ Belgesi",
+        "Öğrenciye Verilen Ceza Tebliğ Yazısı",
+        "Ek Süre Talep Yazısı",
+        "Veliye Gönderilen Ceza Tebliğ Yazısı",
+        "{KurulAdı} Kurulu Görüş Yazısı",
+        "Veli İtiraz Dilekçesi",
+        "Resmi Yazı (İl Mili Eğitim Müdürlüğüne)",
+        "{KurulAdı} Kurulu Görüş Yazısı (Diğer okuldan gelen)"
+      ],
+      "closing": "Teslim Eden                                                                                          Teslim Alan"
+    }
+  },
+  "cezamaddeleri": [
+    {
+      "ceza": "KINAMA",
+      "madde": "164.1.a",
+      "açıklama": "(Değişik:RG-1/7/2015-29403) Okulu, okul eşyasını ve çevresini kirletmek,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "KINAMA",
+      "madde": "164.1.b",
+      "açıklama": "Yapması gereken görevleri yapmamak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "KINAMA",
+      "madde": "164.1.c",
+      "açıklama": "Kılık-kıyafete ilişkin mevzuat hükümlerine uymamak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "KINAMA",
+      "madde": "164.1.ç",
+      "açıklama": "(Değişik:RG-1/7/2015-29403) Tütün ve tütün mamullerini bulundurmak veya kullanmak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "KINAMA",
+      "madde": "164.1.d",
+      "açıklama": "Başkasına ait eşyayı izinsiz almak veya kullanmak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "KINAMA",
+      "madde": "164.1.e",
+      "açıklama": "Yalan söylemek,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "KINAMA",
+      "madde": "164.1.f",
+      "açıklama": "(Değişik:RG-28/10/2016-29871) Okula geldiği hâlde özürsüz eğitim ve öğretim faaliyetlerine, törenlere, sosyal etkinliklere ve okul pansiyonlarında etüde katılmamak, geç katılmak veya bunlardan erken ayrılmak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "KINAMA",
+      "madde": "164.1.g",
+      "açıklama": "(Değişik:RG-28/10/2016-29871) Okul kütüphanesi, atölye, laboratuvar, pansiyon veya diğer bölümlerden aldığı kitap, araç-gereç ve malzemeyi, eksik vermek veya kötü kullanmak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "KINAMA",
+      "madde": "164.1.ğ",
+      "açıklama": "Kaba ve saygısız davranmak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "KINAMA",
+      "madde": "164.1.h",
+      "açıklama": "(Değişik:RG-1/7/2015-29403) Dersin ve ders dışı eğitim faaliyetlerinin akışını ve düzenini bozacak davranışlarda bulunmak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "KINAMA",
+      "madde": "164.1.ı",
+      "açıklama": "Kopya çekmek veya çekilmesine yardımcı olmak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "KINAMA",
+      "madde": "164.1.i",
+      "açıklama": "(Değişik:RG-1/7/2015-29403) Yatılı okullarda pansiyona geç gelmek,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "KINAMA",
+      "madde": "164.1.j",
+      "açıklama": "(Değişik:RG-1/7/2015-29403) Müstehcen veya yasaklanmış araç, gereç ve dokümanları okula ve okula bağlı yerlere sokmak veya yanında bulundurmak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "KINAMA",
+      "madde": "164.1.k",
+      "açıklama": "(Değişik:RG-1/7/2015-29403) Kumar oynamaya yarayan araç-gereç ve doküman bulundurmak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "KINAMA",
+      "madde": "164.1.l",
+      "açıklama": "Bilişim araçlarını amacı dışında kullanmak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "KINAMA",
+      "madde": "164.1.m",
+      "açıklama": "Alınan sağlık ve güvenlik tedbirlerine uymamak.",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "KINAMA",
+      "madde": "164.1.n",
+      "açıklama": "(Ek:RG-1/7/2015-29403) (Değişik:RG-28/10/2016-29871) Ders saatleri içinde öğretmenin bilgisi ve kontrolü dışında bilişim araçlarını açık tutarak dersin akışını bozmak.",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "KINAMA",
+      "madde": "164.1.o",
+      "açıklama": "Eğitim ortamlarında; dersler arası ile öğle arası dinlenme sürelerinde okul yönetiminin izni dışında bilişim araçlarını yanında bulundurmak ve kullanmak.",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "KINAMA",
+      "madde": "164.1.ö",
+      "açıklama": "(Ek:RG-15/11/2022-32014) Okula, okul yönetiminin izni dışında okulla ilgisi olmayan kişileri getirmek",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKULDAN KISA SÜRELİ UZAKLAŞTIRMA",
+      "madde": "164.2.a",
+      "açıklama": "(Değ: 28/10/2016-29871 RG) Kişilere, arkadaşlarına, okul yöneticilerine, öğretmenlerine ve diğer çalışanlarına karşı okul içinde ve dışında sözle, davranışla veya sosyal medya üzerinden hakaret etmek, hakareti paylaşmak, yaymak veya başkalarını bu davranışa kışkırtmak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKULDAN KISA SÜRELİ UZAKLAŞTIRMA",
+      "madde": "164.2.b",
+      "açıklama": "(Değişik:RG-1/7/2015-29403) Pansiyonun düzenini bozmak, pansiyonu terk etmek, gece izinsiz dışarıda kalmak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKULDAN KISA SÜRELİ UZAKLAŞTIRMA",
+      "madde": "164.2.c",
+      "açıklama": "Kişileri veya grupları dil, ırk, cinsiyet, siyasi düşünce, felsefi ve dini inançlarına göre ayırmayı, kınamayı, kötülemeyi amaçlayan davranışlarda bulunmak veya ayrımcılığı körükleyici semboller taşımak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKULDAN KISA SÜRELİ UZAKLAŞTIRMA",
+      "madde": "164.2.ç",
+      "açıklama": "(Değişik:RG-1/7/2015-29403) İzinsiz gösteri, etkinlik ve toplantı düzenlemek, bu tür gösteri, etkinlik ve toplantılara katılmak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKULDAN KISA SÜRELİ UZAKLAŞTIRMA",
+      "madde": "164.2.d",
+      "açıklama": "Her türlü ortamda kumar oynamak veya oynatmak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKULDAN KISA SÜRELİ UZAKLAŞTIRMA",
+      "madde": "164.2.e",
+      "açıklama": "(Değişik:RG-1/7/2015-29403) Okul kurallarının uygulanmasını ve öğrencilere verilen görevlerin yapılmasını engellemek,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKULDAN KISA SÜRELİ UZAKLAŞTIRMA",
+      "madde": "164.2.f",
+      "açıklama": "Başkalarına hakaret etmek,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKULDAN KISA SÜRELİ UZAKLAŞTIRMA",
+      "madde": "164.2.g",
+      "açıklama": "(Değişik:RG-1/7/2015-29403) Müstehcen veya yasaklanmış araç, gereç, doküman ve benzerlerini dağıtmak, duvarlara ve diğer yerlere asmak, yapıştırmak, yazmak; bu amaçlar için okul araç-gerecini ve eklentilerini kullanmak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKULDAN KISA SÜRELİ UZAKLAŞTIRMA",
+      "madde": "164.2.ğ",
+      "açıklama": "(Değişik:RG-1/7/2015-29403) Bilişim araçları veya sosyal medya yoluyla eğitim ve öğretim faaliyetlerine ve kişilere zarar vermek,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKULDAN KISA SÜRELİ UZAKLAŞTIRMA",
+      "madde": "164.2.h",
+      "açıklama": "(Değişik:RG-28/10/2016-29871) Okula geldiği hâlde özürsüz eğitim ve öğretim faaliyetlerine, törenlere ve diğer sosyal etkinliklere katılmamayı, geç katılmayı veya erken ayrılmayı alışkanlık haline getirmek,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKULDAN KISA SÜRELİ UZAKLAŞTIRMA",
+      "madde": "164.2.ı",
+      "açıklama": "Kavga etmek, başkalarına fiili şiddet uygulamak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKULDAN KISA SÜRELİ UZAKLAŞTIRMA",
+      "madde": "164.2.i",
+      "açıklama": "Okul binası, eklenti ve donanımlarına, arkadaşlarının araç-gerecine siyasi, ideolojik veya müstehcen amaçlı yazılar yazmak, resim veya semboller çizmek,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKULDAN KISA SÜRELİ UZAKLAŞTIRMA",
+      "madde": "164.2.j",
+      "açıklama": "Toplu kopya çekmek veya çekilmesine yardımcı olmak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKULDAN KISA SÜRELİ UZAKLAŞTIRMA",
+      "madde": "164.2.k",
+      "açıklama": "Sarhoşluk veren zararlı maddeleri bulundurmak veya kullanmak.",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKULDAN KISA SÜRELİ UZAKLAŞTIRMA",
+      "madde": "164.2.l",
+      "açıklama": "(Ek:RG-1/7/2015-29403) (Değişik:RG-28/10/2016-29871) Millî ve manevi değerlere, genel ahlak ve adaba uygun olmayan tutum ve davranışlarda bulunmak.",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKULDAN KISA SÜRELİ UZAKLAŞTIRMA",
+      "madde": "164.2.m",
+      "açıklama": "Okul personelinin taşınır veya taşınmaz malına zarar vermek ve/veya malını tahrip etmek,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKULDAN KISA SÜRELİ UZAKLAŞTIRMA",
+      "madde": "164.2.n",
+      "açıklama": "(Ek:RG-15/11/2022-32014) Okul yöneticilerinin, öğretmenlerinin, çalışanlarının ve diğer öğrencilerin izinsiz olarak görüntülerini çekmek, kaydetmek, paylaşmak",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKULDAN KISA SÜRELİ UZAKLAŞTIRMA",
+      "madde": "164.2.o",
+      "açıklama": "(Ek:RG-15/11/2022-32014) Okul, pansiyon ve eklentilerini belirlenen kurallar dışında kullanmak, pansiyonda izinsiz kalmak",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKULDAN KISA SÜRELİ UZAKLAŞTIRMA",
+      "madde": "164.2.ö",
+      "açıklama": "(Ek:RG-15/11/2022-32014) Tekrarlayan çeşitli davranışlarıyla başka bir öğrencinin, sosyal veya duygusal gelişimini olumsuz yönde etkileyecek şekilde akran zorbalığı yapmak",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "164.3.a",
+      "açıklama": "Türk Bayrağına, ülkeyi, milleti ve devleti temsil eden sembollere saygısızlık etmek,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "164.3.b",
+      "açıklama": "Millî ve manevi değerleri söz, yazı, resim veya başka bir şekilde aşağılamak; bu değerlere küfür ve hakaret etmek,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "164.3.c",
+      "açıklama": "Okul çalışanlarının görevlerini yapmalarına engel olmak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "164.3.ç",
+      "açıklama": "Hırsızlık yapmak, yaptırmak ve yapılmasına yardımcı olmak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "164.3.d",
+      "açıklama": "Okulla ilişkisi olmayan kişileri, okulda veya eklentilerinde barındırmak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "164.3.e",
+      "açıklama": "(Değişik:RG-1/7/2015-29403) Resmî belgelerde değişiklik yapmak; sahte belge düzenlemek ve kullanmak ve başkalarını yararlandırmak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "164.3.f",
+      "açıklama": "Okul sınırları içinde herhangi bir yeri, izinsiz olarak eğitim ve öğretim amaçları dışında kullanmak veya kullanılmasına yardımcı olmak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "164.3.g",
+      "açıklama": "Okula ait taşınır veya taşınmaz mallara zarar vermek,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "164.3.ğ",
+      "açıklama": "Ders, sınav, uygulama ve diğer faaliyetlerin yapılmasını engellemek veya arkadaşlarını bu eylemlere katılmaya kışkırtmak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "164.3.h",
+      "açıklama": "Eğitim ve öğretim ortamına yaralayıcı, öldürücü silah ve patlayıcı madde ile her türlü aletleri getirmek veya bunları bulundurmak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "164.3.ı",
+      "açıklama": "Zor kullanarak veya tehditle kopya çekmek veya çekilmesini sağlamak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "164.3.i",
+      "açıklama": "Bağımlılık yapan zararlı maddeleri bulundurmak veya kullanmak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "164.3.j",
+      "açıklama": "Yerine başkasını sınava sokmak, başkasının yerine sınava girmek,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "164.3.k",
+      "açıklama": "(Değişik:RG-1/7/2015-29403) Eğitim ve öğretim ortamında; siyasi ve ideolojik amaçlı eylem düzenlemek, başkalarını bu gibi eylemler düzenlemeye kışkırtmak, düzenlenmiş eylemlere katılmak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "164.3.l",
+      "açıklama": "Siyasi partilere, bu partilere bağlı yan kuruluşlara, derneklere, sendikalara ve benzeri kuruluşlara üye olmak, üye kaydetmek, para toplamak ve bağışta bulunmaya zorlamak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "164.3.m",
+      "açıklama": "(Değişik:RG-1/7/2015-29403) Bilişim araçları veya sosyal medya yoluyla eğitim ve öğretimi engellemek, kişilere ağır derecede maddi ve manevi zarar vermek,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "164.3.n",
+      "açıklama": "İzin almadan okulla ilgili; bilgi vermek, basın toplantısı yapmak, bildiri yayınlamak ve dağıtmak, faaliyet tertip etmek veya bu kapsamdaki faaliyetlerde etkin rol almak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "164.3.o",
+      "açıklama": "Bir kimseyi ya da grubu suç sayılan bir eylemi yapmaya, böyle eylemlere katılmaya, yalan bildirimde bulunmaya veya suçu yüklenmeye zorlamak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "164.3.ö",
+      "açıklama": "Zor kullanarak başkasına ait mal ve eşyaya el koymak, başkalarını bu işleri yapmaya zorlamak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "164.3.p",
+      "açıklama": "(Ek:RG-1/7/2015-29403) Genel ahlak ve adaba uygun olmayan, yanlış algı oluşturabilecek tutum ve davranışları alışkanlık hâline getirmek,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "164.3.r",
+      "açıklama": "(Ek:RG-1/7/2015-29403) Kişilere, arkadaşlarına ve okul çalışanlarına; söz ve davranışlarla sarkıntılık yapmak, iftira etmek, başkalarını bu davranışlara kışkırtmak veya zorlamak, yapılan bu fiilleri sosyal medya yoluyla paylaşmak, yaymak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "164.3.s",
+      "açıklama": "(Ek:RG-1/7/2015-29403) Pansiyon düzenini bozmayı, pansiyonu terk etmeyi ve gece izinsiz dışarıda kalmayı alışkanlık hâline getirmek,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "164.3.ş",
+      "açıklama": "(Ek:RG-16/9/2017-30182) Kesici, delici, yaralayıcı ve benzeri aletlerle kendine zarar vermek.",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "ÖRGÜN EĞİTİM DIŞINA ÇIKARMA",
+      "madde": "164.4.a",
+      "açıklama": "Türk Bayrağına, ülkeyi, milleti ve devleti temsil eden sembollere hakaret etmek,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "ÖRGÜN EĞİTİM DIŞINA ÇIKARMA",
+      "madde": "164.4.b",
+      "açıklama": "Türkiye Cumhuriyeti'nin devleti ve milletiyle bölünmez bütünlüğü ilkesine ve Türkiye Cumhuriyetinin insan haklarına ve Anayasanın başlangıcında belirtilen temel ilkelere dayalı millî, demokratik, laik ve sosyal bir hukuk devleti niteliklerine aykırı miting, forum, direniş, yürüyüş, boykot ve işgal gibi ferdi veya toplu eylemler düzenlemek; düzenlenmesini kışkırtmak ve düzenlenmiş bu gibi eylemlere etkin olarak katılmak veya katılmaya zorlamak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "ÖRGÜN EĞİTİM DIŞINA ÇIKARMA",
+      "madde": "164.4.c",
+      "açıklama": "Kişileri veya grupları; dil, ırk, cinsiyet, siyasi düşünce, felsefi ve dini inançlarına göre ayırmayı, kınamayı, kötülemeyi amaçlayan bölücü ve yıkıcı toplu eylemler düzenlemek, katılmak, bu eylemlerin organizasyonunda yer almak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "ÖRGÜN EĞİTİM DIŞINA ÇIKARMA",
+      "madde": "164.4.ç",
+      "açıklama": "Kurul ve komisyonların çalışmasını tehdit veya zor kullanarak engellemek,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "ÖRGÜN EĞİTİM DIŞINA ÇIKARMA",
+      "madde": "164.4.d",
+      "açıklama": "Bağımlılık yapan zararlı maddelerin ticaretini yapmak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "ÖRGÜN EĞİTİM DIŞINA ÇIKARMA",
+      "madde": "164.4.e",
+      "açıklama": "Okul ve eklentilerinde güvenlik güçlerince aranan kişileri saklamak ve barındırmak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "ÖRGÜN EĞİTİM DIŞINA ÇIKARMA",
+      "madde": "164.4.f",
+      "açıklama": "Eğitim ve öğretim ortamını işgal etmek,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "ÖRGÜN EĞİTİM DIŞINA ÇIKARMA",
+      "madde": "164.4.g",
+      "açıklama": "Okul içinde ve dışında tek veya toplu hâlde okulun yönetici, öğretmen, eğitici personel, memur ve diğer personeline karşı saldırıda bulunmak, bu gibi hareketleri düzenlemek veya kışkırtmak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "ÖRGÜN EĞİTİM DIŞINA ÇIKARMA",
+      "madde": "164.4.ğ",
+      "açıklama": "Okul çalışanlarının görevlerini yapmalarına engel olmak için fiili saldırıda bulunmak ve başkalarını bu yöndeki eylemlere kışkırtmak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "ÖRGÜN EĞİTİM DIŞINA ÇIKARMA",
+      "madde": "164.4.h",
+      "açıklama": "Okulun taşınır veya taşınmaz mallarını kasıtlı olarak tahrip etmek,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "ÖRGÜN EĞİTİM DIŞINA ÇIKARMA",
+      "madde": "164.4.ı",
+      "açıklama": "Yaralayıcı, öldürücü her türlü alet, silah, patlayıcı maddeleri kullanmak suretiyle bir kimseyi yaralamaya teşebbüs etmek, yaralamak, öldürmek, maddi veya manevi zarara yol açmak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "ÖRGÜN EĞİTİM DIŞINA ÇIKARMA",
+      "madde": "164.4.i",
+      "açıklama": "Kişi veya kişilere her ne sebeple olursa olsun eziyet etmek; işkence yapmak veya yaptırmak, cinsel istismar ve bu konuda kanunların suç saydığı fiilleri işlemek,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "ÖRGÜN EĞİTİM DIŞINA ÇIKARMA",
+      "madde": "164.4.j",
+      "açıklama": "Çete kurmak, çetede yer almak, yol kesmek, adam kaçırmak; kapkaç ve gasp yapmak, fidye ve haraç almak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "ÖRGÜN EĞİTİM DIŞINA ÇIKARMA",
+      "madde": "164.4.k",
+      "açıklama": "Yasa dışı örgütlerin ve kuruluşların, siyasi ve ideolojik görüşleri doğrultusunda propaganda yapmak,eylem düzenlemek, başkalarını bu gibi eylemleri düzenlemeye kışkırtmak, düzenlenmiş eylemlere etkin biçimdekatılmak, bu kuruluşlara üye olmak, üye kaydetmek; para toplamak ve bağışta bulunmaya zorlamak,",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "ÖRGÜN EĞİTİM DIŞINA ÇIKARMA",
+      "madde": "164.4.l",
+      "açıklama": "(Değişik:RG-1/7/2015-29403) Bilişim araçları veya sosyal medya yoluyla; bölücü, yıkıcı, ahlak dışı ve şiddeti özendiren sesli, sözlü, yazılı ve görüntülü içerikler oluşturmak, bunları çoğaltmak, yaymak ve ticaretini yapmak.",
+      "okultürü": "LİSE"
+    },
+    {
+      "ceza": "UYARMA",
+      "madde": "55.a.1",
+      "açıklama": "Derse ve diğer etkinliklere vaktinde gelmemek ve geçerli bir neden olmaksızın bu davranışı tekrar etmek",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "UYARMA",
+      "madde": "55.a.2",
+      "açıklama": "Okula özürsüz devamsızlığını, özür bildirim formu ya da raporla belgelendirmemek, bunu alışkanlık hâline getirmek, okul yönetimi tarafından verilen izin süresini özürsüz uzatmak",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "UYARMA",
+      "madde": "55.a.3",
+      "açıklama": "Yatılı bölge ortaokullarında öğrenci dolaplarını amacı dışında kullanmak, yasaklanmış malzemeyi dolapta bulundurmak ve yönetime bilgi vermeden dolabını başka arkadaşına devretmek",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "UYARMA",
+      "madde": "55.a.4",
+      "açıklama": "Okula, yönetimce yasaklanmış malzeme getirmek ve bunları kullanmak",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "UYARMA",
+      "madde": "55.a.5",
+      "açıklama": "Yalan söylemek",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "UYARMA",
+      "madde": "55.a.6",
+      "açıklama": "Duvarları, sıraları ve okul çevresini kirletmek",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "UYARMA",
+      "madde": "55.a.7",
+      "açıklama": " Görgü kurallarına uymamak",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "UYARMA",
+      "madde": "55.a.8",
+      "açıklama": "Okul kütüphanesinden veya laboratuvarlardan aldığı kitap, araç, gereç ve malzemeyi zamanında teslim etmemek veya geri vermemek",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "UYARMA",
+      "madde": "55.a.9",
+      "açıklama": "(Mülga:RG-14 / 10 / 2023 - 32339)",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "UYARMA",
+      "madde": "55.a.10",
+      "açıklama": "(Ek:RG-10 / 7 / 2019 - 30827) Kılık ve kıyafetle ilgili kurallara uymamak",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "KINAMA",
+      "madde": "55.b.1",
+      "açıklama": "Yöneticilere, öğretmenlere, görevlilere ve arkadaşlarına kaba ve saygısız davranmak",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "KINAMA",
+      "madde": "55.b.2",
+      "açıklama": "Okulun kurallarını dikkate almayarak kuralları ve ders ortamını bozmak, ders ve ders dışı etkinliklerin yapılmasını engellemek",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "KINAMA",
+      "madde": "55.b.3",
+      "açıklama": "Okul yönetimini yanlış bilgilendirmek, yalan söylemeyi alışkanlık hâline getirmek",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "KINAMA",
+      "madde": "55.b.4",
+      "açıklama": "Okulda bulunduğu hâlde törenlere özürsüz olarak katılmamak ve törenlerde uygun olmayan davranışlarda bulunmak",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "KINAMA",
+      "madde": "55.b.5",
+      "açıklama": "Okulda ya da okul dışında sigara içmek",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "KINAMA",
+      "madde": "55.b.6",
+      "açıklama": "Resmî evrakta değişiklik yapmak",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "KINAMA",
+      "madde": "55.b.7",
+      "açıklama": "Okulda kavga etmek",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "KINAMA",
+      "madde": "55.b.8",
+      "açıklama": "(Değişik:RG-14 / 10 / 2023 - 32339) Sınıfta cep telefonu kullanmak",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "KINAMA",
+      "madde": "55.b.9",
+      "açıklama": "Başkasının malını haberi olmadan almak",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "KINAMA",
+      "madde": "55.b.10",
+      "açıklama": "Okulun ve öğrencilerin eşya, araç ve gerecine kasıtlı olarak zarar vermek",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "KINAMA",
+      "madde": "55.b.11",
+      "açıklama": "(Değişik:RG-10 / 7 / 2019 - 30827) Kılık ve kıyafetle ilgili kurallara uymamakta ısrar etmek",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "KINAMA",
+      "madde": "55.b.12",
+      "açıklama": "Okul ile ilgili mekân ve malzemeyi izinsiz ve eğitimin amaçları dışında kullanmak",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "KINAMA",
+      "madde": "55.b.13",
+      "açıklama": "Yatılı bölge ortaokullarında, izinsiz olarak okulu terk etmek ve gece dışarıda kalmak",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "KINAMA",
+      "madde": "55.b.14",
+      "açıklama": "Sınavda kopya çekmek veya kopya vermek",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "KINAMA",
+      "madde": "55.b.15",
+      "açıklama": "(Ek:RG-14 / 10 / 2023 - 32339) Diğer öğrencilerin sosyal veya duygusal gelişimlerini, akran ve arkadaşlık ilişkilerini olumsuz yönde etkileyecek davranışları alışkanlık hâline getirmek.",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "55.c.1",
+      "açıklama": "Anayasanın başlangıcında belirtilen temel ilkelere dayalı millî, demokratik, lâik, sosyal ve hukuk devleti niteliklerine aykırı davranışlarda bulunmak veya başkalarını da bu tür davranışlara zorlamak",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "55.c.2",
+      "açıklama": "Sarkıntılık, hakaret, iftira, tehdit ve taciz etmek veya başkalarını bu gibi davranışlara kışkırtmak",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "55.c.3",
+      "açıklama": "Okula yaralayıcı, öldürücü aletler getirmek ve bunları bulundurmak",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "55.c.4",
+      "açıklama": "Okul ve çevresinde kasıtlı olarak yangın çıkarmak",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "55.c.5",
+      "açıklama": "Okul ile ilgili mekân ve malzemeyi izinsiz ve eğitim amaçları dışında kullanmayı alışkanlık hâline getirmek",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "55.c.6",
+      "açıklama": "Okul içinde ve dışında; siyasi parti ve sendikaların propagandasını yapmak ve bunlarla ilgili eylemlere katılmak",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "55.c.7",
+      "açıklama": "Herhangi bir kurum ve örgüt adına yardım ve para toplamak",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "55.c.8",
+      "açıklama": "Kişi veya grupları dil, ırk, cinsiyet, siyasi düşünce ve inançlarına göre ayırmak, kınamak, kötülemek ve bu tür eylemlere katılmak",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "55.c.9",
+      "açıklama": "Başkasının malına zarar vermek, haberi olmadan almayı alışkanlık hâline getirmek",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "55.c.10",
+      "açıklama": "Okulun bina, eklenti ve donanımlarını, taşınır ve taşınmaz mallarını kasıtlı olarak tahrip etmeyi alışkanlık hâline getirmek",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "55.c.11",
+      "açıklama": "Okula, derslere, sınavlara girilmesine, derslerin ve sınavların sağlıklı yapılmasına engel olmak",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "55.c.12",
+      "açıklama": "Okul içinde ve dışında okul yöneticilerine, öğretmenlere ve diğer personele ve arkadaşlarına şiddet uygulamak ve saldırıda bulunmak, bu gibi hareketleri düzenlemek veya kışkırtmak",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "55.c.13",
+      "açıklama": "Yatılı bölge ortaokullarında, gece izinsiz olarak dışarıda kalmayı alışkanlık hâline getirmek",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "55.c.14",
+      "açıklama": "Okul ile ilişiği olmayan kişileri okulda veya okula ait yerlerde barındırmak",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "55.c.15",
+      "açıklama": "Kendi yerine başkasının sınava girmesini sağlamak, başkasının yerine sınava girmek",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "55.c.16",
+      "açıklama": "Alkol veya bağımlılık yapan maddeleri kullanmak veya başkalarını kullanmaya teşvik etmek",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "55.c.17",
+      "açıklama": "(Mülga:RG-10 / 7 / 2019 - 30827)",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "OKUL DEĞİŞTİRME",
+      "madde": "55.c.18",
+      "açıklama": "(Ek:RG-14 / 10 / 2023 - 32339) Okul personeli ve öğrencileriyle ilgili dijital araçlar ya da sosyal medya kanalıyla kişilik haklarını ihlal edecek şekilde ses ya da görüntü kaydetmek veya yayımlamak",
+      "okultürü": "ORTAOKUL"
+    }
+  ]
+}

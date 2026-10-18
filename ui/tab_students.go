@@ -1,0 +1,332 @@
+package ui
+
+import (
+	"fmt"
+	"strconv"
+	"strings"
+
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/storage"
+	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
+
+	"okulevrak/excel"
+	"okulevrak/model"
+)
+
+// BuildStudentsTab creates the Student Roster and Excel Import UI
+func BuildStudentsTab(state *AppState) fyne.CanvasObject {
+	var currentStudents []model.Student
+	var selectedStudent *model.Student
+
+	// Count Label
+	countLabel := widget.NewLabelWithStyle("Kayıt: 0 öğrenci", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+
+	// Search & Filter
+	searchEntry := widget.NewEntry()
+	searchEntry.SetPlaceHolder("Öğrenci no veya ad soyad ile ara...")
+
+	classOptions := append([]string{"Tüm Sınıflar"}, state.Store.GetClasses(state.AcademicYear)...)
+	classSelect := widget.NewSelect(classOptions, nil)
+	classSelect.SetSelected("Tüm Sınıflar")
+
+	// Student Detail Form Inputs
+	idEntry := widget.NewEntry()
+	idEntry.Disable()
+
+	schoolNoEntry := widget.NewEntry()
+	fullNameEntry := widget.NewEntry()
+	classEntry := widget.NewEntry()
+	genderSelect := widget.NewSelect([]string{"ERKEK", "KIZ"}, nil)
+	tcEntry := widget.NewEntry()
+	birthPlaceEntry := widget.NewEntry()
+	birthDateEntry := widget.NewEntry()
+	fatherEntry := widget.NewEntry()
+	motherEntry := widget.NewEntry()
+	guardianEntry := widget.NewEntry()
+	phoneEntry := widget.NewEntry()
+	addrEntry := widget.NewEntry()
+	boardingSelect := widget.NewSelect([]string{"GÜNDÜZLÜ", "PANSİYON / YATILI"}, nil)
+	scoreEntry := widget.NewEntry()
+	scoreEntry.SetText("100")
+
+	clearForm := func() {
+		selectedStudent = nil
+		idEntry.SetText("")
+		schoolNoEntry.SetText("")
+		fullNameEntry.SetText("")
+		classEntry.SetText("")
+		genderSelect.ClearSelected()
+		tcEntry.SetText("")
+		birthPlaceEntry.SetText("")
+		birthDateEntry.SetText("")
+		fatherEntry.SetText("")
+		motherEntry.SetText("")
+		guardianEntry.SetText("")
+		phoneEntry.SetText("")
+		addrEntry.SetText("")
+		boardingSelect.SetSelected("GÜNDÜZLÜ")
+		scoreEntry.SetText("100")
+	}
+
+	populateForm := func(st *model.Student) {
+		selectedStudent = st
+		idEntry.SetText(fmt.Sprintf("%d", st.ID))
+		schoolNoEntry.SetText(st.SchoolNo)
+		fullNameEntry.SetText(st.FullName)
+		classEntry.SetText(st.ClassSection)
+		genderSelect.SetSelected(st.Gender)
+		tcEntry.SetText(st.TCNo)
+		birthPlaceEntry.SetText(st.BirthPlace)
+		birthDateEntry.SetText(st.BirthDate)
+		fatherEntry.SetText(st.FatherName)
+		motherEntry.SetText(st.MotherName)
+		guardianEntry.SetText(st.GuardianName)
+		phoneEntry.SetText(st.GuardianPhone)
+		addrEntry.SetText(st.GuardianAddr)
+		boardingSelect.SetSelected(st.BoardingStatus)
+		scoreEntry.SetText(fmt.Sprintf("%d", st.BehaviorScore))
+	}
+
+	// Student List (using widget.List for smooth senior-friendly scrolling)
+	studentList := widget.NewList(
+		func() int {
+			return len(currentStudents)
+		},
+		func() fyne.CanvasObject {
+			return container.NewHBox(
+				widget.NewLabelWithStyle("00000", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+				widget.NewSeparator(),
+				widget.NewLabelWithStyle("9/A", fyne.TextAlignLeading, fyne.TextStyle{Italic: true}),
+				widget.NewSeparator(),
+				widget.NewLabel("Öğrenci Adı Soyadı"),
+				widget.NewSeparator(),
+				widget.NewLabel("Puan: 100"),
+			)
+		},
+		func(i widget.ListItemID, o fyne.CanvasObject) {
+			if i >= len(currentStudents) {
+				return
+			}
+			st := currentStudents[i]
+			box := o.(*fyne.Container)
+			noLbl := box.Objects[0].(*widget.Label)
+			classLbl := box.Objects[2].(*widget.Label)
+			nameLbl := box.Objects[4].(*widget.Label)
+			scoreLbl := box.Objects[6].(*widget.Label)
+
+			noLbl.SetText(fmt.Sprintf("%-5s", st.SchoolNo))
+			classLbl.SetText(st.ClassSection)
+			nameLbl.SetText(st.FullName)
+			scoreLbl.SetText(fmt.Sprintf("Puan: %d", st.BehaviorScore))
+		},
+	)
+
+	reloadStudents := func() {
+		filterClass := classSelect.Selected
+		if filterClass == "Tüm Sınıflar" {
+			filterClass = ""
+		}
+		list, err := state.Store.GetStudents(state.AcademicYear, searchEntry.Text, filterClass)
+		if err == nil {
+			currentStudents = list
+			countLabel.SetText(fmt.Sprintf("Kayıt: %d öğrenci", len(currentStudents)))
+			studentList.Refresh()
+		}
+	}
+
+	studentList.OnSelected = func(id widget.ListItemID) {
+		if id >= 0 && id < len(currentStudents) {
+			st := currentStudents[id]
+			populateForm(&st)
+			state.SelectedStudentNo = st.SchoolNo
+		}
+	}
+
+	searchEntry.OnChanged = func(s string) {
+		reloadStudents()
+	}
+
+	classSelect.OnChanged = func(s string) {
+		reloadStudents()
+	}
+
+
+	// Excel Import Dialog
+	excelBtn := widget.NewButtonWithIcon("Excel'den Öğrenci Yükle (.xlsx / .xls)", theme.DownloadIcon(), func() {
+		fd := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
+			if err != nil || reader == nil {
+				return
+			}
+			filePath := reader.URI().Path()
+			_ = reader.Close()
+
+			// Prompt with the 3 import modes
+			modeRadio := widget.NewRadioGroup([]string{
+				"1. Sadece Yeni Öğrencileri Ekle (Var olanlara dokunma)",
+				"2. Tüm Öğrencileri Sil ve Yeniden Yükle",
+				"3. Mevcut Öğrencilerin Sınıflarını Güncelle",
+			}, nil)
+			modeRadio.SetSelected("1. Sadece Yeni Öğrencileri Ekle (Var olanlara dokunma)")
+
+			infoLabel := widget.NewLabel(fmt.Sprintf("Dosya: %s\nÖğretim Yılı: %s", filePath, state.AcademicYear))
+			content := container.NewVBox(infoLabel, widget.NewSeparator(), modeRadio)
+
+			dialog.ShowCustomConfirm("Excel İçe Aktarma Modu", "İçe Aktar", "İptal", content, func(ok bool) {
+				if !ok {
+					return
+				}
+
+				parsed, err := excel.ImportStudentsFromFile(filePath, state.AcademicYear)
+				if err != nil {
+					showError(state.Window, fmt.Errorf("Excel okunurken hata oluştu: %w", err))
+					return
+				}
+
+				switch modeRadio.Selected {
+				case "2. Tüm Öğrencileri Sil ve Yeniden Yükle":
+					_ = state.Store.DeleteAllStudents(state.AcademicYear)
+					for _, st := range parsed {
+						_ = state.Store.SaveStudent(st)
+					}
+				case "3. Mevcut Öğrencilerin Sınıflarını Güncelle":
+					for _, st := range parsed {
+						existing, err := state.Store.GetStudentByNo(state.AcademicYear, st.SchoolNo)
+						if err == nil && existing != nil {
+							existing.ClassSection = st.ClassSection
+							_ = state.Store.SaveStudent(existing)
+						} else {
+							_ = state.Store.SaveStudent(st)
+						}
+					}
+				default: // Mode 1
+					for _, st := range parsed {
+						existing, _ := state.Store.GetStudentByNo(state.AcademicYear, st.SchoolNo)
+						if existing == nil {
+							_ = state.Store.SaveStudent(st)
+						}
+					}
+				}
+
+				showInfo(state.Window, "İçe Aktarma Tamamlandı", fmt.Sprintf("%d öğrenci başarıyla işlendi.", len(parsed)))
+				state.NotifyChange()
+			}, state.Window)
+		}, state.Window)
+
+		fd.SetFilter(storage.NewExtensionFileFilter([]string{".xlsx", ".xls"}))
+		fd.Show()
+	})
+	excelBtn.Importance = widget.MediumImportance
+
+	// Student Actions: Save, Delete, Clear
+	saveStudentBtn := widget.NewButtonWithIcon("Öğrenciyi Kaydet", theme.DocumentSaveIcon(), func() {
+		no := strings.TrimSpace(schoolNoEntry.Text)
+		name := strings.TrimSpace(fullNameEntry.Text)
+		if no == "" || name == "" {
+			showError(state.Window, fmt.Errorf("Okul numarası ve Ad Soyad zorunludur"))
+			return
+		}
+
+		score := 100
+		if s, err := strconv.Atoi(scoreEntry.Text); err == nil {
+			score = s
+		}
+
+		var id int64
+		if selectedStudent != nil {
+			id = selectedStudent.ID
+		}
+
+		st := &model.Student{
+			ID:             id,
+			AcademicYear:   state.AcademicYear,
+			SchoolNo:       no,
+			FullName:       name,
+			ClassSection:   strings.TrimSpace(classEntry.Text),
+			Gender:         genderSelect.Selected,
+			TCNo:           strings.TrimSpace(tcEntry.Text),
+			BirthPlace:     strings.TrimSpace(birthPlaceEntry.Text),
+			BirthDate:      strings.TrimSpace(birthDateEntry.Text),
+			FatherName:     strings.TrimSpace(fatherEntry.Text),
+			MotherName:     strings.TrimSpace(motherEntry.Text),
+			GuardianName:   strings.TrimSpace(guardianEntry.Text),
+			GuardianPhone:  strings.TrimSpace(phoneEntry.Text),
+			GuardianAddr:   strings.TrimSpace(addrEntry.Text),
+			BoardingStatus: boardingSelect.Selected,
+			BehaviorScore:  score,
+		}
+
+		err := state.Store.SaveStudent(st)
+		if err != nil {
+			showError(state.Window, err)
+			return
+		}
+
+		showInfo(state.Window, "Başarılı", "Öğrenci kaydı kaydedildi.")
+		clearForm()
+		state.NotifyChange()
+	})
+	saveStudentBtn.Importance = widget.HighImportance
+
+	deleteStudentBtn := widget.NewButtonWithIcon("Öğrenciyi Sil", theme.DeleteIcon(), func() {
+		if selectedStudent == nil {
+			showError(state.Window, fmt.Errorf("Silinecek öğrenci seçilmedi"))
+			return
+		}
+		showConfirm(state.Window, "Öğrenci Sil", fmt.Sprintf("%s (%s) kaydını silmek istediğinize emin misiniz?", selectedStudent.FullName, selectedStudent.SchoolNo), func() {
+			_ = state.Store.DeleteStudent(selectedStudent.ID)
+			clearForm()
+			state.NotifyChange()
+		})
+	})
+	deleteStudentBtn.Importance = widget.DangerImportance
+
+	newStudentBtn := widget.NewButtonWithIcon("Formu Temizle / Yeni", theme.ContentAddIcon(), func() {
+		clearForm()
+	})
+	newStudentBtn.Importance = widget.MediumImportance
+
+	// Layout Construction
+	filterRow := container.NewBorder(
+		nil, nil,
+		countLabel,
+		classSelect,
+		searchEntry,
+	)
+
+	leftPanel := container.NewBorder(
+		container.NewVBox(filterRow, excelBtn),
+		nil, nil, nil,
+		studentList,
+	)
+
+	formItems := widget.NewForm(
+		widget.NewFormItem("Okul No *", schoolNoEntry),
+		widget.NewFormItem("Adı Soyadı *", fullNameEntry),
+		widget.NewFormItem("Sınıfı / Şubesi", classEntry),
+		widget.NewFormItem("Cinsiyeti", genderSelect),
+		widget.NewFormItem("T.C. Kimlik No", tcEntry),
+		widget.NewFormItem("Doğum Yeri", birthPlaceEntry),
+		widget.NewFormItem("Doğum Tarihi", birthDateEntry),
+		widget.NewFormItem("Baba Adı", fatherEntry),
+		widget.NewFormItem("Anne Adı", motherEntry),
+		widget.NewFormItem("Veli Adı Soyadı", guardianEntry),
+		widget.NewFormItem("Veli Telefonu", phoneEntry),
+		widget.NewFormItem("Veli Adresi", addrEntry),
+		widget.NewFormItem("Pansiyon / Gündüzlü", boardingSelect),
+		widget.NewFormItem("Davranış Puanı", scoreEntry),
+	)
+
+	formCard := widget.NewCard("Öğrenci Detayları", "Listeden bir öğrenci seçin veya yeni öğrenci bilgilerini girip kaydedin.", formItems)
+	buttonsRow := container.NewHBox(saveStudentBtn, deleteStudentBtn, newStudentBtn)
+
+	rightPanel := container.NewVScroll(container.NewVBox(formCard, buttonsRow))
+
+	split := container.NewHSplit(leftPanel, rightPanel)
+	split.SetOffset(0.5)
+
+	reloadStudents()
+	return split
+}
