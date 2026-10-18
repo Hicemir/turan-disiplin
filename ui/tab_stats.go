@@ -9,8 +9,8 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
-	"okulevrak/model"
-	"okulevrak/pdf"
+	"turandisiplin/model"
+	"turandisiplin/pdf"
 )
 
 // BuildStatsTab creates the Disciplinary Statistics & Penalized Students Roster UI

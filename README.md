@@ -1,4 +1,4 @@
-# 🏛️ Okul Evrak - Öğrenci Disiplin ve Davranış Değerlendirme Sistemi
+# 🏛️ TuranDisiplin - MEB Öğrenci Disiplin ve Davranış Değerlendirme Sistemi
 
 MEB Ortaöğretim ve İlköğretim Kurumları Yönetmeliklerine tam uyumlu, modern, hızlı ve kullanımı son derece kolay masaüstü disiplin ve evrak yönetim sistemi.
 
@@ -10,8 +10,8 @@ Program herhangi bir kurulum sihirbazı veya harici veritabanı kurulumu gerekti
 
 | İşletim Sistemi | İndirme Linki | Çalıştırma |
 | :--- | :--- | :--- |
-| **🪟 Windows (10 / 11 / 8 / 7)** | [📥 **OkulEvrak.exe İndir (Windows)**](https://github.com/Hicemir/okulevrak/releases/download/v1.0/OkulEvrak.exe) | İndirdiğiniz `OkulEvrak.exe` dosyasına çift tıklayarak hemen kullanmaya başlayabilirsiniz. Kurulum gerektirmez. |
-| **🐧 Linux (Ubuntu, Debian, Fedora vb.)** | [📥 **OkulEvrak-Linux İndir (Linux)**](https://github.com/Hicemir/okulevrak/releases/download/v1.0/OkulEvrak-Linux) | İndirdikten sonra çift tıklayın veya `./OkulEvrak-Linux` ile çalıştırın. Kurulum gerektirmez. |
+| **🪟 Windows (10 / 11 / 8 / 7)** | [📥 **TuranDisiplin.exe İndir (Windows)**](https://github.com/Hicemir/okulevrak/releases/latest/download/TuranDisiplin.exe) | İndirdiğiniz `TuranDisiplin.exe` dosyasına çift tıklayarak hemen kullanmaya başlayabilirsiniz. Kurulum gerektirmez. |
+| **🐧 Linux (Ubuntu, Debian, Fedora vb.)** | [📥 **TuranDisiplin-Linux İndir (Linux)**](https://github.com/Hicemir/okulevrak/releases/latest/download/TuranDisiplin-Linux) | İndirdikten sonra çift tıklayın veya `./TuranDisiplin-Linux` ile çalıştırın. Kurulum gerektirmez. |
 
 > 💡 **Not:** İndirme bağlantılarına tıkladığınızda yalnızca seçtiğiniz işletim sistemine ait tek dosya (`.exe` veya Linux ikilisi) iner. Kaynak kod veya ek paket indirmenize gerek yoktur. Doğrudan çift tıklayarak kullanabilirsiniz.
 
@@ -60,8 +60,8 @@ Projeyi yerel makinenizde kaynak koddan derlemek isterseniz:
 go version # Go 1.22+
 
 # Linux için derleme
-go build -ldflags="-s -w" -o executables/OkulEvrak-Linux .
+go build -ldflags="-s -w" -o executables/TuranDisiplin-Linux .
 
 # Windows için çapraz derleme (Linux üzerinden)
-CGO_ENABLED=1 GOOS=windows GOARCH=amd64 CC=x86_64-w64-mingw32-gcc go build -ldflags="-s -w -H=windowsgui" -o executables/OkulEvrak.exe .
+CGO_ENABLED=1 GOOS=windows GOARCH=amd64 CC=x86_64-w64-mingw32-gcc go build -ldflags="-s -w -H=windowsgui" -o executables/TuranDisiplin.exe .
 ```

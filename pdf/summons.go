@@ -6,7 +6,7 @@ import (
 
 	"github.com/signintech/gopdf"
 
-	"okulevrak/model"
+	"turandisiplin/model"
 )
 
 // GenerateCagriPusulasi generates student summons slips (1 page per student).

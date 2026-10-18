@@ -6,7 +6,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
-	"okulevrak/model"
+	"turandisiplin/model"
 )
 
 // BuildSchoolInfoTab creates the School and Board settings UI

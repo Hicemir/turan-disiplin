@@ -10,8 +10,8 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
-	"okulevrak/model"
-	"okulevrak/pdf"
+	"turandisiplin/model"
+	"turandisiplin/pdf"
 )
 
 // BuildSummonsTab creates the Student & Member Summons Slips UI

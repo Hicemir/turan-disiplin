@@ -12,7 +12,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
-	"okulevrak/pdf"
+	"turandisiplin/pdf"
 )
 
 // SquareInfoButton displays card description when hovered over its square hitbox or clicked
@@ -174,8 +174,8 @@ func buildModernHub(state *AppState) fyne.CanvasObject {
 // -------------------------------------------------------------
 
 func buildLegacyHub(state *AppState) fyne.CanvasObject {
-	// 1. Left Brand Column: "OkulEvrak" logo & utilities
-	brandLogo := canvas.NewText("OkulEvrak", color.NRGBA{R: 2, G: 119, B: 189, A: 255})
+	// 1. Left Brand Column: "TuranDisiplin" logo & utilities
+	brandLogo := canvas.NewText("TuranDisiplin", color.NRGBA{R: 2, G: 119, B: 189, A: 255})
 	brandLogo.TextSize = 28
 	brandLogo.TextStyle = fyne.TextStyle{Bold: true, Italic: true}
 	brandLogo.Alignment = fyne.TextAlignCenter

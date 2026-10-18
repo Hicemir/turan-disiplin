@@ -1,4 +1,4 @@
-module okulevrak
+module turandisiplin
 
 go 1.27.1
 

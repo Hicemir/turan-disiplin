@@ -12,9 +12,9 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
-	"okulevrak/config"
-	"okulevrak/pdf"
-	"okulevrak/store"
+	"turandisiplin/config"
+	"turandisiplin/pdf"
+	"turandisiplin/store"
 )
 
 // BuildHeader creates the persistent senior-friendly top bar
@@ -125,13 +125,7 @@ func BuildHeader(state *AppState) fyne.CanvasObject {
 		home, err := os.UserHomeDir()
 		outDir := "."
 		if err == nil {
-			outDir = filepath.Join(home, "OkulEvrak_belgeler")
-			oldDir := filepath.Join(home, "OkulEvrak_Ciktilar")
-			if _, errOld := os.Stat(oldDir); errOld == nil {
-				if _, errNew := os.Stat(outDir); os.IsNotExist(errNew) {
-					_ = os.Rename(oldDir, outDir)
-				}
-			}
+			outDir = filepath.Join(home, "TuranDisiplin_belgeler")
 		}
 		_ = os.MkdirAll(outDir, 0755)
 		_ = pdf.OpenPDF(outDir)

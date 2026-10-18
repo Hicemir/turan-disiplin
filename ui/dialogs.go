@@ -11,9 +11,9 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
-	"okulevrak/config"
-	"okulevrak/picker"
-	"okulevrak/store"
+	"turandisiplin/config"
+	"turandisiplin/picker"
+	"turandisiplin/store"
 )
 
 // SelectExcelFile opens the operating system's native file picker (Windows Explorer or Linux Zenity/KDialog)
@@ -191,7 +191,7 @@ func ShowAcademicYearPicker(state *AppState) {
 
 // ShowHelpDialog displays comprehensive, senior-friendly guidance on e-Okul imports, incidents, and procedures
 func ShowHelpDialog(state *AppState) {
-	titleLabel := widget.NewLabelWithStyle("📖 OkulEvrak Kullanım Rehberi ve Yardım", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
+	titleLabel := widget.NewLabelWithStyle("📖 TuranDisiplin Kullanım Rehberi ve Yardım", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
 
 	makeSection := func(heading string, body string) fyne.CanvasObject {
 		h := widget.NewLabelWithStyle(heading, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
@@ -203,7 +203,7 @@ func ShowHelpDialog(state *AppState) {
 	sec1 := makeSection(
 		"1. e-Okul ve e-Mesem Excel Dosyasını İçe Aktarma",
 		"• e-Okul Yönetim Bilgi Sistemi > Kurum İşlemleri > Öğrenci İşlemleri > Raporlar bölümünden 'Sınıf Listesi' veya 'Genel Öğrenci Listesi' Excel dosyasını (.xlsx veya .xls) bilgisayarınıza indirin.\n"+
-			"• OkulEvrak'ta 'Öğrenciler' ekranını açın ve 'Excel'den Öğrenci Yükle' butonuna tıklayın.\n"+
+			"• TuranDisiplin'de 'Öğrenciler' ekranını açın ve 'Excel'den Öğrenci Yükle' butonuna tıklayın.\n"+
 			"• Açılan standart sistem dosya yöneticisinden indirdiğiniz Excel dosyasını seçin.\n"+
 			"• Program; Öğrenci Numarası, T.C. Kimlik No, Ad Soyad, Sınıf/Şube ve Cinsiyet sütunlarını otomatik algılar.\n"+
 			"• Karşınıza gelen 3 aktarım modundan birini seçebilirsiniz:\n"+
@@ -241,9 +241,9 @@ func ShowHelpDialog(state *AppState) {
 
 	sec6 := makeSection(
 		"6. Güvenlik, Yedekleme ve Bağımsız Çalışma",
-		"• Program tüm verileri bilgisayarınızdaki yerel veritabanında (OkulEvrak.db) saklar.\n"+
+		"• Program tüm verileri bilgisayarınızdaki yerel veritabanında (TuranDisiplin.db) saklar.\n"+
 			"• İnternet bağlantısı veya dış sunucu gerektirmez; verileriniz kurumunuzda güvenle kalır.\n"+
-			"• Oluşturulan tüm resmi evraklar uygulama klasöründeki 'Çıktılar' dizininde arşivlenir.",
+			"• Oluşturulan tüm resmi evraklar kullanıcı ev dizinindeki 'TuranDisiplin_belgeler' dizininde arşivlenir.",
 	)
 
 	helpContent := container.NewVBox(

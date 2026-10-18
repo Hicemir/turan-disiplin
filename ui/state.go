@@ -6,10 +6,10 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
 
-	"okulevrak/config"
-	"okulevrak/model"
-	"okulevrak/store"
-	appTheme "okulevrak/theme"
+	"turandisiplin/config"
+	"turandisiplin/model"
+	"turandisiplin/store"
+	appTheme "turandisiplin/theme"
 )
 
 // AppState stores the active state across the application

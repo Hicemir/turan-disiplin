@@ -9,14 +9,14 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 
-	"okulevrak/config"
-	"okulevrak/ui"
+	"turandisiplin/config"
+	"turandisiplin/ui"
 )
 
 func main() {
-	a := app.NewWithID("com.okulevrak.disiplin")
+	a := app.NewWithID("com.turandisiplin.app")
 
-	w := a.NewWindow("Okul Evrak - Öğrenci Disiplin ve Davranış Değerlendirme Sistemi")
+	w := a.NewWindow("TuranDisiplin - MEB Öğrenci Disiplin ve Davranış Değerlendirme Sistemi")
 	w.Resize(fyne.NewSize(1260, 840))
 	w.CenterOnScreen()
 

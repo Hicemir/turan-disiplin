@@ -9,8 +9,8 @@ import (
 	"strings"
 	"sync"
 
-	"okulevrak/assets"
-	"okulevrak/model"
+	"turandisiplin/assets"
+	"turandisiplin/model"
 )
 
 var (
@@ -24,7 +24,7 @@ func GetConfigDir() (string, error) {
 	if err != nil {
 		configDir = "."
 	}
-	appDir := filepath.Join(configDir, "OkulEvrak")
+	appDir := filepath.Join(configDir, "TuranDisiplin")
 	if err := os.MkdirAll(appDir, 0755); err != nil {
 		return ".", err
 	}
@@ -87,7 +87,7 @@ func GetYonetmelik() *model.YonetmelikData {
 	return data
 }
 
-// SaveYonetmelik saves the updated yonetmelik data to os.UserConfigDir()/OkulEvrak/yonetmelik.json
+// SaveYonetmelik saves the updated yonetmelik data to os.UserConfigDir()/TuranDisiplin/yonetmelik.json
 func SaveYonetmelik(data *model.YonetmelikData) error {
 	yonetmelikMutex.Lock()
 	defer yonetmelikMutex.Unlock()

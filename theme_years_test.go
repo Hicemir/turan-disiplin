@@ -5,9 +5,9 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2/theme"
-	"okulevrak/config"
-	"okulevrak/store"
-	appTheme "okulevrak/theme"
+	"turandisiplin/config"
+	"turandisiplin/store"
+	appTheme "turandisiplin/theme"
 )
 
 func TestAcademicYearSortingAndDeduplication(t *testing.T) {

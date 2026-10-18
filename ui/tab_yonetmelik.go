@@ -9,8 +9,8 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
-	"okulevrak/config"
-	"okulevrak/model"
+	"turandisiplin/config"
+	"turandisiplin/model"
 )
 
 // BuildYonetmelikTab creates the In-App Regulation & Template Editor UI
@@ -244,7 +244,7 @@ func BuildYonetmelikTab(state *AppState) fyne.CanvasObject {
 	cardEdit := widget.NewCard("Madde Düzenleme / Yeni Madde Ekleme", "Listeden bir madde seçerek düzenleyin veya yeni madde ekleyin.", formItems)
 	buttonsRow := container.NewGridWithColumns(3, saveClauseBtn, deleteClauseBtn, newClauseBtn)
 
-	infoLbl := widget.NewLabelWithStyle("💡 Bilgi: Değişiklikler bilgisayarınızdaki OkulEvrak profil klasörüne kaydedilir. 'Fabrika Ayarları' ile istediğiniz an orijinal yönetmeliğe dönebilirsiniz.", fyne.TextAlignLeading, fyne.TextStyle{Italic: true})
+	infoLbl := widget.NewLabelWithStyle("💡 Bilgi: Değişiklikler bilgisayarınızdaki TuranDisiplin profil klasörüne kaydedilir. 'Fabrika Ayarları' ile istediğiniz an orijinal yönetmeliğe dönebilirsiniz.", fyne.TextAlignLeading, fyne.TextStyle{Italic: true})
 	infoLbl.Wrapping = fyne.TextWrapWord
 
 	rightPanel := container.NewVScroll(container.NewVBox(

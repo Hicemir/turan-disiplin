@@ -11,8 +11,8 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
-	"okulevrak/model"
-	"okulevrak/pdf"
+	"turandisiplin/model"
+	"turandisiplin/pdf"
 )
 
 // BuildMinutesTab creates the Beginning/End of Year Meeting Minutes & Case File Index (Dizi Pusulası) UI

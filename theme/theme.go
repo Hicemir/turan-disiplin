@@ -6,7 +6,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
 
-	"okulevrak/assets"
+	"turandisiplin/assets"
 )
 
 type TurkishTheme struct {

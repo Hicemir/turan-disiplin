@@ -11,7 +11,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
-	"okulevrak/model"
+	"turandisiplin/model"
 )
 
 // BuildIncidentsTab creates a clean 2-panel Incident Management UI

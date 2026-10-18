@@ -11,8 +11,8 @@ import (
 	"time"
 
 	_ "modernc.org/sqlite"
-	"okulevrak/config"
-	"okulevrak/model"
+	"turandisiplin/config"
+	"turandisiplin/model"
 )
 
 type Store struct {
@@ -34,7 +34,7 @@ func GetStore() (*Store, error) {
 			initErr = err
 			return
 		}
-		dbPath := filepath.Join(cfgDir, "OkulEvrak.db")
+		dbPath := filepath.Join(cfgDir, "TuranDisiplin.db")
 		db, err := sql.Open("sqlite", dbPath)
 		if err != nil {
 			initErr = fmt.Errorf("veritabanı açılamadı (%s): %w", dbPath, err)

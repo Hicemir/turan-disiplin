@@ -7,7 +7,7 @@ import (
 
 	"github.com/signintech/gopdf"
 
-	"okulevrak/model"
+	"turandisiplin/model"
 )
 
 // GenerateIfadeSavunmaTutanagi generates either İfade Tutanağı or Savunma Tutanağı.

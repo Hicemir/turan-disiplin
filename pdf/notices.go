@@ -6,7 +6,7 @@ import (
 
 	"github.com/signintech/gopdf"
 
-	"okulevrak/model"
+	"turandisiplin/model"
 )
 
 // GenerateCezaTebligatiOgrenci generates student penalty notification slip.

@@ -11,8 +11,8 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
-	"okulevrak/excel"
-	"okulevrak/model"
+	"turandisiplin/excel"
+	"turandisiplin/model"
 )
 
 // BuildStudentsTab creates the Student Roster and Excel Import UI

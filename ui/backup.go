@@ -11,12 +11,12 @@ import (
 	"fyne.io/fyne/v2"
 	fyneDialog "fyne.io/fyne/v2/dialog"
 
-	"okulevrak/config"
-	"okulevrak/picker"
-	"okulevrak/store"
+	"turandisiplin/config"
+	"turandisiplin/picker"
+	"turandisiplin/store"
 )
 
-// BackupDatabase copies the active OkulEvrak.db SQLite database to a user-chosen location
+// BackupDatabase copies the active TuranDisiplin.db SQLite database to a user-chosen location
 func BackupDatabase(state *AppState) {
 	go func() {
 		cfgDir, err := config.GetConfigDir()
@@ -24,11 +24,11 @@ func BackupDatabase(state *AppState) {
 			showError(state.Window, fmt.Errorf("Uygulama klasörüne erişilemedi: %w", err))
 			return
 		}
-		srcPath := filepath.Join(cfgDir, "OkulEvrak.db")
+		srcPath := filepath.Join(cfgDir, "TuranDisiplin.db")
 
-		defaultName := fmt.Sprintf("OkulEvrak_Yedek_%s.db", time.Now().Format("2006-01-02_15-04"))
+		defaultName := fmt.Sprintf("TuranDisiplin_Yedek_%s.db", time.Now().Format("2006-01-02_15-04"))
 		filters := []picker.FileFilter{
-			{Name: "OkulEvrak Veritabanı (*.db)", Extensions: []string{"db"}},
+			{Name: "TuranDisiplin Veritabanı (*.db)", Extensions: []string{"db"}},
 		}
 
 		destPath, err := picker.SaveFile("Veritabanı Yedeği Kaydet", defaultName, filters)
@@ -76,7 +76,7 @@ func executeBackup(state *AppState, srcPath, destPath string) {
 	)
 }
 
-// RestoreDatabase restores OkulEvrak.db from a chosen .db backup file
+// RestoreDatabase restores TuranDisiplin.db from a chosen .db backup file
 func RestoreDatabase(state *AppState) {
 	go func() {
 		cfgDir, err := config.GetConfigDir()
@@ -84,10 +84,10 @@ func RestoreDatabase(state *AppState) {
 			showError(state.Window, fmt.Errorf("Uygulama klasörüne erişilemedi: %w", err))
 			return
 		}
-		targetPath := filepath.Join(cfgDir, "OkulEvrak.db")
+		targetPath := filepath.Join(cfgDir, "TuranDisiplin.db")
 
 		filters := []picker.FileFilter{
-			{Name: "OkulEvrak Veritabanı (*.db)", Extensions: []string{"db"}},
+			{Name: "TuranDisiplin Veritabanı (*.db)", Extensions: []string{"db"}},
 		}
 
 		backupPath, err := picker.OpenFile("Geri Yüklenecek Yedek Dosyasını Seçin (.db)", filters)

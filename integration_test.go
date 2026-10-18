@@ -10,9 +10,9 @@ import (
 
 	"fyne.io/fyne/v2/test"
 
-	"okulevrak/model"
-	"okulevrak/pdf"
-	"okulevrak/ui"
+	"turandisiplin/model"
+	"turandisiplin/pdf"
+	"turandisiplin/ui"
 )
 
 func TestFullAppEndToEnd(t *testing.T) {
@@ -227,7 +227,7 @@ func TestFullAppEndToEnd(t *testing.T) {
 	}
 
 	t.Log("===> Step 7: Generating Official PDFs for All Modules")
-	tmpDir, err := os.MkdirTemp("", "okulevrak_test_*")
+	tmpDir, err := os.MkdirTemp("", "turandisiplin_test_*")
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}

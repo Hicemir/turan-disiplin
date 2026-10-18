@@ -9,8 +9,8 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
-	"okulevrak/config"
-	appTheme "okulevrak/theme"
+	"turandisiplin/config"
+	appTheme "turandisiplin/theme"
 )
 
 // BuildSettingsView creates the Theme and Interface Preferences view

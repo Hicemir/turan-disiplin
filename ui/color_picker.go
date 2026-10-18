@@ -12,7 +12,7 @@ import (
 	fyneDialog "fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 
-	"okulevrak/config"
+	"turandisiplin/config"
 )
 
 // ShowAdvancedColorPicker displays a rich, interactive color picker modal with

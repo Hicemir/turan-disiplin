@@ -6,7 +6,7 @@ import (
 
 	"github.com/signintech/gopdf"
 
-	"okulevrak/model"
+	"turandisiplin/model"
 )
 
 // GenerateKurulKarari generates the official EK-1 (Lise) or EK-10 (Ortaokul) Disciplinary Board Decision Document.

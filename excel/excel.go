@@ -9,7 +9,7 @@ import (
 	"github.com/extrame/xls"
 	"github.com/xuri/excelize/v2"
 
-	"okulevrak/model"
+	"turandisiplin/model"
 )
 
 // ReadSheetData reads all sheets from an .xlsx or .xls file into a map of sheetName -> [][]string.
