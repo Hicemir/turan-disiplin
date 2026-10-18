@@ -58,25 +58,15 @@ func TestThemesPaletteAndCustomTheme(t *testing.T) {
 	customAccent := color.NRGBA{R: 255, G: 165, B: 0, A: 255}
 
 	allThemes := appTheme.GetAllThemes(customBg, customAccent)
-	if len(allThemes) != 12 { // 6 dark + 5 light + 1 custom
-		t.Fatalf("expected 12 themes including custom, got %d", len(allThemes))
+	if len(allThemes) != 3 { // dark_cyan + light + custom
+		t.Fatalf("expected 3 themes including custom, got %d", len(allThemes))
 	}
 
-	expectedDark := []string{"dark", "dark_emerald", "dark_purple", "dark_amber", "dark_ruby", "dark_cyan"}
-	for _, id := range expectedDark {
+	expectedThemes := []string{"dark_cyan", "light"}
+	for _, id := range expectedThemes {
 		th := appTheme.NewTurkishTheme(id, 15.0)
 		fg := th.Color(theme.ColorNameForeground, theme.VariantDark)
 		bg := th.Color(theme.ColorNameBackground, theme.VariantDark)
-		if fg == nil || bg == nil {
-			t.Errorf("theme %s returned nil color", id)
-		}
-	}
-
-	expectedLight := []string{"light", "cream", "green", "bordeaux", "navy"}
-	for _, id := range expectedLight {
-		th := appTheme.NewTurkishTheme(id, 15.0)
-		fg := th.Color(theme.ColorNameForeground, theme.VariantLight)
-		bg := th.Color(theme.ColorNameBackground, theme.VariantLight)
 		if fg == nil || bg == nil {
 			t.Errorf("theme %s returned nil color", id)
 		}

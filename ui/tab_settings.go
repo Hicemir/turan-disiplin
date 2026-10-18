@@ -227,15 +227,31 @@ func BuildSettingsView(state *AppState) fyne.CanvasObject {
 		backupCard,
 	)
 
+	applyBtnBottom := widget.NewButtonWithIcon("Ayarları Uygula ve Kaydet", theme.DocumentSaveIcon(), func() {
+		applyBtn.OnTapped()
+	})
+	applyBtnBottom.Importance = widget.HighImportance
+
 	card := widget.NewCard(
-		"⚙️ Görünüm ve Tema Ayarları",
+		"⚙️ Tercihler",
 		"Ekran tasarımını, tema rengini ve yazı boyutunu seçiniz",
 		container.NewVBox(
 			form,
 			widget.NewSeparator(),
-			container.NewHBox(applyBtn),
+			container.NewHBox(applyBtnBottom),
 		),
 	)
 
-	return container.NewVScroll(container.NewPadded(card))
+	topSaveBar := container.NewBorder(
+		nil, nil,
+		widget.NewLabelWithStyle("⚙️ Görünüm ve Tema Ayarları", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+		applyBtn,
+	)
+
+	scrollContent := container.NewVScroll(container.NewPadded(card))
+	return container.NewBorder(
+		container.NewPadded(topSaveBar),
+		nil, nil, nil,
+		scrollContent,
+	)
 }

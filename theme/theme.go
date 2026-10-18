@@ -35,22 +35,13 @@ func GetAllThemes(customColors ...color.Color) []ThemeInfo {
 	}
 
 	return []ThemeInfo{
-		// Koyu Temalar (Dark Themes)
-		{ID: "dark", Name: "Koyu Gri / Mavi", BgColor: color.NRGBA{R: 15, G: 23, B: 42, A: 255}, AccentColor: color.NRGBA{R: 59, G: 130, B: 246, A: 255}},
-		{ID: "dark_emerald", Name: "Koyu Gece / Zümrüt Yeşili", BgColor: color.NRGBA{R: 6, G: 26, B: 20, A: 255}, AccentColor: color.NRGBA{R: 16, G: 185, B: 129, A: 255}},
-		{ID: "dark_purple", Name: "Koyu Gece / Ametist Mor", BgColor: color.NRGBA{R: 20, G: 9, B: 36, A: 255}, AccentColor: color.NRGBA{R: 168, G: 85, B: 247, A: 255}},
-		{ID: "dark_amber", Name: "Koyu Gece / Kehribar Altın", BgColor: color.NRGBA{R: 24, G: 24, B: 27, A: 255}, AccentColor: color.NRGBA{R: 245, G: 158, B: 11, A: 255}},
-		{ID: "dark_ruby", Name: "Koyu Gece / Yakut Kırmızı", BgColor: color.NRGBA{R: 31, G: 10, B: 16, A: 255}, AccentColor: color.NRGBA{R: 244, G: 63, B: 94, A: 255}},
-		{ID: "dark_cyan", Name: "Koyu Gece / Buz Turkuaz", BgColor: color.NRGBA{R: 4, G: 24, B: 36, A: 255}, AccentColor: color.NRGBA{R: 6, G: 182, B: 212, A: 255}},
+		// 1. Koyu Turkuaz (Gece)
+		{ID: "dark_cyan", Name: "Koyu Turkuaz (Gece Modu)", BgColor: color.NRGBA{R: 4, G: 24, B: 36, A: 255}, AccentColor: color.NRGBA{R: 6, G: 182, B: 212, A: 255}},
 
-		// Açık Temalar (Light Themes)
-		{ID: "light", Name: "Açık Tema", BgColor: color.NRGBA{R: 248, G: 250, B: 252, A: 255}, AccentColor: color.NRGBA{R: 29, G: 78, B: 216, A: 255}},
-		{ID: "cream", Name: "Sarı / Krem", BgColor: color.NRGBA{R: 255, G: 253, B: 231, A: 255}, AccentColor: color.NRGBA{R: 2, G: 119, B: 189, A: 255}},
-		{ID: "green", Name: "Yeşil / Doğa", BgColor: color.NRGBA{R: 240, G: 253, B: 244, A: 255}, AccentColor: color.NRGBA{R: 21, G: 128, B: 61, A: 255}},
-		{ID: "bordeaux", Name: "Bordo / Klasik", BgColor: color.NRGBA{R: 250, G: 245, B: 240, A: 255}, AccentColor: color.NRGBA{R: 136, G: 19, B: 55, A: 255}},
-		{ID: "navy", Name: "Lacivert / Kurumsal", BgColor: color.NRGBA{R: 241, G: 245, B: 249, A: 255}, AccentColor: color.NRGBA{R: 30, G: 58, B: 138, A: 255}},
+		// 2. Açık Turkuaz (Gündüz) - Arka Plan: #e2e8f0, Vurgu: #06b6d4
+		{ID: "light", Name: "Açık Turkuaz (Gündüz Modu)", BgColor: color.NRGBA{R: 226, G: 232, B: 240, A: 255}, AccentColor: color.NRGBA{R: 6, G: 182, B: 212, A: 255}},
 
-		// Özel Kişiselleştirilmiş Tema
+		// 3. Özel Kişiselleştirilmiş Tema
 		{ID: "custom", Name: "🎨 Özel Tema (Kişiselleştirilmiş)", BgColor: customBg, AccentColor: customAccent},
 	}
 }
@@ -142,78 +133,7 @@ func (t *TurkishTheme) Font(style fyne.TextStyle) fyne.Resource {
 
 func (t *TurkishTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) color.Color {
 	switch t.Mode {
-	case "cream": // Warm nostalgia cream
-		switch name {
-		case theme.ColorNameBackground:
-			return color.NRGBA{R: 255, G: 253, B: 231, A: 255} // Cream #fffde7
-		case theme.ColorNameOverlayBackground:
-			return color.NRGBA{R: 255, G: 250, B: 205, A: 255}
-		case theme.ColorNameForeground:
-			return color.NRGBA{R: 20, G: 20, B: 20, A: 255}
-		case theme.ColorNameForegroundOnPrimary:
-			return color.NRGBA{R: 255, G: 255, B: 255, A: 255}
-		case theme.ColorNamePrimary:
-			return color.NRGBA{R: 2, G: 119, B: 189, A: 255} // Deep blue
-		case theme.ColorNameSuccess:
-			return color.NRGBA{R: 46, G: 125, B: 50, A: 255}
-		case theme.ColorNameError:
-			return color.NRGBA{R: 198, G: 40, B: 40, A: 255}
-		case theme.ColorNameButton:
-			return color.NRGBA{R: 240, G: 235, B: 204, A: 255}
-		case theme.ColorNameInputBackground:
-			return color.NRGBA{R: 255, G: 255, B: 255, A: 255}
-		case theme.ColorNameSeparator:
-			return color.NRGBA{R: 218, G: 197, B: 130, A: 255}
-		default:
-			return t.base.Color(name, theme.VariantLight)
-		}
-
-	case "dark": // Deep Slate dark mode
-		return buildDarkPalette(name,
-			color.NRGBA{R: 15, G: 23, B: 42, A: 255},
-			color.NRGBA{R: 30, G: 41, B: 59, A: 255},
-			color.NRGBA{R: 51, G: 65, B: 85, A: 255},
-			color.NRGBA{R: 59, G: 130, B: 246, A: 255},
-			color.NRGBA{R: 71, G: 85, B: 105, A: 255},
-			t.base)
-
-	case "dark_emerald": // Deep Night Forest & Emerald
-		return buildDarkPalette(name,
-			color.NRGBA{R: 6, G: 26, B: 20, A: 255},
-			color.NRGBA{R: 13, G: 40, B: 32, A: 255},
-			color.NRGBA{R: 19, G: 56, B: 44, A: 255},
-			color.NRGBA{R: 16, G: 185, B: 129, A: 255},
-			color.NRGBA{R: 27, G: 77, B: 62, A: 255},
-			t.base)
-
-	case "dark_purple": // Deep Night Violet & Amethyst
-		return buildDarkPalette(name,
-			color.NRGBA{R: 20, G: 9, B: 36, A: 255},
-			color.NRGBA{R: 33, G: 16, B: 58, A: 255},
-			color.NRGBA{R: 48, G: 23, B: 84, A: 255},
-			color.NRGBA{R: 168, G: 85, B: 247, A: 255},
-			color.NRGBA{R: 67, G: 32, B: 117, A: 255},
-			t.base)
-
-	case "dark_amber": // Charcoal Pitch & Warm Amber
-		return buildDarkPalette(name,
-			color.NRGBA{R: 24, G: 24, B: 27, A: 255},
-			color.NRGBA{R: 39, G: 39, B: 42, A: 255},
-			color.NRGBA{R: 63, G: 63, B: 70, A: 255},
-			color.NRGBA{R: 245, G: 158, B: 11, A: 255},
-			color.NRGBA{R: 82, G: 82, B: 91, A: 255},
-			t.base)
-
-	case "dark_ruby": // Deep Crimson & Vivid Ruby
-		return buildDarkPalette(name,
-			color.NRGBA{R: 31, G: 10, B: 16, A: 255},
-			color.NRGBA{R: 45, G: 16, B: 24, A: 255},
-			color.NRGBA{R: 66, G: 23, B: 35, A: 255},
-			color.NRGBA{R: 244, G: 63, B: 94, A: 255},
-			color.NRGBA{R: 94, G: 33, B: 50, A: 255},
-			t.base)
-
-	case "dark_cyan": // Abyssal Deep Ocean & Cyan
+	case "dark_cyan", "dark", "dark_emerald", "dark_purple", "dark_amber", "dark_ruby": // Koyu Turkuaz (Gece Modu)
 		return buildDarkPalette(name,
 			color.NRGBA{R: 4, G: 24, B: 36, A: 255},
 			color.NRGBA{R: 8, G: 37, B: 54, A: 255},
@@ -222,92 +142,14 @@ func (t *TurkishTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant
 			color.NRGBA{R: 17, G: 75, B: 109, A: 255},
 			t.base)
 
-	case "green": // Fresh Mint / Forest Emerald
-		switch name {
-		case theme.ColorNameBackground:
-			return color.NRGBA{R: 240, G: 253, B: 244, A: 255} // Mint #f0fdf4
-		case theme.ColorNameOverlayBackground:
-			return color.NRGBA{R: 255, G: 255, B: 255, A: 255}
-		case theme.ColorNameForeground:
-			return color.NRGBA{R: 15, G: 23, B: 42, A: 255}
-		case theme.ColorNameForegroundOnPrimary:
-			return color.NRGBA{R: 255, G: 255, B: 255, A: 255}
-		case theme.ColorNamePrimary:
-			return color.NRGBA{R: 21, G: 128, B: 61, A: 255} // Emerald
-		case theme.ColorNameSuccess:
-			return color.NRGBA{R: 22, G: 163, B: 74, A: 255}
-		case theme.ColorNameError:
-			return color.NRGBA{R: 185, G: 28, B: 28, A: 255}
-		case theme.ColorNameButton:
-			return color.NRGBA{R: 220, G: 252, B: 231, A: 255}
-		case theme.ColorNameInputBackground:
-			return color.NRGBA{R: 255, G: 255, B: 255, A: 255}
-		case theme.ColorNameSeparator:
-			return color.NRGBA{R: 187, G: 247, B: 208, A: 255}
-		default:
-			return t.base.Color(name, theme.VariantLight)
-		}
-
-	case "bordeaux": // Warm Academic Crimson / Burgundy
-		switch name {
-		case theme.ColorNameBackground:
-			return color.NRGBA{R: 250, G: 245, B: 240, A: 255} // Linen #faf5f0
-		case theme.ColorNameOverlayBackground:
-			return color.NRGBA{R: 255, G: 255, B: 255, A: 255}
-		case theme.ColorNameForeground:
-			return color.NRGBA{R: 24, G: 24, B: 27, A: 255}
-		case theme.ColorNameForegroundOnPrimary:
-			return color.NRGBA{R: 255, G: 255, B: 255, A: 255}
-		case theme.ColorNamePrimary:
-			return color.NRGBA{R: 136, G: 19, B: 55, A: 255} // Bordo #881337
-		case theme.ColorNameSuccess:
-			return color.NRGBA{R: 21, G: 128, B: 61, A: 255}
-		case theme.ColorNameError:
-			return color.NRGBA{R: 185, G: 28, B: 28, A: 255}
-		case theme.ColorNameButton:
-			return color.NRGBA{R: 254, G: 226, B: 226, A: 255}
-		case theme.ColorNameInputBackground:
-			return color.NRGBA{R: 255, G: 255, B: 255, A: 255}
-		case theme.ColorNameSeparator:
-			return color.NRGBA{R: 254, G: 205, B: 211, A: 255}
-		default:
-			return t.base.Color(name, theme.VariantLight)
-		}
-
-	case "navy": // Ice cool slate & Corporate Navy
-		switch name {
-		case theme.ColorNameBackground:
-			return color.NRGBA{R: 241, G: 245, B: 249, A: 255} // Ice cool #f1f5f9
-		case theme.ColorNameOverlayBackground:
-			return color.NRGBA{R: 255, G: 255, B: 255, A: 255}
-		case theme.ColorNameForeground:
-			return color.NRGBA{R: 15, G: 23, B: 42, A: 255}
-		case theme.ColorNameForegroundOnPrimary:
-			return color.NRGBA{R: 255, G: 255, B: 255, A: 255}
-		case theme.ColorNamePrimary:
-			return color.NRGBA{R: 30, G: 58, B: 138, A: 255} // Navy #1e3a8a
-		case theme.ColorNameSuccess:
-			return color.NRGBA{R: 21, G: 128, B: 61, A: 255}
-		case theme.ColorNameError:
-			return color.NRGBA{R: 185, G: 28, B: 28, A: 255}
-		case theme.ColorNameButton:
-			return color.NRGBA{R: 226, G: 232, B: 240, A: 255}
-		case theme.ColorNameInputBackground:
-			return color.NRGBA{R: 255, G: 255, B: 255, A: 255}
-		case theme.ColorNameSeparator:
-			return color.NRGBA{R: 203, G: 213, B: 225, A: 255}
-		default:
-			return t.base.Color(name, theme.VariantLight)
-		}
-
 	case "custom":
 		bg := t.CustomBg
 		if bg == nil {
-			bg = color.NRGBA{R: 30, G: 30, B: 46, A: 255}
+			bg = color.NRGBA{R: 226, G: 232, B: 240, A: 255}
 		}
 		accent := t.CustomAccent
 		if accent == nil {
-			accent = color.NRGBA{R: 137, G: 180, B: 250, A: 255}
+			accent = color.NRGBA{R: 6, G: 182, B: 212, A: 255}
 		}
 
 		r, g, b, _ := bg.RGBA()
@@ -348,28 +190,28 @@ func (t *TurkishTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant
 			}
 		}
 
-	default: // "light" Clean daylight slate
+	default: // "light" Açık Turkuaz (Gündüz Modu: #e2e8f0 Arka Plan, #06b6d4 Vurgu)
 		switch name {
 		case theme.ColorNameBackground:
-			return color.NRGBA{R: 248, G: 250, B: 252, A: 255}
+			return color.NRGBA{R: 226, G: 232, B: 240, A: 255} // Soft light slate #e2e8f0
 		case theme.ColorNameOverlayBackground:
-			return color.NRGBA{R: 255, G: 255, B: 255, A: 255}
+			return color.NRGBA{R: 255, G: 255, B: 255, A: 255} // Crisp white cards
 		case theme.ColorNameForeground:
-			return color.NRGBA{R: 15, G: 23, B: 42, A: 255}
+			return color.NRGBA{R: 15, G: 23, B: 42, A: 255} // Dark slate text
 		case theme.ColorNameForegroundOnPrimary:
 			return color.NRGBA{R: 255, G: 255, B: 255, A: 255}
 		case theme.ColorNamePrimary:
-			return color.NRGBA{R: 29, G: 78, B: 216, A: 255}
+			return color.NRGBA{R: 6, G: 182, B: 212, A: 255} // Vibrant cyan #06b6d4
 		case theme.ColorNameSuccess:
-			return color.NRGBA{R: 21, G: 128, B: 61, A: 255}
+			return color.NRGBA{R: 22, G: 163, B: 74, A: 255}
 		case theme.ColorNameError:
-			return color.NRGBA{R: 185, G: 28, B: 28, A: 255}
+			return color.NRGBA{R: 220, G: 38, B: 38, A: 255}
 		case theme.ColorNameButton:
-			return color.NRGBA{R: 226, G: 232, B: 240, A: 255}
+			return color.NRGBA{R: 203, G: 213, B: 225, A: 255} // Soft button #cbd5e1
 		case theme.ColorNameInputBackground:
 			return color.NRGBA{R: 255, G: 255, B: 255, A: 255}
 		case theme.ColorNameSeparator:
-			return color.NRGBA{R: 203, G: 213, B: 225, A: 255}
+			return color.NRGBA{R: 148, G: 163, B: 184, A: 255}
 		default:
 			return t.base.Color(name, theme.VariantLight)
 		}

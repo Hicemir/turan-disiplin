@@ -122,44 +122,47 @@ func buildModernHub(state *AppState) fyne.CanvasObject {
 
 		topRow := container.NewBorder(nil, nil, nil, infoBtn, titleLabel)
 
-		cardContent := container.NewVBox(
+		cardContent := container.NewBorder(
 			topRow,
-			descLabel,
 			btn,
+			nil, nil,
+			container.NewCenter(descLabel),
 		)
 		return widget.NewCard("", "", cardContent)
 	}
 
-	// Column 1: Girişler & Tanımlar
-	col1 := container.NewVBox(
-		widget.NewLabelWithStyle("📝 GİRİŞLER & YÖNETİM", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+	categoryHeader := container.NewGridWithColumns(3,
+		widget.NewLabelWithStyle("📝 GİRİŞLER & YÖNETİM", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
+		widget.NewLabelWithStyle("📜 KARARLAR & EVRAKLAR", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
+		widget.NewLabelWithStyle("📊 RAPORLAR & İSTATİSTİKLER", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
+	)
+
+	// 3x4 Symmetrical Uniform Grid (Row-by-row alignment)
+	cardsGrid := container.NewGridWithColumns(3,
+		// Row 1
 		createNavCard("🏛️ Kurum ve Kurul Bilgileri", "Okul müdürü, asil ve yedek kurul üyeleri, resmi yazı kodları ve antet ayarları.", false, "school"),
-		createNavCard("👥 Öğrenci İşlemleri & Excel", "Öğrenci listesi, e-Okul / e-Mesem'den 3 modlu Excel aktarımı, öğrenci arama ve düzenleme.", false, "students"),
-		createNavCard("🐞 Olay Girişi & Soruşturma", "İncelenen disiplin olayları, öğrenci rolleri ve sosyo-ekonomik inceleme profilleri.", false, "incidents"),
-		createNavCard("💬 Öğrenci Yazılı Uyarı", "MEB Yönetmeliği 163/2 uyarınca resmi öğrenci yazılı uyarı tutanağı oluşturma.", false, "written_warning"),
-	)
-
-	// Column 2: Kararlar & Resmi Evraklar
-	col2 := container.NewVBox(
-		widget.NewLabelWithStyle("📜 KARARLAR & EVRAKLAR", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 		createNavCard("⚖️ DİSİPLİN KURULU KARARI (EK-1 / EK-10)", "21/17 satırlı resmi karar tutanağı, puan hesaplama, otomatik gerekçeli karar ve PDF.", true, "verdict"),
-		createNavCard("📨 Çağrı Pusulaları", "Öğrenci savunma ve ifade çağrı pusulaları, tebellüğ bloğu ve kurul üye toplantı çağrısı.", false, "summons"),
-		createNavCard("📝 Tutanak ve Formlar", "İfade, savunma, bilgi toplama (5 tür), ek süre, şikayet ve rehberlik formları.", false, "forms"),
-		createNavCard("📬 Ceza Tebligatları", "Öğrenci ve veli karar tebligat pusulaları (5 günlük yasal itiraz hakkı ile).", false, "notices"),
-	)
-
-	// Column 3: Raporlar & İnceleme
-	col3 := container.NewVBox(
-		widget.NewLabelWithStyle("📊 RAPORLAR & İSTATİSTİKLER", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 		createNavCard("🔄 Puan İadesi / Yaptırım Kaldırma", "Lise için Madde 171/2 Sene Sonu Puan İade Çizelgesi, Ortaokul için Yaptırım Kaldırma Raporu.", false, "restoration"),
+
+		// Row 2
+		createNavCard("👥 Öğrenci İşlemleri & Excel", "Öğrenci listesi, e-Okul / e-Mesem'den 3 modlu Excel aktarımı, öğrenci arama ve düzenleme.", false, "students"),
+		createNavCard("📨 Çağrı Pusulaları", "Öğrenci savunma ve ifade çağrı pusulaları, tebellüğ bloğu ve kurul üye toplantı çağrısı.", false, "summons"),
 		createNavCard("📊 Ceza İstatistikleri Raporu", "1. ve 2. Dönem ceza dağılımları ve okul disiplin analiz raporları.", false, "stats"),
+
+		// Row 3
+		createNavCard("🐞 Olay Girişi & Soruşturma", "İncelenen disiplin olayları, öğrenci rolleri ve sosyo-ekonomik inceleme profilleri.", false, "incidents"),
+		createNavCard("📝 Tutanak ve Formlar", "İfade, savunma, bilgi toplama (5 tür), ek süre, şikayet ve rehberlik formları.", false, "forms"),
 		createNavCard("📚 Dizi Pusulası (Dosya İndeksi)", "Soruşturma dosyasında yer alan evrakların resmi dizi pusulası.", false, "dizi"),
+
+		// Row 4
+		createNavCard("💬 Öğrenci Yazılı Uyarı", "MEB Yönetmeliği 163/2 uyarınca resmi öğrenci yazılı uyarı tutanağı oluşturma.", false, "written_warning"),
+		createNavCard("📬 Ceza Tebligatları", "Öğrenci ve veli karar tebligat pusulaları (5 günlük yasal itiraz hakkı ile).", false, "notices"),
 		createNavCard("☀️ Sene Başı / Sonu Kurul Tutanağı", "Dönem başı ve sonu resmi disiplin kurulu toplantı tutanakları.", false, "minutes"),
 	)
 
+	dashboardBox := container.NewVBox(categoryHeader, widget.NewSeparator(), cardsGrid)
 	statsCard := buildLiveStatsCard(state, false)
-	columnsGrid := container.NewGridWithColumns(3, col1, col2, col3)
-	mainContent := container.NewBorder(nil, nil, nil, statsCard, columnsGrid)
+	mainContent := container.NewBorder(nil, nil, nil, statsCard, dashboardBox)
 	mainBody := container.NewScroll(mainContent)
 
 	return container.NewBorder(

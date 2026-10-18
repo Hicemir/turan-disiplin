@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"runtime/debug"
 	"strconv"
 	"strings"
 
@@ -204,6 +205,12 @@ func BuildStudentsTab(state *AppState) fyne.CanvasObject {
 					return
 				}
 
+				defer func() {
+					if r := recover(); r != nil {
+						showError(state.Window, fmt.Errorf("Excel okunurken beklenmeyen hata oluştu: %v", r))
+					}
+				}()
+
 				parsed, err := excel.ImportStudentsFromFile(filePath, state.AcademicYear)
 				if err != nil {
 					showError(state.Window, fmt.Errorf("Excel okunurken hata oluştu: %w", err))
@@ -235,8 +242,17 @@ func BuildStudentsTab(state *AppState) fyne.CanvasObject {
 					}
 				}
 
-				showInfo(state.Window, "İçe Aktarma Tamamlandı", fmt.Sprintf("%d öğrenci başarıyla işlendi.", len(parsed)))
-				state.NotifyChange()
+				// Update classes dropdown
+				classes := state.Store.GetClasses(state.AcademicYear)
+				cOpts := []string{"Tüm Sınıflar"}
+				cOpts = append(cOpts, classes...)
+				classSelect.Options = cOpts
+				classSelect.Refresh()
+
+				// Smooth list refresh without rebuilding window
+				reloadStudents()
+				ShowTurkishInfo("İçe Aktarma Tamamlandı", fmt.Sprintf("%d öğrenci başarıyla işlendi ve veritabanına kaydedildi.", len(parsed)), state.Window)
+				debug.FreeOSMemory() // Release memory immediately
 			}, state.Window)
 		})
 	})

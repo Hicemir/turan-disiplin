@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"runtime/debug"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -12,6 +13,14 @@ import (
 	"turandisiplin/config"
 	"turandisiplin/ui"
 )
+
+func init() {
+	// Proactive memory debloating:
+	// Set target GC percentage to 20 to collect garbage frequently,
+	// and set memory limit to 80MB so Go releases memory aggressively to OS.
+	debug.SetGCPercent(20)
+	debug.SetMemoryLimit(80 * 1024 * 1024)
+}
 
 func main() {
 	a := app.NewWithID("com.turandisiplin.app")
