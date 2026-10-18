@@ -1,9 +1,11 @@
 package main
 
 import (
+	"image/color"
 	"testing"
 
 	"fyne.io/fyne/v2/theme"
+	"okulevrak/config"
 	"okulevrak/store"
 	appTheme "okulevrak/theme"
 )
@@ -15,8 +17,8 @@ func TestAcademicYearSortingAndDeduplication(t *testing.T) {
 	}
 
 	years := st.GetAcademicYears()
-	if len(years) < 6 {
-		t.Fatalf("expected at least 6 academic years, got %d", len(years))
+	if len(years) < 4 {
+		t.Fatalf("expected at least 4 academic years, got %d", len(years))
 	}
 
 	// Verify descending chronological order
@@ -38,12 +40,26 @@ func TestAcademicYearSortingAndDeduplication(t *testing.T) {
 	if store.NormalizeAcademicYear(" 2029 / 2030 ") != "2029 - 2030" {
 		t.Errorf("normalization failed for 2029 / 2030: got %s", store.NormalizeAcademicYear(" 2029 / 2030 "))
 	}
+
+	// Test GetNextNearestAcademicYear
+	nextYear := store.GetNextNearestAcademicYear([]string{"2028 - 2029", "2027 - 2028"})
+	if nextYear != "2029 - 2030" {
+		t.Errorf("expected 2029 - 2030, got %s", nextYear)
+	}
+
+	// Test DeleteAcademicYear
+	if err := st.DeleteAcademicYear("9998 - 9999"); err != nil {
+		t.Errorf("failed to delete non-existent year: %v", err)
+	}
 }
 
-func TestThemesPaletteAndDarkModes(t *testing.T) {
-	allThemes := appTheme.GetAllThemes()
-	if len(allThemes) != 11 {
-		t.Fatalf("expected 11 themes, got %d", len(allThemes))
+func TestThemesPaletteAndCustomTheme(t *testing.T) {
+	customBg := color.NRGBA{R: 20, G: 20, B: 30, A: 255}
+	customAccent := color.NRGBA{R: 255, G: 165, B: 0, A: 255}
+
+	allThemes := appTheme.GetAllThemes(customBg, customAccent)
+	if len(allThemes) != 12 { // 6 dark + 5 light + 1 custom
+		t.Fatalf("expected 12 themes including custom, got %d", len(allThemes))
 	}
 
 	expectedDark := []string{"dark", "dark_emerald", "dark_purple", "dark_amber", "dark_ruby", "dark_cyan"}
@@ -64,5 +80,23 @@ func TestThemesPaletteAndDarkModes(t *testing.T) {
 		if fg == nil || bg == nil {
 			t.Errorf("theme %s returned nil color", id)
 		}
+	}
+
+	// Test Custom Theme
+	thCustom := appTheme.NewTurkishTheme("custom", 15.0, customBg, customAccent)
+	customBgRes := thCustom.Color(theme.ColorNameBackground, theme.VariantDark)
+	customAccentRes := thCustom.Color(theme.ColorNamePrimary, theme.VariantDark)
+	if customBgRes == nil || customAccentRes == nil {
+		t.Errorf("custom theme returned nil colors")
+	}
+
+	// Test ColorToHex and HexToColor
+	hex := config.ColorToHex(color.NRGBA{R: 255, G: 0, B: 128, A: 255})
+	if hex != "#ff0080" {
+		t.Errorf("expected #ff0080, got %s", hex)
+	}
+	cBack := config.HexToColor(hex, color.NRGBA{})
+	if cBack.R != 255 || cBack.G != 0 || cBack.B != 128 {
+		t.Errorf("hex roundtrip failed: %+v", cBack)
 	}
 }

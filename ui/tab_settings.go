@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
@@ -33,8 +34,11 @@ func BuildSettingsView(state *AppState) fyne.CanvasObject {
 	}, nil)
 	uiRadio.SetSelected(currentUIModeLabel)
 
-	// 2. Color Theme Selector with 2-Square Color Previews
-	allThemes := appTheme.GetAllThemes()
+	// 2. Custom Colors and Themes
+	currentCustomBg := config.HexToColor(state.Config.CustomBgColor, color.NRGBA{R: 30, G: 30, B: 46, A: 255})
+	currentCustomAccent := config.HexToColor(state.Config.CustomAccentColor, color.NRGBA{R: 137, G: 180, B: 250, A: 255})
+
+	allThemes := appTheme.GetAllThemes(currentCustomBg, currentCustomAccent)
 	selectedThemeID := state.Config.ThemeMode
 	if selectedThemeID == "" {
 		selectedThemeID = "light"
@@ -90,6 +94,48 @@ func BuildSettingsView(state *AppState) fyne.CanvasObject {
 	}
 	refreshThemeRows()
 
+	// Custom Color Picker Card
+	customBgPreview := canvas.NewRectangle(currentCustomBg)
+	customBgPreview.SetMinSize(fyne.NewSize(26, 26))
+	customBgPreview.CornerRadius = 4.0
+
+	customAccentPreview := canvas.NewRectangle(currentCustomAccent)
+	customAccentPreview.SetMinSize(fyne.NewSize(26, 26))
+	customAccentPreview.CornerRadius = 4.0
+
+	bgPickBtn := widget.NewButtonWithIcon("Arka Plan Rengi Seç", theme.ColorPaletteIcon(), func() {
+		dialog.ShowColorPicker("Arka Plan Rengi Seçin", "Lütfen renk seçiniz", func(c color.Color) {
+			if c != nil {
+				currentCustomBg = config.HexToColor(config.ColorToHex(c), color.NRGBA{R: 30, G: 30, B: 46, A: 255})
+				customBgPreview.FillColor = currentCustomBg
+				customBgPreview.Refresh()
+				selectedThemeID = "custom"
+				allThemes = appTheme.GetAllThemes(currentCustomBg, currentCustomAccent)
+				refreshThemeRows()
+			}
+		}, state.Window)
+	})
+
+	accentPickBtn := widget.NewButtonWithIcon("Vurgu / Buton Rengi Seç", theme.ColorPaletteIcon(), func() {
+		dialog.ShowColorPicker("Vurgu / Buton Rengi Seçin", "Lütfen renk seçiniz", func(c color.Color) {
+			if c != nil {
+				currentCustomAccent = config.HexToColor(config.ColorToHex(c), color.NRGBA{R: 137, G: 180, B: 250, A: 255})
+				customAccentPreview.FillColor = currentCustomAccent
+				customAccentPreview.Refresh()
+				selectedThemeID = "custom"
+				allThemes = appTheme.GetAllThemes(currentCustomBg, currentCustomAccent)
+				refreshThemeRows()
+			}
+		}, state.Window)
+	})
+
+	customColorBox := widget.NewCard("🎨 Özel Tema Renk Paleti", "Kendi renklerinizi seçerek özel temanızı oluşturun",
+		container.NewVBox(
+			container.NewHBox(customBgPreview, bgPickBtn),
+			container.NewHBox(customAccentPreview, accentPickBtn),
+		),
+	)
+
 	// 3. Font Size Selector (15pt, 17pt, 19pt)
 	sizeMap := map[string]float32{
 		"15pt": 15.0,
@@ -112,7 +158,7 @@ func BuildSettingsView(state *AppState) fyne.CanvasObject {
 	}, nil)
 	sizeRadio.SetSelected(currentSizeLabel)
 
-	// Save button (Single, prominent action button - NO duplicate back buttons)
+	// Save button
 	applyBtn := widget.NewButtonWithIcon("Ayarları Uygula ve Kaydet", theme.DocumentSaveIcon(), func() {
 		newUIMode := uiModeMap[uiRadio.Selected]
 		newThemeMode := selectedThemeID
@@ -121,15 +167,29 @@ func BuildSettingsView(state *AppState) fyne.CanvasObject {
 		state.Config.UIMode = newUIMode
 		state.Config.ThemeMode = newThemeMode
 		state.Config.FontSize = newFontSize
+		state.Config.CustomBgColor = config.ColorToHex(currentCustomBg)
+		state.Config.CustomAccentColor = config.ColorToHex(currentCustomAccent)
 		_ = config.SaveConfig(state.Config)
 
-		if state.App != nil {
-			state.App.Settings().SetTheme(appTheme.NewTurkishTheme(newThemeMode, newFontSize))
-		}
+		state.ApplyTheme(newThemeMode, newFontSize)
 
-		showInfo(state.Window, "Başarılı", "Görünüm ve tema ayarlarınız başarıyla güncellendi.")
+		dialog.ShowInformation("Başarılı", "Görünüm ve tema ayarlarınız başarıyla güncellendi.", state.Window)
 	})
 	applyBtn.Importance = widget.HighImportance
+
+	// 4. Backup & Restore Card
+	backupCard := widget.NewCard(
+		"💾 Veritabanı Yedekleme ve Kurtarma",
+		"Tüm okul, öğrenci, olay ve disiplin kayıtlarınızı güvenle yedekleyin veya eski yedeği geri yükleyin",
+		container.NewHBox(
+			widget.NewButtonWithIcon("Veritabanını Yedekle", theme.DownloadIcon(), func() {
+				BackupDatabase(state)
+			}),
+			widget.NewButtonWithIcon("Yedekten Geri Yükle", theme.UploadIcon(), func() {
+				RestoreDatabase(state)
+			}),
+		),
+	)
 
 	form := container.NewVBox(
 		widget.NewLabelWithStyle("Ana Ekran Görünüm Düzeni", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
@@ -137,9 +197,12 @@ func BuildSettingsView(state *AppState) fyne.CanvasObject {
 		widget.NewSeparator(),
 		widget.NewLabelWithStyle("Renk Teması (Arka Plan ve Vurgu Rengi)", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 		themeContainer,
+		customColorBox,
 		widget.NewSeparator(),
 		widget.NewLabelWithStyle("Yazı Boyutu", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 		sizeRadio,
+		widget.NewSeparator(),
+		backupCard,
 	)
 
 	card := widget.NewCard(

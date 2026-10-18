@@ -2,14 +2,17 @@ package ui
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	fyneDialog "fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/sqweek/dialog"
 
+	"okulevrak/config"
 	"okulevrak/store"
 )
 
@@ -54,13 +57,44 @@ func ShowAcademicYearPicker(state *AppState) {
 	yearSelect.SetSelected(state.AcademicYear)
 
 	newYearEntry := widget.NewEntry()
-	newYearEntry.SetPlaceHolder("Yeni Yıl (Örn: 2029 - 2030)")
+	nextYear := store.GetNextNearestAcademicYear(years)
+	newYearEntry.SetText(nextYear)
+
+	deleteYearBtn := widget.NewButtonWithIcon("Seçili Öğretim Yılını Sil", theme.DeleteIcon(), func() {
+		if len(years) <= 1 {
+			fyneDialog.ShowInformation("Uyarı", "Sistemde en az bir öğretim yılı kalmalıdır. Tek kalan yılı silemezsiniz.", state.Window)
+			return
+		}
+
+		fyneDialog.ShowConfirm(
+			"Öğretim Yılını Sil",
+			fmt.Sprintf("DİKKAT:\n'%s' öğretim yılını silmek istediğinize emin misiniz?\n\nBu yıla ait TÜM öğrenci kayıtları, disiplin olayları ve kararları kalıcı olarak silinecektir!\nBu işlem geri alınamaz.", selectedYear),
+			func(confirmed bool) {
+				if !confirmed {
+					return
+				}
+				toDel := selectedYear
+				_ = state.Store.DeleteAcademicYear(toDel)
+				state.Config.DeletedYears = append(state.Config.DeletedYears, toDel)
+				_ = config.SaveConfig(state.Config)
+
+				remaining := state.Store.GetAcademicYears()
+				if len(remaining) > 0 {
+					state.SetAcademicYear(remaining[0])
+				}
+				fyneDialog.ShowInformation("Silindi", fmt.Sprintf("'%s' öğretim yılı başarıyla silindi.", toDel), state.Window)
+			},
+			state.Window,
+		)
+	})
+	deleteYearBtn.Importance = widget.DangerImportance
 
 	content := container.NewVBox(
 		widget.NewLabelWithStyle("Aktif Öğretim Yılını Seçin:", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 		yearSelect,
+		deleteYearBtn,
 		widget.NewSeparator(),
-		widget.NewLabel("Veya yeni bir öğretim yılı yazıp ekleyin:"),
+		widget.NewLabel("Veya yeni bir öğretim yılı ekleyin:"),
 		newYearEntry,
 	)
 
@@ -69,8 +103,11 @@ func ShowAcademicYearPicker(state *AppState) {
 			return
 		}
 		chosen := selectedYear
-		if strings.TrimSpace(newYearEntry.Text) != "" {
+		if strings.TrimSpace(newYearEntry.Text) != "" && strings.TrimSpace(newYearEntry.Text) != nextYear {
 			chosen = store.NormalizeAcademicYear(newYearEntry.Text)
+		} else if strings.TrimSpace(newYearEntry.Text) == nextYear && newYearEntry.Text != selectedYear {
+			// user kept the auto-filled next year and wants to add it
+			chosen = store.NormalizeAcademicYear(nextYear)
 		}
 		if chosen != "" && chosen != state.AcademicYear {
 			state.SetAcademicYear(chosen)

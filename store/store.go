@@ -343,6 +343,14 @@ func (s *Store) GetAcademicYears() []string {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
 
+	cfg, _ := config.LoadConfig()
+	deletedMap := make(map[string]bool)
+	if cfg != nil {
+		for _, dy := range cfg.DeletedYears {
+			deletedMap[NormalizeAcademicYear(dy)] = true
+		}
+	}
+
 	yearMap := make(map[string]bool)
 	defaults := []string{
 		"2028 - 2029",
@@ -353,7 +361,10 @@ func (s *Store) GetAcademicYears() []string {
 		"2023 - 2024",
 	}
 	for _, y := range defaults {
-		yearMap[NormalizeAcademicYear(y)] = true
+		norm := NormalizeAcademicYear(y)
+		if !deletedMap[norm] {
+			yearMap[norm] = true
+		}
 	}
 
 	rows, err := s.db.Query("SELECT DISTINCT academic_year FROM students UNION SELECT DISTINCT academic_year FROM incidents UNION SELECT DISTINCT academic_year FROM school_info")
@@ -363,7 +374,7 @@ func (s *Store) GetAcademicYears() []string {
 			var y string
 			if err := rows.Scan(&y); err == nil {
 				norm := NormalizeAcademicYear(y)
-				if norm != "" {
+				if norm != "" && !deletedMap[norm] {
 					yearMap[norm] = true
 				}
 			}
@@ -386,6 +397,42 @@ func (s *Store) GetAcademicYears() []string {
 	})
 
 	return res
+}
+
+// GetNextNearestAcademicYear calculates the next chronological academic year, e.g. "2029 - 2030"
+func GetNextNearestAcademicYear(years []string) string {
+	maxYear := 0
+	for _, y := range years {
+		sy := ExtractStartYear(y)
+		if sy > maxYear {
+			maxYear = sy
+		}
+	}
+	if maxYear == 0 {
+		maxYear = time.Now().Year()
+	}
+	return fmt.Sprintf("%d - %d", maxYear+1, maxYear+2)
+}
+
+// DeleteAcademicYear removes all records associated with a specific academic year
+func (s *Store) DeleteAcademicYear(academicYear string) error {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
+	norm := NormalizeAcademicYear(academicYear)
+	queries := []string{
+		"DELETE FROM students WHERE academic_year = ?",
+		"DELETE FROM incidents WHERE academic_year = ?",
+		"DELETE FROM incident_students WHERE academic_year = ?",
+		"DELETE FROM meeting_decisions WHERE academic_year = ?",
+		"DELETE FROM reward_penalty_counts WHERE academic_year = ?",
+	}
+	for _, q := range queries {
+		if _, err := s.db.Exec(q, norm); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // Student methods

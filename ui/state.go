@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"image/color"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
 
@@ -89,7 +91,9 @@ func InitState(a fyne.App, w fyne.Window) (*AppState, error) {
 			cfg.ThemeMode = tMode
 			_ = config.SaveConfig(cfg)
 		}
-		a.Settings().SetTheme(appTheme.NewTurkishTheme(tMode, cfg.FontSize))
+		cBg := config.HexToColor(cfg.CustomBgColor, color.NRGBA{R: 30, G: 30, B: 46, A: 255})
+		cAccent := config.HexToColor(cfg.CustomAccentColor, color.NRGBA{R: 137, G: 180, B: 250, A: 255})
+		a.Settings().SetTheme(appTheme.NewTurkishTheme(tMode, cfg.FontSize, cBg, cAccent))
 	}
 
 	return GlobalState, nil
@@ -133,14 +137,16 @@ func (s *AppState) SetSchoolType(sType string) {
 	}
 }
 
-// ApplyTheme switches color mode ("light", "cream", "dark") and font size
+// ApplyTheme switches color mode ("light", "cream", "dark", "custom") and font size
 func (s *AppState) ApplyTheme(mode string, fontSize float32) {
 	s.Config.ThemeMode = mode
 	s.Config.FontSize = fontSize
 	_ = config.SaveConfig(s.Config)
 
 	if s.App != nil {
-		s.App.Settings().SetTheme(appTheme.NewTurkishTheme(mode, fontSize))
+		cBg := config.HexToColor(s.Config.CustomBgColor, color.NRGBA{R: 30, G: 30, B: 46, A: 255})
+		cAccent := config.HexToColor(s.Config.CustomAccentColor, color.NRGBA{R: 137, G: 180, B: 250, A: 255})
+		s.App.Settings().SetTheme(appTheme.NewTurkishTheme(mode, fontSize, cBg, cAccent))
 	}
 }
 

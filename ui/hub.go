@@ -112,10 +112,10 @@ func buildLegacyHub(state *AppState) fyne.CanvasObject {
 	}
 
 	backupBtn := leftBtn("Yedekleme", theme.DownloadIcon(), func() {
-		showInfo(state.Window, "Yedekleme", "Veritabanı OkulEvrak.db dosyanız güvenle korunmaktadır.")
+		BackupDatabase(state)
 	})
 	restoreBtn := leftBtn("Geri Yükleme", theme.UploadIcon(), func() {
-		showInfo(state.Window, "Geri Yükleme", "OkulEvrak.db dosyanız doğrudan uygulama klasöründe yönetilmektedir.")
+		RestoreDatabase(state)
 	})
 	modernSwitchBtn := leftBtn("Modern Arayüze Geç", theme.ViewRefreshIcon(), func() {
 		state.SetUIMode("modern")

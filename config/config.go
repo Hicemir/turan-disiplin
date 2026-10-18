@@ -3,8 +3,10 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	"image/color"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	"okulevrak/assets"
@@ -126,12 +128,36 @@ func ResetYonetmelik() (*model.YonetmelikData, error) {
 	return ResetToDefault()
 }
 
-// AppConfig stores user preferences like last selected academic year and theme settings
+// AppConfig stores user preferences like last selected academic year, theme settings and custom colors
 type AppConfig struct {
-	DefaultYear string  `json:"default_year"`
-	UIMode      string  `json:"ui_mode"`    // "modern" or "legacy"
-	ThemeMode   string  `json:"theme_mode"` // "light", "dark", "cream"
-	FontSize    float32 `json:"font_size"`  // 15, 17, 19
+	DefaultYear       string   `json:"default_year"`
+	UIMode            string   `json:"ui_mode"`              // "modern" or "legacy"
+	ThemeMode         string   `json:"theme_mode"`           // theme ID or "custom"
+	FontSize          float32  `json:"font_size"`            // 15, 17, 19
+	DeletedYears      []string `json:"deleted_years,omitempty"`
+	CustomBgColor     string   `json:"custom_bg_color,omitempty"`
+	CustomAccentColor string   `json:"custom_accent_color,omitempty"`
+}
+
+// ColorToHex converts any color.Color to #rrggbb hex string
+func ColorToHex(c color.Color) string {
+	if c == nil {
+		return "#1e1e2e"
+	}
+	r, g, b, _ := c.RGBA()
+	return fmt.Sprintf("#%02x%02x%02x", uint8(r>>8), uint8(g>>8), uint8(b>>8))
+}
+
+// HexToColor parses a #rrggbb or rrggbb hex string to color.NRGBA
+func HexToColor(s string, fallback color.NRGBA) color.NRGBA {
+	s = strings.TrimPrefix(s, "#")
+	if len(s) == 6 {
+		var r, g, b uint8
+		if _, err := fmt.Sscanf(s, "%02x%02x%02x", &r, &g, &b); err == nil {
+			return color.NRGBA{R: r, G: g, B: b, A: 255}
+		}
+	}
+	return fallback
 }
 
 func GetConfigFilePath() string {

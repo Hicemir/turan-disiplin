@@ -12,6 +12,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
+	"okulevrak/config"
 	"okulevrak/pdf"
 	"okulevrak/store"
 )
@@ -41,16 +42,45 @@ func BuildHeader(state *AppState) fyne.CanvasObject {
 	})
 	yearSelect.SetSelected(state.AcademicYear)
 
-	// Add Custom Year Button
+	// Add Custom Year Button with auto-filled next year
 	addYearBtn := widget.NewButtonWithIcon("Yeni Yıl", theme.ContentAddIcon(), func() {
 		entry := widget.NewEntry()
-		entry.SetPlaceHolder("Örn: 2029 - 2030")
+		nextYear := store.GetNextNearestAcademicYear(yearOptions)
+		entry.SetText(nextYear)
 		dialog.ShowCustomConfirm("Yeni Öğretim Yılı Ekle", "Ekle", "İptal", entry, func(ok bool) {
 			if ok && strings.TrimSpace(entry.Text) != "" {
 				norm := store.NormalizeAcademicYear(entry.Text)
 				state.SetAcademicYear(norm)
 			}
 		}, state.Window)
+	})
+
+	// Delete Active Year Button with confirmation
+	deleteYearBtn := widget.NewButtonWithIcon("Yılı Sil", theme.DeleteIcon(), func() {
+		if len(yearOptions) <= 1 {
+			dialog.ShowInformation("Uyarı", "Sistemde en az bir öğretim yılı kalmalıdır. Tek kalan yılı silemezsiniz.", state.Window)
+			return
+		}
+		dialog.ShowConfirm(
+			"Öğretim Yılını Sil",
+			fmt.Sprintf("DİKKAT:\n'%s' öğretim yılını silmek istediğinize emin misiniz?\n\nBu yıla ait TÜM öğrenci, olay ve disiplin kararları kalıcı olarak silinecektir!\nBu işlem geri alınamaz.", state.AcademicYear),
+			func(ok bool) {
+				if !ok {
+					return
+				}
+				toDelete := state.AcademicYear
+				_ = state.Store.DeleteAcademicYear(toDelete)
+				state.Config.DeletedYears = append(state.Config.DeletedYears, toDelete)
+				_ = config.SaveConfig(state.Config)
+
+				remaining := state.Store.GetAcademicYears()
+				if len(remaining) > 0 {
+					state.SetAcademicYear(remaining[0])
+				}
+				dialog.ShowInformation("Silindi", fmt.Sprintf("'%s' öğretim yılı başarıyla silindi.", toDelete), state.Window)
+			},
+			state.Window,
+		)
 	})
 
 	// School Type Radio
@@ -73,6 +103,11 @@ func BuildHeader(state *AppState) fyne.CanvasObject {
 		_ = pdf.OpenPDF(outDir)
 	})
 
+	// Backup Database Button
+	backupBtn := widget.NewButtonWithIcon("Yedekleme", theme.DownloadIcon(), func() {
+		BackupDatabase(state)
+	})
+
 	// Settings Button
 	settingsBtn := widget.NewButtonWithIcon("Ayarlar & Tema", theme.SettingsIcon(), func() {
 		state.NavigateTo("settings")
@@ -84,11 +119,13 @@ func BuildHeader(state *AppState) fyne.CanvasObject {
 		widget.NewLabelWithStyle("Öğretim Yılı:", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 		yearSelect,
 		addYearBtn,
+		deleteYearBtn,
 		widget.NewSeparator(),
 		widget.NewLabelWithStyle("Kurum:", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 		schoolTypeRadio,
 		widget.NewSeparator(),
 		openFolderBtn,
+		backupBtn,
 		widget.NewSeparator(),
 		settingsBtn,
 	)
