@@ -15,76 +15,61 @@ import (
 	"okulevrak/pdf"
 )
 
-// InfoHoverButton displays card description in a pop-up when hovered or clicked
-type InfoHoverButton struct {
+// SquareInfoButton displays card description when hovered over its square hitbox or clicked
+type SquareInfoButton struct {
 	widget.BaseWidget
 	title       string
 	description string
 	window      fyne.Window
-	popUp       *widget.PopUp
+	onHover     func(bool)
 	icon        *widget.Icon
+	bg          *canvas.Rectangle
 }
 
-func newInfoHoverButton(title, desc string, w fyne.Window) *InfoHoverButton {
-	b := &InfoHoverButton{
+func newSquareInfoButton(title, desc string, w fyne.Window, onHover func(bool)) *SquareInfoButton {
+	b := &SquareInfoButton{
 		title:       title,
 		description: desc,
 		window:      w,
+		onHover:     onHover,
 		icon:        widget.NewIcon(theme.InfoIcon()),
+		bg:          canvas.NewRectangle(color.Transparent),
 	}
+	b.bg.CornerRadius = 4.0
 	b.ExtendBaseWidget(b)
 	return b
 }
 
-func (b *InfoHoverButton) CreateRenderer() fyne.WidgetRenderer {
-	return widget.NewSimpleRenderer(b.icon)
+func (b *SquareInfoButton) CreateRenderer() fyne.WidgetRenderer {
+	stack := container.NewStack(b.bg, container.NewCenter(b.icon))
+	return widget.NewSimpleRenderer(stack)
 }
 
-func (b *InfoHoverButton) MinSize() fyne.Size {
-	return fyne.NewSize(22, 22)
+func (b *SquareInfoButton) MinSize() fyne.Size {
+	return fyne.NewSize(28, 28)
 }
 
-func (b *InfoHoverButton) MouseIn(e *desktop.MouseEvent) {
-	if b.window == nil {
-		return
-	}
-	b.showTip(e.AbsolutePosition)
-}
-
-func (b *InfoHoverButton) MouseOut() {
-	b.hideTip()
-}
-
-func (b *InfoHoverButton) MouseMoved(e *desktop.MouseEvent) {}
-
-func (b *InfoHoverButton) Tapped(e *fyne.PointEvent) {
-	if b.popUp != nil {
-		b.hideTip()
-	} else {
-		b.showTip(e.AbsolutePosition)
+func (b *SquareInfoButton) MouseIn(_ *desktop.MouseEvent) {
+	b.bg.FillColor = color.NRGBA{R: 255, G: 255, B: 255, A: 35}
+	b.bg.Refresh()
+	if b.onHover != nil {
+		b.onHover(true)
 	}
 }
 
-func (b *InfoHoverButton) showTip(pos fyne.Position) {
-	if b.popUp != nil {
-		return
+func (b *SquareInfoButton) MouseOut() {
+	b.bg.FillColor = color.Transparent
+	b.bg.Refresh()
+	if b.onHover != nil {
+		b.onHover(false)
 	}
-	titleLbl := widget.NewLabelWithStyle(b.title, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
-	descLbl := widget.NewLabel(b.description)
-	descLbl.Wrapping = fyne.TextWrapWord
-
-	content := container.NewVBox(titleLbl, widget.NewSeparator(), descLbl)
-	padded := container.NewPadded(content)
-	padded.Resize(fyne.NewSize(320, 100))
-
-	b.popUp = widget.NewPopUp(padded, b.window.Canvas())
-	b.popUp.ShowAtPosition(pos.Add(fyne.NewPos(12, 12)))
 }
 
-func (b *InfoHoverButton) hideTip() {
-	if b.popUp != nil {
-		b.popUp.Hide()
-		b.popUp = nil
+func (b *SquareInfoButton) MouseMoved(_ *desktop.MouseEvent) {}
+
+func (b *SquareInfoButton) Tapped(_ *fyne.PointEvent) {
+	if b.window != nil {
+		ShowTurkishInfo(b.title, b.description, b.window)
 	}
 }
 
@@ -111,13 +96,35 @@ func buildModernHub(state *AppState) fyne.CanvasObject {
 			btn.Importance = widget.HighImportance
 		}
 
-		titleLabel := widget.NewLabelWithStyle(title, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+		titleLabel := widget.NewRichText(&widget.TextSegment{
+			Text: title,
+			Style: widget.RichTextStyle{
+				Alignment: fyne.TextAlignCenter,
+				TextStyle: fyne.TextStyle{Bold: true},
+				SizeName:  theme.SizeNameSubHeadingText,
+			},
+		})
+		titleLabel.Wrapping = fyne.TextWrapWord
 
-		infoBtn := newInfoHoverButton(title, desc, state.Window)
+		descLabel := widget.NewLabel(desc)
+		descLabel.Wrapping = fyne.TextWrapWord
+		descLabel.TextStyle = fyne.TextStyle{Italic: true}
+		descLabel.Alignment = fyne.TextAlignCenter
+		descLabel.Hide()
+
+		infoBtn := newSquareInfoButton(title, desc, state.Window, func(hovered bool) {
+			if hovered {
+				descLabel.Show()
+			} else {
+				descLabel.Hide()
+			}
+		})
+
 		topRow := container.NewBorder(nil, nil, nil, infoBtn, titleLabel)
 
 		cardContent := container.NewVBox(
 			topRow,
+			descLabel,
 			btn,
 		)
 		return widget.NewCard("", "", cardContent)
@@ -152,7 +159,8 @@ func buildModernHub(state *AppState) fyne.CanvasObject {
 
 	statsCard := buildLiveStatsCard(state, false)
 	columnsGrid := container.NewGridWithColumns(3, col1, col2, col3)
-	mainBody := container.NewBorder(nil, nil, nil, statsCard, container.NewVScroll(columnsGrid))
+	mainContent := container.NewBorder(nil, nil, nil, statsCard, columnsGrid)
+	mainBody := container.NewScroll(mainContent)
 
 	return container.NewBorder(
 		header,

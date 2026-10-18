@@ -139,20 +139,16 @@ func ShowAdvancedColorPicker(title string, initialColor color.Color, onChosen fu
 	for _, hexCode := range presetHexes {
 		h := hexCode
 		c := config.HexToColor(h, color.NRGBA{R: 255, G: 255, B: 255, A: 255})
-		sw := canvas.NewRectangle(c)
-		sw.SetMinSize(fyne.NewSize(32, 28))
-		sw.CornerRadius = 4.0
-		sw.StrokeColor = color.NRGBA{R: 200, G: 200, B: 200, A: 180}
-		sw.StrokeWidth = 1.0
+		targetColor := c
+		targetHex := h
 
-		btn := widget.NewButton("", func() {
+		sw := newClickableSwatch(targetColor, func() {
 			updating = true
-			r, g, b, _ := c.RGBA()
-			rVal := float64(uint8(r >> 8))
-			gVal := float64(uint8(g >> 8))
-			bVal := float64(uint8(b >> 8))
+			rVal := float64(targetColor.R)
+			gVal := float64(targetColor.G)
+			bVal := float64(targetColor.B)
 
-			currentColor = color.NRGBA{R: uint8(rVal), G: uint8(gVal), B: uint8(bVal), A: 255}
+			currentColor = targetColor
 			previewRect.FillColor = currentColor
 			previewRect.Refresh()
 
@@ -163,11 +159,11 @@ func ShowAdvancedColorPicker(title string, initialColor color.Color, onChosen fu
 			rLabel.SetText(fmt.Sprintf("%3d", int(rVal)))
 			gLabel.SetText(fmt.Sprintf("%3d", int(gVal)))
 			bLabel.SetText(fmt.Sprintf("%3d", int(bVal)))
-			hexLabel.SetText(h)
-			hexEntry.SetText(h)
+			hexLabel.SetText(targetHex)
+			hexEntry.SetText(targetHex)
 			updating = false
 		})
-		paletteGrid.Add(container.NewStack(sw, btn))
+		paletteGrid.Add(sw)
 	}
 
 	// Sliders Container
@@ -205,3 +201,38 @@ func ShowAdvancedColorPicker(title string, initialColor color.Color, onChosen fu
 	d.Resize(fyne.NewSize(420, 500))
 	d.Show()
 }
+
+// clickableSwatch is a clean, frameless-safe tappable color rectangle for palettes
+type clickableSwatch struct {
+	widget.BaseWidget
+	rect     *canvas.Rectangle
+	onTapped func()
+}
+
+func newClickableSwatch(c color.Color, onTapped func()) *clickableSwatch {
+	w := &clickableSwatch{
+		rect:     canvas.NewRectangle(c),
+		onTapped: onTapped,
+	}
+	w.rect.SetMinSize(fyne.NewSize(36, 28))
+	w.rect.CornerRadius = 5.0
+	w.rect.StrokeColor = color.NRGBA{R: 200, G: 200, B: 200, A: 200}
+	w.rect.StrokeWidth = 1.0
+	w.ExtendBaseWidget(w)
+	return w
+}
+
+func (s *clickableSwatch) CreateRenderer() fyne.WidgetRenderer {
+	return widget.NewSimpleRenderer(s.rect)
+}
+
+func (s *clickableSwatch) Tapped(_ *fyne.PointEvent) {
+	if s.onTapped != nil {
+		s.onTapped()
+	}
+}
+
+func (s *clickableSwatch) MinSize() fyne.Size {
+	return fyne.NewSize(36, 28)
+}
+

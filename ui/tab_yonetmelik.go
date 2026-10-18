@@ -63,32 +63,32 @@ func BuildYonetmelikTab(state *AppState) fyne.CanvasObject {
 		descEntry.SetText(c.Description)
 	}
 
-	// Clauses List
+	// Clauses List (Compact 2-line template for responsive width)
 	clauseList := widget.NewList(
 		func() int {
 			return len(currentClauses)
 		},
 		func() fyne.CanvasObject {
-			return container.NewHBox(
-				widget.NewLabelWithStyle("[LİSE]", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
-				widget.NewSeparator(),
-				widget.NewLabelWithStyle("Madde", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
-				widget.NewSeparator(),
-				widget.NewLabelWithStyle("Ceza", fyne.TextAlignLeading, fyne.TextStyle{Italic: true}),
-				widget.NewSeparator(),
-				widget.NewLabel("Açıklama özeti"),
-			)
+			typeLbl := widget.NewLabelWithStyle("[LİSE]", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+			artLbl := widget.NewLabelWithStyle("Madde", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+			penLbl := widget.NewLabelWithStyle("Ceza", fyne.TextAlignLeading, fyne.TextStyle{Italic: true})
+			descLbl := widget.NewLabel("Açıklama özeti")
+			descLbl.Truncation = fyne.TextTruncateEllipsis
+
+			headerRow := container.NewHBox(typeLbl, artLbl, penLbl)
+			return container.NewVBox(headerRow, descLbl)
 		},
 		func(i widget.ListItemID, o fyne.CanvasObject) {
 			if i >= len(currentClauses) {
 				return
 			}
 			c := currentClauses[i]
-			box := o.(*fyne.Container)
-			typeLbl := box.Objects[0].(*widget.Label)
-			artLbl := box.Objects[2].(*widget.Label)
-			penLbl := box.Objects[4].(*widget.Label)
-			descLbl := box.Objects[6].(*widget.Label)
+			vbox := o.(*fyne.Container)
+			headerRow := vbox.Objects[0].(*fyne.Container)
+			typeLbl := headerRow.Objects[0].(*widget.Label)
+			artLbl := headerRow.Objects[1].(*widget.Label)
+			penLbl := headerRow.Objects[2].(*widget.Label)
+			descLbl := vbox.Objects[1].(*widget.Label)
 
 			sType := c.SchoolType
 			if sType == "" {
@@ -96,11 +96,11 @@ func BuildYonetmelikTab(state *AppState) fyne.CanvasObject {
 			}
 			typeLbl.SetText(fmt.Sprintf("[%s]", sType))
 			artLbl.SetText(c.Article)
-			penLbl.SetText(c.Penalty)
+			penLbl.SetText("• " + c.Penalty)
 
 			shortDesc := c.Description
-			if len(shortDesc) > 60 {
-				shortDesc = shortDesc[:57] + "..."
+			if len(shortDesc) > 50 {
+				shortDesc = shortDesc[:47] + "..."
 			}
 			descLbl.SetText(shortDesc)
 		},
@@ -204,8 +204,8 @@ func BuildYonetmelikTab(state *AppState) fyne.CanvasObject {
 		clearForm()
 	})
 
-	// Reset to Factory Defaults Button
-	resetDefaultsBtn := widget.NewButtonWithIcon("Varsayılana Dön (Fabrika Ayarları)", theme.ViewRefreshIcon(), func() {
+	// Reset to Factory Defaults Button (Compact)
+	resetDefaultsBtn := widget.NewButtonWithIcon("Fabrika Ayarları", theme.ViewRefreshIcon(), func() {
 		showConfirm(state.Window, "Yönetmeliği Sıfırla", "Tüm özel eklediğiniz/düzenlediğiniz yönetmelik maddeleri silinecek ve orijinal sisteme gömülü yönetmelik yüklenecektir. Devam edilsin mi?", func() {
 			ym, err := config.ResetYonetmelik()
 			if err != nil {
@@ -220,13 +220,12 @@ func BuildYonetmelikTab(state *AppState) fyne.CanvasObject {
 		})
 	})
 
-	// Layout Structure
-	filterRow := container.NewHBox(
+	// Layout Structure (Clean, responsive and compressible)
+	filterRow := container.NewBorder(
+		nil, nil,
 		countLabel,
-		widget.NewSeparator(),
-		schoolTypeFilter,
-		widget.NewSeparator(),
 		resetDefaultsBtn,
+		schoolTypeFilter,
 	)
 
 	leftPanel := container.NewBorder(
@@ -242,18 +241,21 @@ func BuildYonetmelikTab(state *AppState) fyne.CanvasObject {
 		widget.NewFormItem("Suç / Eylem Açıklaması *", descEntry),
 	)
 
-	cardEdit := widget.NewCard("Madde Düzenleme / Yeni Madde Ekleme", "Listeden bir madde seçerek metnini düzenleyebilir veya yeni ceza maddeleri ekleyebilirsiniz.", formItems)
-	buttonsRow := container.NewHBox(saveClauseBtn, deleteClauseBtn, newClauseBtn)
+	cardEdit := widget.NewCard("Madde Düzenleme / Yeni Madde Ekleme", "Listeden bir madde seçerek düzenleyin veya yeni madde ekleyin.", formItems)
+	buttonsRow := container.NewGridWithColumns(3, saveClauseBtn, deleteClauseBtn, newClauseBtn)
+
+	infoLbl := widget.NewLabelWithStyle("💡 Bilgi: Değişiklikler bilgisayarınızdaki OkulEvrak profil klasörüne kaydedilir. 'Fabrika Ayarları' ile istediğiniz an orijinal yönetmeliğe dönebilirsiniz.", fyne.TextAlignLeading, fyne.TextStyle{Italic: true})
+	infoLbl.Wrapping = fyne.TextWrapWord
 
 	rightPanel := container.NewVScroll(container.NewVBox(
 		cardEdit,
 		buttonsRow,
 		widget.NewSeparator(),
-		widget.NewLabelWithStyle("💡 Bilgi: Yaptığınız tüm değişiklikler bilgisayarınızdaki OkulEvrak profil klasörüne kaydedilir ve bir sonraki açılışta otomatik yüklenir. 'Varsayılana Dön' ile istediğiniz an fabrika ayarlarına dönebilirsiniz.", fyne.TextAlignLeading, fyne.TextStyle{Italic: true}),
+		infoLbl,
 	))
 
 	split := container.NewHSplit(leftPanel, rightPanel)
-	split.SetOffset(0.55)
+	split.SetOffset(0.48)
 
 	reloadList()
 	return split

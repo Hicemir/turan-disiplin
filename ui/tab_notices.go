@@ -74,44 +74,6 @@ func BuildNoticesTab(state *AppState) fyne.CanvasObject {
 		},
 	)
 
-	reloadPenalized := func() {
-		cFilter := classSelect.Selected
-		if cFilter == "Tüm Sınıflar" {
-			cFilter = ""
-		}
-		pFilter := penaltySelect.Selected
-		if pFilter == "Tüm Cezalar" {
-			pFilter = ""
-		}
-		list, err := state.Store.GetPenalizedStudents(state.AcademicYear, cFilter, pFilter)
-		if err == nil {
-			// Apply search filter
-			var filtered []model.IncidentStudent
-			sTerm := strings.ToLower(searchEntry.Text)
-			for _, st := range list {
-				if sTerm == "" || strings.Contains(strings.ToLower(st.FullName), sTerm) || strings.Contains(st.SchoolNo, sTerm) {
-					filtered = append(filtered, st)
-				}
-			}
-			penalizedStudents = filtered
-			noticesList.Refresh()
-		}
-	}
-
-	noticesList.OnSelected = func(id widget.ListItemID) {
-		if id >= 0 && id < len(penalizedStudents) {
-			st := penalizedStudents[id]
-			selectedStudent = &st
-			summaryLabel.SetText(fmt.Sprintf("Seçilen: %s (%s - %s)\nKarar No: %s  |  Tarih: %s\nVerilen Ceza: %s\nYönetmelik Maddesi: %s (%s)\nİndirilen Puan: %d  |  Kalan Puan: %d",
-				st.FullName, st.ClassSection, st.SchoolNo, st.VerdictNo, st.VerdictDate, st.ImposedPenalty, st.ClauseCode, st.ClauseDescription, st.DeductedPoints, st.RemainingPoints))
-		}
-	}
-
-	searchEntry.OnChanged = func(s string) { reloadPenalized() }
-	classSelect.OnChanged = func(s string) { reloadPenalized() }
-	penaltySelect.OnChanged = func(s string) { reloadPenalized() }
-
-
 	// Action 1: Öğrenci Karar Tebligat Pusulası PDF
 	pdfOgrenciTebligatBtn := widget.NewButtonWithIcon("PDF OLUŞTUR VE AÇ (ÖĞRENCİ TEBLİGAT PUSULASI)", theme.DocumentIcon(), func() {
 		if selectedStudent == nil {
@@ -210,14 +172,70 @@ func BuildNoticesTab(state *AppState) fyne.CanvasObject {
 
 		_ = pdf.OpenPDF(outPath)
 	})
-	pdfVeliTebligatBtn.Importance = widget.SuccessImportance
+	pdfOgrenciTebligatBtn.Disable()
+	pdfVeliTebligatBtn.Disable()
 
-	// Filter Row
-	filterBar := container.NewHBox(
+	// Empty state message when no verdicts exist yet in the academic year
+	emptyNoticeBox := container.NewCenter(container.NewVBox(
+		widget.NewLabelWithStyle("ℹ️ Bu öğretim yılında henüz kesinleşmiş bir disiplin kurulu kararı bulunmamaktadır.", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
+		widget.NewLabelWithStyle("Ceza Tebligatı: Disiplin Kurulu tarafından kesinleşen cezaların (Kınama, Uzaklaştırma vb.)\nöğrenciye ve veliye resmi olarak tebliğ edilmesi için tebligat pusulası oluşturur.\n\nÖğrenciye ceza tebligatı düzenlemek için önce 'DİSİPLİN KURULU KARARI (EK-1)' bölümünden ilgili olay için kurul kararı oluşturunuz.", fyne.TextAlignCenter, fyne.TextStyle{Italic: true}),
+	))
+
+	listStack := container.NewStack(noticesList, emptyNoticeBox)
+
+	reloadPenalized := func() {
+		cFilter := classSelect.Selected
+		if cFilter == "Tüm Sınıflar" {
+			cFilter = ""
+		}
+		pFilter := penaltySelect.Selected
+		if pFilter == "Tüm Cezalar" {
+			pFilter = ""
+		}
+		list, err := state.Store.GetPenalizedStudents(state.AcademicYear, cFilter, pFilter)
+		if err == nil {
+			// Apply search filter
+			var filtered []model.IncidentStudent
+			sTerm := strings.ToLower(searchEntry.Text)
+			for _, st := range list {
+				if sTerm == "" || strings.Contains(strings.ToLower(st.FullName), sTerm) || strings.Contains(st.SchoolNo, sTerm) {
+					filtered = append(filtered, st)
+				}
+			}
+			penalizedStudents = filtered
+			noticesList.Refresh()
+
+			if len(penalizedStudents) == 0 {
+				emptyNoticeBox.Show()
+				noticesList.Hide()
+			} else {
+				emptyNoticeBox.Hide()
+				noticesList.Show()
+			}
+		}
+	}
+
+	noticesList.OnSelected = func(id widget.ListItemID) {
+		if id >= 0 && id < len(penalizedStudents) {
+			st := penalizedStudents[id]
+			selectedStudent = &st
+			summaryLabel.SetText(fmt.Sprintf("Seçilen: %s (%s - %s)\nKarar No: %s  |  Tarih: %s\nVerilen Ceza: %s\nYönetmelik Maddesi: %s (%s)\nİndirilen Puan: %d  |  Kalan Puan: %d",
+				st.FullName, st.ClassSection, st.SchoolNo, st.VerdictNo, st.VerdictDate, st.ImposedPenalty, st.ClauseCode, st.ClauseDescription, st.DeductedPoints, st.RemainingPoints))
+			pdfOgrenciTebligatBtn.Enable()
+			pdfVeliTebligatBtn.Enable()
+		}
+	}
+
+	searchEntry.OnChanged = func(s string) { reloadPenalized() }
+	classSelect.OnChanged = func(s string) { reloadPenalized() }
+	penaltySelect.OnChanged = func(s string) { reloadPenalized() }
+
+	// Filter Row (Responsive with full-width search input)
+	filterBar := container.NewBorder(
+		nil, nil,
 		widget.NewLabelWithStyle("Filtrele:", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+		container.NewHBox(classSelect, penaltySelect),
 		searchEntry,
-		classSelect,
-		penaltySelect,
 	)
 
 	// Settings Form
@@ -239,7 +257,7 @@ func BuildNoticesTab(state *AppState) fyne.CanvasObject {
 		),
 		summaryCard,
 		nil, nil,
-		noticesList,
+		listStack,
 	)
 
 	reloadPenalized()

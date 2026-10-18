@@ -23,6 +23,9 @@ func BuildStudentsTab(state *AppState) fyne.CanvasObject {
 	// Count Label
 	countLabel := widget.NewLabelWithStyle("Kayıt: 0 öğrenci", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
 
+	studentRolesLabel := widget.NewLabel("Seçili öğrencinin olay / disiplin geçmişi ve rolleri burada görüntülenir.")
+	studentRolesLabel.Wrapping = fyne.TextWrapWord
+
 	// Search & Filter
 	searchEntry := NewSingleLineEntry()
 	searchEntry.SetPlaceHolder("Öğrenci no veya ad soyad ile ara...")
@@ -68,6 +71,7 @@ func BuildStudentsTab(state *AppState) fyne.CanvasObject {
 		addrEntry.SetText("")
 		boardingSelect.SetSelected("GÜNDÜZLÜ")
 		scoreEntry.SetText("100")
+		studentRolesLabel.SetText("Seçili öğrencinin olay / disiplin geçmişi ve rolleri burada görüntülenir.")
 	}
 
 	populateForm := func(st *model.Student) {
@@ -87,6 +91,34 @@ func BuildStudentsTab(state *AppState) fyne.CanvasObject {
 		addrEntry.SetText(st.GuardianAddr)
 		boardingSelect.SetSelected(st.BoardingStatus)
 		scoreEntry.SetText(fmt.Sprintf("%d", st.BehaviorScore))
+
+		// Review student's roles in incidents & disciplinary history
+		records, _ := state.Store.GetIncidentStudentsBySchoolNo(state.AcademicYear, st.SchoolNo)
+		if len(records) == 0 {
+			studentRolesLabel.SetText("Bu öğrencinin bu öğretim yılında kayıtlı bir olay veya disiplin soruşturması bulunmamaktadır.")
+		} else {
+			var sb strings.Builder
+			for _, r := range records {
+				roleStr := r.Role
+				if roleStr == "" {
+					roleStr = "ROL BELİRTİLMEMİŞ"
+				}
+				outcome := "Soruşturma Aşamasında"
+				if r.VerdictNo != "" && r.ImposedPenalty != "" {
+					outcome = fmt.Sprintf("Karar No %s: %s", r.VerdictNo, r.ImposedPenalty)
+				}
+				sb.WriteString(fmt.Sprintf("• Olay: %s (Olay Kodu: %s)\n  Olaydaki Rolü: %s\n  Durum / Ceza: %s\n", r.IncidentTitle, r.IncidentCode, roleStr, outcome))
+				if r.StatementText != "" {
+					stmt := r.StatementText
+					if len(stmt) > 90 {
+						stmt = stmt[:87] + "..."
+					}
+					sb.WriteString(fmt.Sprintf("  Öğrenci İfadesi: \"%s\"\n", stmt))
+				}
+				sb.WriteString("\n")
+			}
+			studentRolesLabel.SetText(strings.TrimSpace(sb.String()))
+		}
 	}
 
 	// Student List (using widget.List for smooth senior-friendly scrolling)
@@ -318,9 +350,10 @@ func BuildStudentsTab(state *AppState) fyne.CanvasObject {
 	)
 
 	formCard := widget.NewCard("Öğrenci Detayları", "Listeden bir öğrenci seçin veya yeni öğrenci bilgilerini girip kaydedin.", formItems)
+	roleHistoryCard := widget.NewCard("Disiplin Olayları ve Rol Geçmişi", "Öğrencinin bu öğretim yılındaki olay rolleri ve soruşturma geçmişi", studentRolesLabel)
 	buttonsRow := container.NewHBox(saveStudentBtn, deleteStudentBtn, newStudentBtn)
 
-	rightPanel := container.NewVScroll(container.NewVBox(formCard, buttonsRow))
+	rightPanel := container.NewVScroll(container.NewVBox(formCard, roleHistoryCard, buttonsRow))
 
 	split := container.NewHSplit(leftPanel, rightPanel)
 	split.SetOffset(0.5)

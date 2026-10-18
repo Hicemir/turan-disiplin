@@ -854,6 +854,33 @@ func (s *Store) GetPriorPenalties(studentName string) string {
 	return sb.String()
 }
 
+// GetIncidentStudentsBySchoolNo returns all incident records for a specific student
+func (s *Store) GetIncidentStudentsBySchoolNo(academicYear, schoolNo string) ([]model.IncidentStudent, error) {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+
+	rows, err := s.db.Query(`SELECT id, academic_year, incident_code, incident_title, role, school_no, full_name,
+		class_section, statement_text, imposed_penalty, verdict_no, verdict_date
+		FROM incident_students
+		WHERE academic_year = ? AND school_no = ?
+		ORDER BY id DESC`, academicYear, schoolNo)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var list []model.IncidentStudent
+	for rows.Next() {
+		var is model.IncidentStudent
+		if err := rows.Scan(&is.ID, &is.AcademicYear, &is.IncidentCode, &is.IncidentTitle, &is.Role,
+			&is.SchoolNo, &is.FullName, &is.ClassSection, &is.StatementText, &is.ImposedPenalty,
+			&is.VerdictNo, &is.VerdictDate); err == nil {
+			list = append(list, is)
+		}
+	}
+	return list, nil
+}
+
 // GetPenalizedStudents returns all students who received a verdict with imposed penalty
 func (s *Store) GetPenalizedStudents(academicYear, classFilter, penaltyFilter string) ([]model.IncidentStudent, error) {
 	s.lock.RLock()

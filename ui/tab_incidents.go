@@ -41,6 +41,30 @@ func BuildIncidentsTab(state *AppState) fyne.CanvasObject {
 	var incidentList *widget.List
 	var editStudentProfileBtn *widget.Button
 	var removeStudentFromIncBtn *widget.Button
+	var saveStudentStatementBtn *widget.Button
+	var stStatementLabel *widget.Label
+	var stInlineRoleSelect *widget.Select
+	var stInlineStatementEntry *SmartMultiLineEntry
+
+	clearSelectedStudent := func() {
+		selectedIncStudent = nil
+		state.SelectedIncStudentID = 0
+		if stStatementLabel != nil {
+			stStatementLabel.SetText("İfade girmek veya düzenlemek için yukarıdaki listeden bir öğrenci seçiniz.")
+		}
+		if stInlineStatementEntry != nil {
+			stInlineStatementEntry.SetText("")
+		}
+		if saveStudentStatementBtn != nil {
+			saveStudentStatementBtn.Disable()
+		}
+		if editStudentProfileBtn != nil {
+			editStudentProfileBtn.Disable()
+		}
+		if removeStudentFromIncBtn != nil {
+			removeStudentFromIncBtn.Disable()
+		}
+	}
 
 	clearIncidentForm := func() {
 		selectedIncident = nil
@@ -55,22 +79,16 @@ func BuildIncidentsTab(state *AppState) fyne.CanvasObject {
 		summaryEntry.SetText("")
 
 		incidentStudents = nil
-		selectedIncStudent = nil
-		state.SelectedIncStudentID = 0
+		clearSelectedStudent()
 		if incStudentsList != nil {
 			incStudentsList.Refresh()
-		}
-		if editStudentProfileBtn != nil {
-			editStudentProfileBtn.Disable()
-		}
-		if removeStudentFromIncBtn != nil {
-			removeStudentFromIncBtn.Disable()
 		}
 	}
 
 	reloadIncStudents := func() {
 		if selectedIncident == nil {
 			incidentStudents = nil
+			clearSelectedStudent()
 			if incStudentsList != nil {
 				incStudentsList.Refresh()
 			}
@@ -89,6 +107,7 @@ func BuildIncidentsTab(state *AppState) fyne.CanvasObject {
 		if inc == nil {
 			return
 		}
+		isDifferent := (selectedIncident == nil || selectedIncident.IncidentCode != inc.IncidentCode)
 		selectedIncident = inc
 		state.SelectedIncidentCode = inc.IncidentCode
 
@@ -101,16 +120,10 @@ func BuildIncidentsTab(state *AppState) fyne.CanvasObject {
 		petitionEntry.SetText(inc.PetitionRef)
 		summaryEntry.SetText(inc.Summary)
 
-		selectedIncStudent = nil
-		state.SelectedIncStudentID = 0
-		if editStudentProfileBtn != nil {
-			editStudentProfileBtn.Disable()
+		if isDifferent {
+			clearSelectedStudent()
+			reloadIncStudents()
 		}
-		if removeStudentFromIncBtn != nil {
-			removeStudentFromIncBtn.Disable()
-		}
-
-		reloadIncStudents()
 	}
 
 	// Attached Student List
@@ -364,6 +377,25 @@ func BuildIncidentsTab(state *AppState) fyne.CanvasObject {
 
 			_ = state.Store.SaveIncidentStudent(is)
 			reloadIncStudents()
+
+			// Ensure incident stays actively selected in incidentList
+			if selectedIncident != nil {
+				for idx, inc := range currentIncidents {
+					if inc.IncidentCode == selectedIncident.IncidentCode {
+						incidentList.Select(idx)
+						break
+					}
+				}
+			}
+
+			// Automatically select the newly added student in incStudentsList
+			for idx, st := range incidentStudents {
+				if st.SchoolNo == chosen.SchoolNo {
+					incStudentsList.Select(idx)
+					break
+				}
+			}
+
 			ShowTurkishInfo("Öğrenci Eklendi", fmt.Sprintf("%s (%s) başarıyla olaya eklendi.", chosen.FullName, chosen.SchoolNo), state.Window)
 		}, state.Window)
 
@@ -489,6 +521,14 @@ func BuildIncidentsTab(state *AppState) fyne.CanvasObject {
 				editStudentProfileBtn.Disable()
 				removeStudentFromIncBtn.Disable()
 				reloadIncStudents()
+				if selectedIncident != nil {
+					for idx, inc := range currentIncidents {
+						if inc.IncidentCode == selectedIncident.IncidentCode {
+							incidentList.Select(idx)
+							break
+						}
+					}
+				}
 			},
 			state.Window,
 		)
@@ -496,10 +536,56 @@ func BuildIncidentsTab(state *AppState) fyne.CanvasObject {
 	removeStudentFromIncBtn.Importance = widget.DangerImportance
 	removeStudentFromIncBtn.Disable()
 
+	// Inline Student Statement & Role Editor (Under incident and student list)
+	stStatementLabel = widget.NewLabelWithStyle("İfade girmek veya düzenlemek için yukarıdaki listeden bir öğrenci seçiniz.", fyne.TextAlignLeading, fyne.TextStyle{Italic: true})
+
+	stInlineRoleSelect = NewTurkishSelect([]string{
+		"SUÇLANAN ÖĞRENCİ",
+		"MAĞDUR / ŞİKAYETÇİ ÖĞRENCİ",
+		"BİLGİSİNE BAŞVURULACAK ÖĞRENCİ (TANIK)",
+	}, nil)
+
+	stInlineStatementEntry = NewSmartMultiLineEntry()
+	stInlineStatementEntry.SetPlaceHolder("Öğrencinin olayla ilgili sözlü / yazılı ifadesi ve savunması...")
+
+	saveStudentStatementBtn = widget.NewButtonWithIcon("Öğrenci İfadesini & Rolünü Kaydet", theme.DocumentSaveIcon(), func() {
+		if selectedIncStudent == nil {
+			showError(state.Window, fmt.Errorf("Lütfen önce listeden bir öğrenci seçiniz"))
+			return
+		}
+		selectedIncStudent.Role = stInlineRoleSelect.Selected
+		selectedIncStudent.StatementText = stInlineStatementEntry.Text
+
+		err := state.Store.SaveIncidentStudent(selectedIncStudent)
+		if err != nil {
+			showError(state.Window, err)
+			return
+		}
+		reloadIncStudents()
+		ShowTurkishInfo("Kaydedildi", fmt.Sprintf("%s adlı öğrencinin ifadesi ve rolü kaydedildi.", selectedIncStudent.FullName), state.Window)
+	})
+	saveStudentStatementBtn.Importance = widget.HighImportance
+	saveStudentStatementBtn.Disable()
+
+	studentStatementForm := widget.NewForm(
+		widget.NewFormItem("Olaydaki Rolü *", stInlineRoleSelect),
+		widget.NewFormItem("Öğrenci İfadesi / Savunması *", stInlineStatementEntry),
+	)
+
+	statementCard := widget.NewCard("Öğrenci İfadesi & Olaydaki Rolü", "Olaya bağlı seçili öğrencinin ifadesi ve olaydaki rolü", container.NewVBox(
+		stStatementLabel,
+		studentStatementForm,
+		container.NewHBox(saveStudentStatementBtn, editStudentProfileBtn),
+	))
+
 	incStudentsList.OnSelected = func(id widget.ListItemID) {
 		if id >= 0 && id < len(incidentStudents) {
 			is := incidentStudents[id]
 			selectedIncStudent = &is
+			stStatementLabel.SetText(fmt.Sprintf("Seçili Öğrenci: %s (%s - No: %s)", is.FullName, is.ClassSection, is.SchoolNo))
+			stInlineRoleSelect.SetSelected(is.Role)
+			stInlineStatementEntry.SetText(is.StatementText)
+			saveStudentStatementBtn.Enable()
 			editStudentProfileBtn.Enable()
 			removeStudentFromIncBtn.Enable()
 		}
@@ -523,13 +609,12 @@ func BuildIncidentsTab(state *AppState) fyne.CanvasObject {
 	studentsHeader := container.NewHBox(
 		widget.NewLabelWithStyle("👥 Olaya Bağlı Öğrenciler", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 		addStudentToIncBtn,
-		editStudentProfileBtn,
 		removeStudentFromIncBtn,
 	)
 
 	// Wrap students list in a fixed-height container so it displays cleanly in the vertical form
 	studentsScroll := container.NewVScroll(incStudentsList)
-	studentsScroll.SetMinSize(fyne.NewSize(500, 220))
+	studentsScroll.SetMinSize(fyne.NewSize(500, 180))
 
 	studentsCard := widget.NewCard("Olaya Bağlı Öğrenci Listesi", "Soruşturmaya dahil edilen öğrenciler ve rolleri", container.NewVBox(
 		studentsHeader,
@@ -548,10 +633,13 @@ func BuildIncidentsTab(state *AppState) fyne.CanvasObject {
 		incidentBtns,
 		widget.NewSeparator(),
 		studentsCard,
+		widget.NewSeparator(),
+		statementCard,
 	)
 
 	rightPanelScroll := container.NewVScroll(rightPanelContent)
 	summaryEntry.ParentScroll = rightPanelScroll
+	stInlineStatementEntry.ParentScroll = rightPanelScroll
 
 	splitMain := container.NewHSplit(leftIncList, rightPanelScroll)
 	splitMain.SetOffset(0.28)

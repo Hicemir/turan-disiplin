@@ -41,9 +41,10 @@ func BuildHeader(state *AppState) fyne.CanvasObject {
 		}
 	})
 	yearSelect.SetSelected(state.AcademicYear)
+	yearSelectContainer := container.NewGridWrap(fyne.NewSize(140, 36), yearSelect)
 
-	// Add Custom Year Button with auto-filled next year
-	addYearBtn := widget.NewButtonWithIcon("Yeni Yıl", theme.ContentAddIcon(), func() {
+	// Add Custom Year Button (Compact + icon)
+	addYearBtn := widget.NewButtonWithIcon("", theme.ContentAddIcon(), func() {
 		entry := NewSingleLineEntry()
 		nextYear := store.GetNextNearestAcademicYear(yearOptions)
 		entry.SetText(nextYear)
@@ -55,8 +56,8 @@ func BuildHeader(state *AppState) fyne.CanvasObject {
 		}, state.Window)
 	})
 
-	// Delete Active Year Button with confirmation
-	deleteYearBtn := widget.NewButtonWithIcon("Yılı Sil", theme.DeleteIcon(), func() {
+	// Delete Active Year Button (Compact trash icon)
+	deleteYearBtn := widget.NewButtonWithIcon("", theme.DeleteIcon(), func() {
 		if len(yearOptions) <= 1 {
 			ShowTurkishInfo("Uyarı", "Sistemde en az bir öğretim yılı kalmalıdır. Tek kalan yılı silemezsiniz.", state.Window)
 			return
@@ -83,14 +84,41 @@ func BuildHeader(state *AppState) fyne.CanvasObject {
 		)
 	})
 
-	// School Type Radio
-	schoolTypeRadio := widget.NewRadioGroup([]string{"LİSE", "ORTAOKUL"}, func(selected string) {
-		if selected != "" && selected != state.SchoolInfo.SchoolType {
-			state.SetSchoolType(selected)
+	// Responsive, compact School Type Toggle (No big gap, responsive label)
+	var liseBtn, ortaokulBtn *widget.Button
+	ortaokulLabel := "ORTAOKUL"
+	if state.Window != nil && state.Window.Canvas() != nil && state.Window.Canvas().Size().Width < 1050 {
+		ortaokulLabel = "O.OKUL"
+	}
+
+	updateSchoolTypeButtons := func() {
+		if state.SchoolInfo.SchoolType == "ORTAOKUL" {
+			liseBtn.Importance = widget.LowImportance
+			ortaokulBtn.Importance = widget.HighImportance
+		} else {
+			liseBtn.Importance = widget.HighImportance
+			ortaokulBtn.Importance = widget.LowImportance
+		}
+		liseBtn.Refresh()
+		ortaokulBtn.Refresh()
+	}
+
+	liseBtn = widget.NewButton("LİSE", func() {
+		if state.SchoolInfo.SchoolType != "LİSE" {
+			state.SetSchoolType("LİSE")
+			updateSchoolTypeButtons()
 		}
 	})
-	schoolTypeRadio.Horizontal = true
-	schoolTypeRadio.SetSelected(state.SchoolInfo.SchoolType)
+
+	ortaokulBtn = widget.NewButton(ortaokulLabel, func() {
+		if state.SchoolInfo.SchoolType != "ORTAOKUL" {
+			state.SetSchoolType("ORTAOKUL")
+			updateSchoolTypeButtons()
+		}
+	})
+
+	updateSchoolTypeButtons()
+	schoolTypeBox := container.NewHBox(liseBtn, ortaokulBtn)
 
 	// Open Output Folder Button
 	openFolderBtn := widget.NewButtonWithIcon("Belgeler Klasörü", theme.FolderOpenIcon(), func() {
@@ -128,12 +156,12 @@ func BuildHeader(state *AppState) fyne.CanvasObject {
 		title,
 		widget.NewSeparator(),
 		widget.NewLabelWithStyle("Öğretim Yılı:", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
-		yearSelect,
+		yearSelectContainer,
 		addYearBtn,
 		deleteYearBtn,
 		widget.NewSeparator(),
 		widget.NewLabelWithStyle("Kurum:", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
-		schoolTypeRadio,
+		schoolTypeBox,
 		widget.NewSeparator(),
 		openFolderBtn,
 		backupBtn,
@@ -143,7 +171,7 @@ func BuildHeader(state *AppState) fyne.CanvasObject {
 	)
 
 	return container.NewVBox(
-		headerBox,
+		container.NewHScroll(headerBox),
 		widget.NewSeparator(),
 	)
 }
