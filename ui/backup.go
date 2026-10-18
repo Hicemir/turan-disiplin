@@ -8,10 +8,11 @@ import (
 	"path/filepath"
 	"time"
 
+	"fyne.io/fyne/v2"
 	fyneDialog "fyne.io/fyne/v2/dialog"
-	"github.com/sqweek/dialog"
 
 	"okulevrak/config"
+	"okulevrak/picker"
 	"okulevrak/store"
 )
 
@@ -26,17 +27,27 @@ func BackupDatabase(state *AppState) {
 		srcPath := filepath.Join(cfgDir, "OkulEvrak.db")
 
 		defaultName := fmt.Sprintf("OkulEvrak_Yedek_%s.db", time.Now().Format("2006-01-02_15-04"))
-		destPath, err := dialog.File().
-			Title("Veritabanı Yedeği Kaydet").
-			SetStartFile(defaultName).
-			Filter("OkulEvrak Veritabanı (*.db)", "db").
-			Save()
+		filters := []picker.FileFilter{
+			{Name: "OkulEvrak Veritabanı (*.db)", Extensions: []string{"db"}},
+		}
+
+		destPath, err := picker.SaveFile("Veritabanı Yedeği Kaydet", defaultName, filters)
 
 		if err != nil {
-			if errors.Is(err, dialog.ErrCancelled) {
+			if errors.Is(err, picker.ErrCancelled) {
 				return
 			}
-			showError(state.Window, fmt.Errorf("Yedekleme konumu seçilemedi: %w", err))
+			// If native tool unavailable, fallback to Fyne dialog
+			fyneDialog.ShowFileSave(func(writer fyne.URIWriteCloser, err error) {
+				if err != nil || writer == nil {
+					return
+				}
+				p := writer.URI().Path()
+				_ = writer.Close()
+				if p != "" {
+					executeBackup(state, srcPath, p)
+				}
+			}, state.Window)
 			return
 		}
 
@@ -48,18 +59,21 @@ func BackupDatabase(state *AppState) {
 			destPath += ".db"
 		}
 
-		// Perform safe file copy
-		if err := copyFile(srcPath, destPath); err != nil {
-			showError(state.Window, fmt.Errorf("Yedekleme dosyası kaydedilemedi: %w", err))
-			return
-		}
-
-		fyneDialog.ShowInformation(
-			"Yedekleme Başarılı",
-			fmt.Sprintf("Veritabanı yedeğiniz başarıyla oluşturuldu:\n\n%s", destPath),
-			state.Window,
-		)
+		executeBackup(state, srcPath, destPath)
 	}()
+}
+
+func executeBackup(state *AppState, srcPath, destPath string) {
+	if err := copyFile(srcPath, destPath); err != nil {
+		showError(state.Window, fmt.Errorf("Yedekleme dosyası kaydedilemedi: %w", err))
+		return
+	}
+
+	fyneDialog.ShowInformation(
+		"Yedekleme Başarılı",
+		fmt.Sprintf("Veritabanı yedeğiniz başarıyla oluşturuldu:\n\n%s", destPath),
+		state.Window,
+	)
 }
 
 // RestoreDatabase restores OkulEvrak.db from a chosen .db backup file
@@ -72,16 +86,27 @@ func RestoreDatabase(state *AppState) {
 		}
 		targetPath := filepath.Join(cfgDir, "OkulEvrak.db")
 
-		backupPath, err := dialog.File().
-			Title("Geri Yüklenecek Yedek Dosyasını Seçin (.db)").
-			Filter("OkulEvrak Veritabanı (*.db)", "db").
-			Load()
+		filters := []picker.FileFilter{
+			{Name: "OkulEvrak Veritabanı (*.db)", Extensions: []string{"db"}},
+		}
+
+		backupPath, err := picker.OpenFile("Geri Yüklenecek Yedek Dosyasını Seçin (.db)", filters)
 
 		if err != nil {
-			if errors.Is(err, dialog.ErrCancelled) {
+			if errors.Is(err, picker.ErrCancelled) {
 				return
 			}
-			showError(state.Window, fmt.Errorf("Yedek dosyası seçilemedi: %w", err))
+			// If native tool unavailable, fallback to Fyne dialog
+			fyneDialog.ShowFileOpen(func(reader fyne.URIReadCloser, err error) {
+				if err != nil || reader == nil {
+					return
+				}
+				p := reader.URI().Path()
+				_ = reader.Close()
+				if p != "" {
+					executeRestoreConfirmation(state, targetPath, p)
+				}
+			}, state.Window)
 			return
 		}
 
@@ -89,42 +114,46 @@ func RestoreDatabase(state *AppState) {
 			return
 		}
 
-		// Prompt user with clear warning and confirmation
-		fyneDialog.ShowConfirm(
-			"Geri Yükleme Onayı",
-			fmt.Sprintf(
-				"DİKKAT: Seçtiğiniz '%s' yedek dosyası mevcut veritabanınızın üzerine yazılacaktır.\n\n"+
-					"Bu işlem geri alınamaz! Mevcut veritabanınızı bu yedekle değiştirmek istediğinize emin misiniz?",
-				filepath.Base(backupPath),
-			),
-			func(ok bool) {
-				if !ok {
-					return
-				}
-
-				if err := copyFile(backupPath, targetPath); err != nil {
-					showError(state.Window, fmt.Errorf("Geri yükleme başarısız oldu: %w", err))
-					return
-				}
-
-				// Re-read school info and refresh application
-				st, err := store.GetStore()
-				if err == nil && st != nil {
-					if info, err := st.GetSchoolInfo(); err == nil && info != nil {
-						state.SchoolInfo = info
-					}
-				}
-				state.NotifyChange()
-
-				fyneDialog.ShowInformation(
-					"Geri Yükleme Başarılı",
-					"Veritabanınız başarıyla geri yüklendi ve güncellendi.",
-					state.Window,
-				)
-			},
-			state.Window,
-		)
+		executeRestoreConfirmation(state, targetPath, backupPath)
 	}()
+}
+
+func executeRestoreConfirmation(state *AppState, targetPath, backupPath string) {
+	// Prompt user with clear warning and confirmation
+	fyneDialog.ShowConfirm(
+		"Geri Yükleme Onayı",
+		fmt.Sprintf(
+			"DİKKAT: Seçtiğiniz '%s' yedek dosyası mevcut veritabanınızın üzerine yazılacaktır.\n\n"+
+				"Bu işlem geri alınamaz! Mevcut veritabanınızı bu yedekle değiştirmek istediğinize emin misiniz?",
+			filepath.Base(backupPath),
+		),
+		func(ok bool) {
+			if !ok {
+				return
+			}
+
+			if err := copyFile(backupPath, targetPath); err != nil {
+				showError(state.Window, fmt.Errorf("Geri yükleme başarısız oldu: %w", err))
+				return
+			}
+
+			// Re-read school info and refresh application
+			st, err := store.GetStore()
+			if err == nil && st != nil {
+				if info, err := st.GetSchoolInfo(); err == nil && info != nil {
+					state.SchoolInfo = info
+				}
+			}
+			state.NotifyChange()
+
+			fyneDialog.ShowInformation(
+				"Geri Yükleme Başarılı",
+				"Veritabanınız başarıyla geri yüklendi ve güncellendi.",
+				state.Window,
+			)
+		},
+		state.Window,
+	)
 }
 
 func copyFile(src, dst string) error {

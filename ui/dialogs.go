@@ -10,22 +10,22 @@ import (
 	fyneDialog "fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"github.com/sqweek/dialog"
 
 	"okulevrak/config"
+	"okulevrak/picker"
 	"okulevrak/store"
 )
 
 // SelectExcelFile opens the operating system's native file picker (Windows Explorer or Linux Zenity/KDialog)
 func SelectExcelFile(w fyne.Window, onSelected func(filePath string)) {
 	go func() {
-		filePath, err := dialog.File().
-			Title("Excel Öğrenci Listesi Seçin (.xlsx / .xls)").
-			Filter("Excel Dosyaları (*.xlsx, *.xls)", "xlsx", "xls").
-			Load()
+		filters := []picker.FileFilter{
+			{Name: "Excel Dosyaları (*.xlsx, *.xls)", Extensions: []string{"xlsx", "xls"}},
+		}
+		filePath, err := picker.OpenFile("Excel Öğrenci Listesi Seçin (.xlsx / .xls)", filters)
 
 		if err != nil {
-			if errors.Is(err, dialog.ErrCancelled) {
+			if errors.Is(err, picker.ErrCancelled) {
 				return
 			}
 			// If native dialog fails (e.g. headless or missing GUI tool), fall back to Fyne's dialog
