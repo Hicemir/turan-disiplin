@@ -3,6 +3,7 @@ package excel
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -210,3 +211,32 @@ func TestReadSheetData_CorruptedFileCrashProof(t *testing.T) {
 	// Any result is fine as long as it does not panic/crash
 	_ = err
 }
+
+func TestReadSheetData_RealFile(t *testing.T) {
+	for _, p := range []string{"/home/hicemir/Documents/disiplintest/sadeceveri.xls", "/home/hicemir/Documents/disiplintest/normal.xls"} {
+		if _, err := os.Stat(p); err != nil {
+			continue
+		}
+		data, sheets, err := ReadSheetData(p)
+		if err != nil {
+			t.Errorf("ReadSheetData error on %s: %v", p, err)
+			continue
+		}
+		for _, s := range sheets {
+			rows := data[s]
+			students, pErr := ParseStudentRows(rows, "2024 - 2025")
+			if pErr != nil {
+				t.Errorf("ParseStudentRows error: %v", pErr)
+			}
+			if len(students) == 0 {
+				t.Errorf("Expected students in %s, got 0", p)
+			}
+			for _, st := range students {
+				if strings.ContainsRune(st.FullName, '\uFFFD') || strings.ContainsRune(st.SchoolNo, '\uFFFD') {
+					t.Errorf("Student contains replacement rune: No=%q Name=%q", st.SchoolNo, st.FullName)
+				}
+			}
+		}
+	}
+}
+

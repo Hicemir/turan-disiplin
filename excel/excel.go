@@ -7,12 +7,15 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 
-	"github.com/extrame/xls"
+	"github.com/shakinm/xlsReader/xls"
 	"github.com/xuri/excelize/v2"
 	"golang.org/x/net/html"
+	"golang.org/x/text/encoding/charmap"
 
 	"turandisiplin/model"
 )
@@ -119,47 +122,99 @@ func readXLS(filePath string) (res map[string][][]string, sheets []string, err e
 		}
 	}()
 
-	wb, err := xls.Open(filePath, "utf-8")
+	fileBytes, err := os.ReadFile(filePath)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	numSheets := wb.NumSheets()
-	if numSheets == 0 {
+	// Fix case sensitivity in CFB directory: "WORKBOOK\0" -> "Workbook\0" (used by Crystal Reports / e-Okul)
+	upperWorkbook := []byte("W\x00O\x00R\x00K\x00B\x00O\x00O\x00K\x00\x00\x00")
+	normalWorkbook := []byte("W\x00o\x00r\x00k\x00b\x00o\x00o\x00k\x00\x00\x00")
+	fileBytes = bytes.Replace(fileBytes, upperWorkbook, normalWorkbook, -1)
+
+	wb, err := xls.OpenReader(bytes.NewReader(fileBytes))
+	if err != nil {
+		return nil, nil, err
+	}
+
+	sheetCount := wb.GetNumberSheets()
+	if sheetCount == 0 {
 		return nil, nil, fmt.Errorf("xls dosyasında sayfa bulunamadı")
 	}
 
 	res = make(map[string][][]string)
-	for i := 0; i < numSheets; i++ {
-		sheet := wb.GetSheet(i)
-		if sheet == nil {
+	for sIdx := 0; sIdx < sheetCount; sIdx++ {
+		sheet, err := wb.GetSheet(sIdx)
+		if err != nil {
 			continue
 		}
-		sheets = append(sheets, sheet.Name)
+		sheetName := sheet.GetName()
+		if sheetName == "" {
+			sheetName = fmt.Sprintf("Sayfa%d", sIdx+1)
+		}
+		sheets = append(sheets, sheetName)
+
+		numRows := sheet.GetNumberRows()
 		var rows [][]string
-		maxRow := int(sheet.MaxRow)
-		for r := 0; r <= maxRow; r++ {
-			rowObj := sheet.Row(r)
-			if rowObj == nil {
+		for r := 0; r < numRows; r++ {
+			row, err := sheet.GetRow(r)
+			if err != nil {
 				continue
 			}
-			lastCol := rowObj.LastCol()
-			var cols []string
+			cols := row.GetCols()
+			if len(cols) == 0 {
+				continue
+			}
+
+			var cellVals []string
 			hasContent := false
-			for c := 0; c <= lastCol; c++ {
-				val := strings.TrimSpace(rowObj.Col(c))
+			for _, c := range cols {
+				val := decodeTurkish(c.GetString())
 				if val != "" {
 					hasContent = true
 				}
-				cols = append(cols, val)
+				cellVals = append(cellVals, val)
 			}
 			if hasContent {
-				rows = append(rows, cols)
+				rows = append(rows, cellVals)
 			}
 		}
-		res[sheet.Name] = rows
+		res[sheetName] = rows
 	}
 	return res, sheets, nil
+}
+
+// decodeTurkish cleans up Turkish characters from BIFF8/CP1252/CP1254 encodings and eliminates mojibake.
+func decodeTurkish(raw string) string {
+	// 1. Fix CP1252 -> UTF-8 mojibake (e.g. Ã–, Ä°, ÄŸ, etc.)
+	if strings.Contains(raw, "Ã") || strings.Contains(raw, "Ä") || strings.Contains(raw, "Å") {
+		enc := charmap.Windows1252.NewEncoder()
+		if b, err := enc.String(raw); err == nil && utf8.ValidString(b) && !strings.ContainsRune(b, '\uFFFD') {
+			return strings.TrimSpace(b)
+		}
+	}
+	// 2. If it's already clean valid UTF-8, return trimmed string
+	if utf8.ValidString(raw) && !strings.ContainsRune(raw, '\uFFFD') {
+		return strings.TrimSpace(raw)
+	}
+	// 3. Fallback: decode Windows-1254
+	dec := charmap.Windows1254.NewDecoder()
+	if decoded, err := dec.String(raw); err == nil && !strings.ContainsRune(decoded, '\uFFFD') {
+		return strings.TrimSpace(decoded)
+	}
+	return strings.TrimSpace(raw)
+}
+
+func isOnlyPunctuation(s string) bool {
+	for _, r := range s {
+		if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') ||
+			r == 'ç' || r == 'Ç' || r == 'ğ' || r == 'Ğ' || r == 'ı' || r == 'I' ||
+			r == 'İ' || r == 'i' || r == 'ö' || r == 'Ö' || r == 'ş' || r == 'Ş' ||
+			r == 'ü' || r == 'Ü' {
+			return false
+		}
+	}
+	return true
 }
 
 // readHTMLTable parses HTML-formatted reports exported by e-Okul / ActiveReports
@@ -465,10 +520,11 @@ func parseCardBasedStudents(rows [][]string, schoolYear string) []*model.Student
 	}
 
 	for _, row := range rows {
-		// Detect class banner
-		banner := extractClassBanner(row)
-		if banner != "" {
-			currentClass = banner
+		// Detect class banner in any cell
+		for _, cell := range row {
+			if b := extractClassBannerText(cell); b != "" {
+				currentClass = b
+			}
 		}
 
 		for cIdx, cell := range row {
@@ -477,149 +533,126 @@ func parseCardBasedStudents(rows [][]string, schoolYear string) []*model.Student
 				continue
 			}
 			norm := normalizeTurkish(val)
-			nextCell := ""
-			if cIdx+1 < len(row) {
-				nextCell = strings.TrimSpace(row[cIdx+1])
-			}
+			norm = strings.ReplaceAll(norm, ".", "")
+			norm = strings.ReplaceAll(norm, ":", "")
+			norm = strings.TrimSpace(norm)
 
-			// Check for T.C. Kimlik No
-			if (strings.Contains(norm, "TC") || strings.Contains(norm, "KIMLIK NO")) && !strings.Contains(norm, "BAKANLIG") {
-				rawNum := extractValueAfterLabel(val)
-				if rawNum == "" {
-					rawNum = nextCell
+			// Get candidate value from next non-empty cell in row, or after ":" in the same cell
+			var valStr string
+			if strings.Contains(cell, ":") {
+				parts := strings.SplitN(cell, ":", 2)
+				if len(parts) == 2 && strings.TrimSpace(parts[1]) != "" {
+					valStr = strings.TrimSpace(parts[1])
 				}
-				num := cleanNumeric(rawNum)
-				if len(num) == 11 {
-					// If current student already has TC and SchoolNo, this starts a new student card
-					if current != nil && current.TCNo != "" && current.SchoolNo != "" {
-						saveCurrent()
-						current = &model.Student{AcademicYear: schoolYear, ClassSection: currentClass}
-					} else if current == nil {
-						current = &model.Student{AcademicYear: schoolYear, ClassSection: currentClass}
+			}
+			if valStr == "" {
+				for k := cIdx + 1; k < len(row); k++ {
+					if strings.TrimSpace(row[k]) != "" {
+						valStr = strings.TrimSpace(row[k])
+						break
 					}
-					current.TCNo = num
 				}
 			}
 
-			// Check for Okul No / Öğrenci No
-			if strings.Contains(norm, "OKUL NO") || strings.Contains(norm, "OGRENCI NO") {
-				rawNo := extractValueAfterLabel(val)
-				if rawNo == "" {
-					rawNo = nextCell
-				}
-				no := cleanNumeric(rawNo)
-				if len(no) >= 1 && len(no) <= 6 {
-					if current != nil && current.SchoolNo != "" && current.SchoolNo != no {
+			// 1. Okul No
+			if strings.Contains(norm, "OGRENCI NUMARASI") || strings.Contains(norm, "OGRENCI NO") || strings.Contains(norm, "OKUL NO") {
+				cleanNo := cleanNumeric(valStr)
+				if len(cleanNo) >= 1 && len(cleanNo) <= 6 {
+					if current != nil && current.SchoolNo != "" && current.SchoolNo != cleanNo {
 						saveCurrent()
-						current = &model.Student{AcademicYear: schoolYear, ClassSection: currentClass}
+						current = &model.Student{AcademicYear: schoolYear, ClassSection: currentClass, BehaviorScore: 100, BoardingStatus: "GÜNDÜZLÜ"}
 					} else if current == nil {
-						current = &model.Student{AcademicYear: schoolYear, ClassSection: currentClass}
+						current = &model.Student{AcademicYear: schoolYear, ClassSection: currentClass, BehaviorScore: 100, BoardingStatus: "GÜNDÜZLÜ"}
 					}
-					current.SchoolNo = no
+					current.SchoolNo = cleanNo
 				}
 			}
 
-			// Check for Adı Soyadı
+			// 2. T.C. Kimlik No
+			if (strings.Contains(norm, "TC") || strings.Contains(norm, "KIMLIK NO")) && !strings.Contains(norm, "BAKANLI") {
+				cleanTC := cleanNumeric(valStr)
+				if len(cleanTC) == 11 {
+					if current != nil && current.TCNo != "" && current.TCNo != cleanTC && current.SchoolNo != "" {
+						saveCurrent()
+						current = &model.Student{AcademicYear: schoolYear, ClassSection: currentClass, BehaviorScore: 100, BoardingStatus: "GÜNDÜZLÜ"}
+					} else if current == nil {
+						current = &model.Student{AcademicYear: schoolYear, ClassSection: currentClass, BehaviorScore: 100, BoardingStatus: "GÜNDÜZLÜ"}
+					}
+					current.TCNo = cleanTC
+				}
+			}
+
+			// 3. Adı Soyadı
 			if strings.Contains(norm, "ADI SOYADI") || strings.Contains(norm, "AD SOYAD") {
-				name := extractValueAfterLabel(val)
-				if name == "" {
-					name = nextCell
-				}
-				if name != "" && hasAlphabetic(name) {
+				if valStr != "" && len(valStr) >= 2 && !isOnlyPunctuation(valStr) && hasAlphabetic(valStr) {
 					if current == nil {
-						current = &model.Student{AcademicYear: schoolYear, ClassSection: currentClass}
+						current = &model.Student{AcademicYear: schoolYear, ClassSection: currentClass, BehaviorScore: 100, BoardingStatus: "GÜNDÜZLÜ"}
 					}
-					current.FullName = strings.TrimSpace(name)
+					current.FullName = strings.TrimSpace(valStr)
 				}
-			} else if (norm == "ADI:" || norm == "ADI") && nextCell != "" {
+			} else if (norm == "ADI" || norm == "AD") && valStr != "" && !isOnlyPunctuation(valStr) && hasAlphabetic(valStr) {
 				if current == nil {
-					current = &model.Student{AcademicYear: schoolYear, ClassSection: currentClass}
+					current = &model.Student{AcademicYear: schoolYear, ClassSection: currentClass, BehaviorScore: 100, BoardingStatus: "GÜNDÜZLÜ"}
 				}
 				if current.FullName == "" {
-					current.FullName = nextCell
+					current.FullName = strings.TrimSpace(valStr)
 				}
-			} else if (norm == "SOYADI:" || norm == "SOYADI") && nextCell != "" {
+			} else if (norm == "SOYADI" || norm == "SOYAD") && valStr != "" && !isOnlyPunctuation(valStr) && hasAlphabetic(valStr) {
 				if current != nil {
-					current.FullName = strings.TrimSpace(current.FullName + " " + nextCell)
+					current.FullName = strings.TrimSpace(current.FullName + " " + valStr)
 				}
 			}
 
-			// Check for Sınıfı / Şubesi
-			if strings.Contains(norm, "SINIFI") || strings.Contains(norm, "SUBESI") || strings.Contains(norm, "SINIF") {
-				cls := extractValueAfterLabel(val)
-				if cls == "" {
-					cls = nextCell
-				}
-				if cls != "" && len(cls) < 30 {
-					cleanCls := strings.TrimSpace(cls)
+			// 4. Sınıfı / Şubesi
+			if strings.Contains(norm, "SINIFI/SUBESI") || strings.Contains(norm, "SINIFI") || strings.Contains(norm, "SUBESI") || strings.Contains(norm, "SINIF") {
+				if valStr != "" && len(valStr) <= 25 && !isOnlyPunctuation(valStr) {
+					cleanCls := strings.TrimSpace(valStr)
 					cleanCls = strings.ReplaceAll(cleanCls, " / ", "-")
 					cleanCls = strings.ReplaceAll(cleanCls, "/", "-")
 					cleanCls = strings.ReplaceAll(cleanCls, " ", "")
-					if current != nil {
+					if current != nil && cleanCls != "" {
 						current.ClassSection = cleanCls
 					}
 				}
 			}
 
-			// Check for Cinsiyet
+			// 5. Cinsiyet
 			if strings.Contains(norm, "CINSIYET") {
-				gen := extractValueAfterLabel(val)
-				if gen == "" {
-					gen = nextCell
-				}
-				genUpper := normalizeTurkish(gen)
-				if strings.HasPrefix(genUpper, "K") {
-					if current != nil {
+				if current != nil && valStr != "" {
+					genUpper := normalizeTurkish(valStr)
+					if strings.HasPrefix(genUpper, "K") {
 						current.Gender = "KIZ"
-					}
-				} else if strings.HasPrefix(genUpper, "E") {
-					if current != nil {
+					} else if strings.HasPrefix(genUpper, "E") {
 						current.Gender = "ERKEK"
 					}
 				}
 			}
 
-			// Check for Baba Adı
-			if strings.Contains(norm, "BABA ADI") || strings.Contains(norm, "BABA") {
-				baba := extractValueAfterLabel(val)
-				if baba == "" {
-					baba = nextCell
-				}
-				if current != nil && baba != "" {
-					current.FatherName = baba
+			// 6. Baba Adı
+			if strings.Contains(norm, "BABA ADI") || norm == "BABA" {
+				if current != nil && valStr != "" && !isOnlyPunctuation(valStr) && hasAlphabetic(valStr) {
+					current.FatherName = strings.TrimSpace(valStr)
 				}
 			}
 
-			// Check for Anne Adı
-			if strings.Contains(norm, "ANNE ADI") || strings.Contains(norm, "ANNE") {
-				anne := extractValueAfterLabel(val)
-				if anne == "" {
-					anne = nextCell
-				}
-				if current != nil && anne != "" {
-					current.MotherName = anne
+			// 7. Anne Adı
+			if strings.Contains(norm, "ANNE ADI") || norm == "ANNE" {
+				if current != nil && valStr != "" && !isOnlyPunctuation(valStr) && hasAlphabetic(valStr) {
+					current.MotherName = strings.TrimSpace(valStr)
 				}
 			}
 
-			// Check for Doğum Tarihi
+			// 8. Doğum Tarihi
 			if strings.Contains(norm, "DOGUM TARIHI") {
-				dt := extractValueAfterLabel(val)
-				if dt == "" {
-					dt = nextCell
-				}
-				if current != nil && dt != "" {
-					current.BirthDate = dt
+				if current != nil && valStr != "" && !isOnlyPunctuation(valStr) {
+					current.BirthDate = strings.TrimSpace(valStr)
 				}
 			}
 
-			// Check for Doğum Yeri
+			// 9. Doğum Yeri
 			if strings.Contains(norm, "DOGUM YERI") {
-				dy := extractValueAfterLabel(val)
-				if dy == "" {
-					dy = nextCell
-				}
-				if current != nil && dy != "" {
-					current.BirthPlace = dy
+				if current != nil && valStr != "" && !isOnlyPunctuation(valStr) && hasAlphabetic(valStr) {
+					current.BirthPlace = strings.TrimSpace(valStr)
 				}
 			}
 		}
@@ -640,27 +673,47 @@ func extractValueAfterLabel(s string) string {
 // extractClassBanner checks if row is a section divider banner.
 func extractClassBanner(row []string) string {
 	for _, cell := range row {
-		c := strings.TrimSpace(cell)
-		if c == "" {
-			continue
-		}
-		upper := strings.ToUpper(c)
-		if (strings.Contains(upper, "SINIF") || strings.Contains(upper, "ŞUBE") || strings.Contains(upper, "SUBE")) &&
-			(strings.Contains(upper, "9.") || strings.Contains(upper, "10.") || strings.Contains(upper, "11.") || strings.Contains(upper, "12.") ||
-				strings.Contains(upper, "5.") || strings.Contains(upper, "6.") || strings.Contains(upper, "7.") || strings.Contains(upper, "8.") ||
-				strings.Contains(upper, "HAZIRLIK") || strings.Contains(upper, "SINIFI /") || strings.Contains(upper, "/")) {
-			return cleanBanner(c)
+		if b := extractClassBannerText(cell); b != "" {
+			return b
 		}
 	}
 	return ""
 }
 
-func cleanBanner(raw string) string {
-	parts := strings.Split(raw, ":")
-	if len(parts) > 1 {
-		return strings.TrimSpace(parts[len(parts)-1])
+func extractClassBannerText(text string) string {
+	text = strings.TrimSpace(text)
+	if strings.HasSuffix(text, ":") || strings.Contains(text, "...") || strings.Contains(text, ".....") {
+		return ""
 	}
-	return strings.TrimSpace(raw)
+	upper := strings.ToUpper(text)
+	if !strings.Contains(upper, "SINIF") && !strings.Contains(upper, "ŞUBE") && !strings.Contains(upper, "SUBE") {
+		return ""
+	}
+	lines := strings.Split(text, "\n")
+	for _, l := range lines {
+		lUpper := strings.ToUpper(l)
+		if strings.Contains(lUpper, "SINIF") || strings.Contains(lUpper, "ŞUBE") {
+			l = strings.TrimSpace(l)
+			// Remove "(ALANI YOK)" or prefixes
+			l = regexp.MustCompile(`(?i)\(alan[ıi]\s*yok\)`).ReplaceAllString(l, "")
+			l = regexp.MustCompile(`(?i)^.*-\s*`).ReplaceAllString(l, "")
+			// "Hazırlık Sınıfı / A Şubesi" -> "Hazırlık-A"
+			l = strings.ReplaceAll(l, "Sınıfı", "")
+			l = strings.ReplaceAll(l, "SINIFI", "")
+			l = strings.ReplaceAll(l, "Şubesi", "")
+			l = strings.ReplaceAll(l, "SUBESI", "")
+			l = strings.ReplaceAll(l, "/", "-")
+			l = strings.TrimSpace(l)
+			parts := strings.Split(l, "-")
+			if len(parts) >= 2 {
+				p1 := strings.TrimSpace(parts[0])
+				p2 := strings.TrimSpace(parts[1])
+				return p1 + "-" + p2
+			}
+			return l
+		}
+	}
+	return ""
 }
 
 func detectHeaderMapping(row []string) map[string]int {
@@ -912,6 +965,16 @@ func isClassCandidate(s string) bool {
 
 func cleanNumeric(s string) string {
 	s = strings.TrimSpace(s)
+	isDigits := true
+	for _, r := range s {
+		if r < '0' || r > '9' {
+			isDigits = false
+			break
+		}
+	}
+	if isDigits && len(s) > 0 {
+		return s
+	}
 	if f, err := strconv.ParseFloat(s, 64); err == nil && f >= 0 {
 		return strconv.FormatInt(int64(f), 10)
 	}

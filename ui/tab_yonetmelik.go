@@ -36,12 +36,12 @@ func BuildYonetmelikTab(state *AppState) fyne.CanvasObject {
 	articleEntry.SetPlaceHolder("Örn: Madde 164/1-a")
 
 	penaltySelect := NewTurkishSelect([]string{
+		"Sözlü Uyarma",
+		"Yazılı Uyarma",
 		"Kınama",
 		"Okuldan Kısa Süreli Uzaklaştırma",
 		"Okul Değiştirme",
 		"Örgün Eğitim Dışına Çıkarma",
-		"Uyarma",
-		"Okul Değiştirme Yaptırımı",
 	}, nil)
 
 	descEntry := NewSmartMultiLineEntry()

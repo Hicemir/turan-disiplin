@@ -28,7 +28,7 @@ func BuildNoticesTab(state *AppState) fyne.CanvasObject {
 	classSelect := NewTurkishSelect(classes, nil)
 	classSelect.SetSelected("Tüm Sınıflar")
 
-	penalties := []string{"Tüm Cezalar", "Kınama", "Okuldan Kısa Süreli Uzaklaştırma", "Okul Değiştirme", "Örgün Eğitim Dışına Çıkarma", "Uyarma"}
+	penalties := []string{"Tüm Cezalar", "Sözlü Uyarma", "Yazılı Uyarma", "Kınama", "Okuldan Kısa Süreli Uzaklaştırma (1-5 Gün)", "Okul Değiştirme", "Örgün Eğitim Dışına Çıkarma"}
 	penaltySelect := NewTurkishSelect(penalties, nil)
 	penaltySelect.SetSelected("Tüm Cezalar")
 

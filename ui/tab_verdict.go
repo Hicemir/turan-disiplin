@@ -15,6 +15,49 @@ import (
 	"turandisiplin/pdf"
 )
 
+func normalizeTurkish(s string) string {
+	var sb strings.Builder
+	for _, r := range s {
+		switch r {
+		case 'ı', 'I', 'İ', 'i':
+			sb.WriteRune('I')
+		case 'ğ', 'Ğ':
+			sb.WriteRune('G')
+		case 'ü', 'Ü':
+			sb.WriteRune('U')
+		case 'ş', 'Ş':
+			sb.WriteRune('S')
+		case 'ö', 'Ö':
+			sb.WriteRune('O')
+		case 'ç', 'Ç':
+			sb.WriteRune('C')
+		default:
+			if r >= 'a' && r <= 'z' {
+				sb.WriteRune(r - ('a' - 'A'))
+			} else {
+				sb.WriteRune(r)
+			}
+		}
+	}
+	return sb.String()
+}
+
+// GetPenaltyPointsDeduction calculates official MEB points deduction for a given disciplinary penalty.
+func GetPenaltyPointsDeduction(penalty string) int {
+	p := normalizeTurkish(penalty)
+	if strings.Contains(p, "ORGUN") && strings.Contains(p, "DISI") {
+		return 80
+	} else if strings.Contains(p, "OKUL DEGISTIRME") {
+		return 40
+	} else if strings.Contains(p, "UZAKLASTIRMA") {
+		return 20
+	} else if strings.Contains(p, "KINAMA") {
+		return 10
+	}
+	// Sözlü Uyarma, Yazılı Uyarma, Uyarma
+	return 0
+}
+
 // BuildVerdictTab creates the Disciplinary Board Verdict UI
 func BuildVerdictTab(state *AppState) fyne.CanvasObject {
 	var currentIncidents []model.Incident
@@ -87,13 +130,15 @@ func BuildVerdictTab(state *AppState) fyne.CanvasObject {
 
 	clauseCodeEntry := NewSingleLineEntry()
 	clauseDescEntry := NewSmartMultiLineEntry()
+
+
 	penaltySelect := NewTurkishSelect([]string{
+		"Sözlü Uyarma",
+		"Yazılı Uyarma",
 		"Kınama",
 		"Okuldan Kısa Süreli Uzaklaştırma (1-5 Gün)",
 		"Okul Değiştirme",
 		"Örgün Eğitim Dışına Çıkarma",
-		"Uyarma",
-		"Okul Değiştirme Yaptırımı",
 	}, nil)
 
 	suspensionDaysEntry := NewSingleLineEntry()
@@ -150,6 +195,12 @@ func BuildVerdictTab(state *AppState) fyne.CanvasObject {
 		verdictTextEntry.SetText(text)
 	}
 
+	penaltySelect.OnChanged = func(selected string) {
+		ded := GetPenaltyPointsDeduction(selected)
+		deductedPointsEntry.SetText(fmt.Sprintf("%d", ded))
+		generateVerdictText()
+	}
+
 	autoFillBtn := widget.NewButtonWithIcon("Metni Otomatik Oluştur", theme.DocumentCreateIcon(), func() {
 		generateVerdictText()
 	})
@@ -159,21 +210,8 @@ func BuildVerdictTab(state *AppState) fyne.CanvasObject {
 			clauseCodeEntry.SetText(c.Article)
 			clauseDescEntry.SetText(c.Description)
 			penaltySelect.SetSelected(c.Penalty)
-
-			// Auto points deduction
-			p := strings.ToUpper(c.Penalty)
-			if strings.Contains(p, "KINAMA") {
-				deductedPointsEntry.SetText("10")
-			} else if strings.Contains(p, "UZAKLAŞTIRMA") {
-				deductedPointsEntry.SetText("20")
-			} else if strings.Contains(p, "OKUL DEĞİŞTİRME") {
-				deductedPointsEntry.SetText("40")
-			} else if strings.Contains(p, "ÖRGÜN EĞİTİM DIŞINA") {
-				deductedPointsEntry.SetText("100")
-			} else {
-				deductedPointsEntry.SetText("0")
-			}
-
+			ded := GetPenaltyPointsDeduction(c.Penalty)
+			deductedPointsEntry.SetText(fmt.Sprintf("%d", ded))
 			generateVerdictText()
 		}
 	}

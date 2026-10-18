@@ -110,24 +110,34 @@ func GenerateKurulKarari(school *model.SchoolInfo, student *model.Student, incid
 	doc.PDF.SetLineWidth(0.3)
 
 	for _, r := range rows {
-		// Calculate height required for right cell
 		val := strings.TrimSpace(r.Value)
 		if val == "" {
 			val = "—"
 		}
 
+		// Set font first so gopdf measures text glyph widths accurately
+		if r.Bold {
+			doc.SetBoldFont(fontSize)
+		} else {
+			doc.SetRegularFont(fontSize)
+		}
+
+		lines, err := doc.PDF.SplitTextWithWordWrap(val, wCol3-8)
+		if err != nil || len(lines) == 0 {
+			lines = []string{val}
+		}
+
+		cellH := float64(len(lines))*lineH + 5.0
+		if cellH < 14.0 {
+			cellH = 14.0
+		}
+
 		// Check if we need a new page
 		curY := doc.PDF.GetY()
-		if curY > PageHeightPortrait-doc.MarginBottom-120 {
+		if curY+cellH > PageHeightPortrait-doc.MarginBottom-60 {
 			doc.PDF.AddPage()
 			curY = doc.MarginTop
 			doc.PDF.SetY(curY)
-		}
-
-		linesCount := (len(val) / 55) + 1
-		cellH := float64(linesCount) * lineH
-		if cellH < 12.0 {
-			cellH = 12.0
 		}
 
 		doc.DrawRect(doc.MarginLeft, curY, wCol1, cellH)
@@ -145,15 +155,17 @@ func GenerateKurulKarari(school *model.SchoolInfo, student *model.Student, incid
 		doc.PDF.SetY(curY + 2)
 		_ = doc.PDF.CellWithOption(&gopdf.Rect{W: wCol2, H: cellH - 4}, ":", gopdf.CellOption{Align: gopdf.Center})
 
-		// Col 3: Value
+		// Col 3: Exact wrapped lines rendered safely within boundaries
 		if r.Bold {
 			doc.SetBoldFont(fontSize)
 		} else {
 			doc.SetRegularFont(fontSize)
 		}
-		doc.PDF.SetX(doc.MarginLeft + wCol1 + wCol2 + 3)
-		doc.PDF.SetY(curY + 2)
-		_ = doc.PDF.MultiCell(&gopdf.Rect{W: wCol3 - 6, H: lineH}, val)
+		for i, line := range lines {
+			doc.PDF.SetX(doc.MarginLeft + wCol1 + wCol2 + 4)
+			doc.PDF.SetY(curY + 2.5 + float64(i)*lineH)
+			_ = doc.PDF.CellWithOption(&gopdf.Rect{W: wCol3 - 8, H: lineH}, line, gopdf.CellOption{Align: gopdf.Left})
+		}
 
 		doc.PDF.SetY(curY + cellH)
 	}

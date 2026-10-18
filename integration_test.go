@@ -20,7 +20,7 @@ func TestFullAppEndToEnd(t *testing.T) {
 	testApp := test.NewApp()
 	defer testApp.Quit()
 
-	testWin := testApp.NewWindow("Okul Evrak Test")
+	testWin := testApp.NewWindow("TuranDisiplin Test")
 	state, err := ui.InitState(testApp, testWin)
 	if err != nil {
 		t.Fatalf("InitState failed: %v", err)
@@ -401,4 +401,29 @@ func TestFullAppEndToEnd(t *testing.T) {
 	}
 
 	t.Log("===> All tests completed successfully! Database is verified fresh, clean, and bugless.")
+}
+
+func TestPenaltyPointDeductions(t *testing.T) {
+	testCases := []struct {
+		penalty  string
+		expected int
+	}{
+		{"Kınama", 10},
+		{"KINAMA", 10},
+		{"Okuldan Kısa Süreli Uzaklaştırma (1-5 Gün)", 20},
+		{"Kısa Süreli Uzaklaştırma", 20},
+		{"Okul Değiştirme", 40},
+		{"Örgün Eğitim Dışına Çıkarma", 80},
+		{"Sözlü Uyarma", 0},
+		{"Yazılı Uyarma", 0},
+		{"Uyarma", 0},
+		{"", 0},
+	}
+
+	for _, tc := range testCases {
+		got := ui.GetPenaltyPointsDeduction(tc.penalty)
+		if got != tc.expected {
+			t.Errorf("GetPenaltyPointsDeduction(%q) = %d, expected %d", tc.penalty, got, tc.expected)
+		}
+	}
 }

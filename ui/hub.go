@@ -295,10 +295,10 @@ func buildLegacyHub(state *AppState) fyne.CanvasObject {
 	// 3. Right Column: CEZA ALAN ÖĞRENCİ SAYILARI (Guaranteed fixed minimum width)
 	rightCol := buildLiveStatsCard(state, true)
 
-	// Top Bar in Legacy Mode: "OKUL EVRAK" Title & Quick Actions
+	// Top Bar in Legacy Mode: "TURANDİSİPLİN" Title & Quick Actions
 	topBar := container.NewBorder(
 		nil, nil,
-		widget.NewLabelWithStyle("OKUL EVRAK", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+		widget.NewLabelWithStyle("TURANDİSİPLİN", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 		container.NewHBox(
 			widget.NewButtonWithIcon("Öğretim Yılı: "+state.AcademicYear, theme.HistoryIcon(), func() {
 				ShowAcademicYearPicker(state)

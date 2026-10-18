@@ -19,7 +19,7 @@ import (
 
 // BuildHeader creates the persistent senior-friendly top bar
 func BuildHeader(state *AppState) fyne.CanvasObject {
-	title := widget.NewLabelWithStyle("🏛️ OKUL EVRAK", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	title := widget.NewLabelWithStyle("🏛️ TURANDİSİPLİN", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
 
 	// Academic Year Dropdown
 	state.AcademicYear = store.NormalizeAcademicYear(state.AcademicYear)
