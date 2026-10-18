@@ -24,31 +24,31 @@ func BuildStudentsTab(state *AppState) fyne.CanvasObject {
 	countLabel := widget.NewLabelWithStyle("Kayıt: 0 öğrenci", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
 
 	// Search & Filter
-	searchEntry := widget.NewEntry()
+	searchEntry := NewSingleLineEntry()
 	searchEntry.SetPlaceHolder("Öğrenci no veya ad soyad ile ara...")
 
 	classOptions := append([]string{"Tüm Sınıflar"}, state.Store.GetClasses(state.AcademicYear)...)
-	classSelect := widget.NewSelect(classOptions, nil)
+	classSelect := NewTurkishSelect(classOptions, nil)
 	classSelect.SetSelected("Tüm Sınıflar")
 
 	// Student Detail Form Inputs
-	idEntry := widget.NewEntry()
+	idEntry := NewSingleLineEntry()
 	idEntry.Disable()
 
-	schoolNoEntry := widget.NewEntry()
-	fullNameEntry := widget.NewEntry()
-	classEntry := widget.NewEntry()
-	genderSelect := widget.NewSelect([]string{"ERKEK", "KIZ"}, nil)
-	tcEntry := widget.NewEntry()
-	birthPlaceEntry := widget.NewEntry()
-	birthDateEntry := widget.NewEntry()
-	fatherEntry := widget.NewEntry()
-	motherEntry := widget.NewEntry()
-	guardianEntry := widget.NewEntry()
-	phoneEntry := widget.NewEntry()
-	addrEntry := widget.NewEntry()
-	boardingSelect := widget.NewSelect([]string{"GÜNDÜZLÜ", "PANSİYON / YATILI"}, nil)
-	scoreEntry := widget.NewEntry()
+	schoolNoEntry := NewSingleLineEntry()
+	fullNameEntry := NewSingleLineEntry()
+	classEntry := NewSingleLineEntry()
+	genderSelect := NewTurkishSelect([]string{"ERKEK", "KIZ"}, nil)
+	tcEntry := NewSingleLineEntry()
+	birthPlaceEntry := NewSingleLineEntry()
+	birthDateEntry := NewSingleLineEntry()
+	fatherEntry := NewSingleLineEntry()
+	motherEntry := NewSingleLineEntry()
+	guardianEntry := NewSingleLineEntry()
+	phoneEntry := NewSingleLineEntry()
+	addrEntry := NewSingleLineEntry()
+	boardingSelect := NewTurkishSelect([]string{"GÜNDÜZLÜ", "PANSİYON / YATILI"}, nil)
+	scoreEntry := NewSingleLineEntry()
 	scoreEntry.SetText("100")
 
 	clearForm := func() {
@@ -265,11 +265,19 @@ func BuildStudentsTab(state *AppState) fyne.CanvasObject {
 			showError(state.Window, fmt.Errorf("Silinecek öğrenci seçilmedi"))
 			return
 		}
-		showConfirm(state.Window, "Öğrenci Sil", fmt.Sprintf("%s (%s) kaydını silmek istediğinize emin misiniz?", selectedStudent.FullName, selectedStudent.SchoolNo), func() {
-			_ = state.Store.DeleteStudent(selectedStudent.ID)
-			clearForm()
-			state.NotifyChange()
-		})
+		ShowTurkishDangerConfirm(
+			"Öğrenci Sil",
+			fmt.Sprintf("%s (%s) kaydını silmek istediğinize emin misiniz?", selectedStudent.FullName, selectedStudent.SchoolNo),
+			func(confirmed bool) {
+				if !confirmed {
+					return
+				}
+				_ = state.Store.DeleteStudent(selectedStudent.ID)
+				clearForm()
+				state.NotifyChange()
+			},
+			state.Window,
+		)
 	})
 	deleteStudentBtn.Importance = widget.DangerImportance
 

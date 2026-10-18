@@ -120,7 +120,7 @@ func RestoreDatabase(state *AppState) {
 
 func executeRestoreConfirmation(state *AppState, targetPath, backupPath string) {
 	// Prompt user with clear warning and confirmation
-	fyneDialog.ShowConfirm(
+	ShowTurkishConfirm(
 		"Geri Yükleme Onayı",
 		fmt.Sprintf(
 			"DİKKAT: Seçtiğiniz '%s' yedek dosyası mevcut veritabanınızın üzerine yazılacaktır.\n\n"+
@@ -146,7 +146,7 @@ func executeRestoreConfirmation(state *AppState, targetPath, backupPath string) 
 			}
 			state.NotifyChange()
 
-			fyneDialog.ShowInformation(
+			ShowTurkishInfo(
 				"Geri Yükleme Başarılı",
 				"Veritabanınız başarıyla geri yüklendi ve güncellendi.",
 				state.Window,

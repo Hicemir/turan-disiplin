@@ -131,6 +131,7 @@ func ResetYonetmelik() (*model.YonetmelikData, error) {
 // AppConfig stores user preferences like last selected academic year, theme settings and custom colors
 type AppConfig struct {
 	DefaultYear       string   `json:"default_year"`
+	RememberYear      bool     `json:"remember_year"`        // If true, skip startup year dialog
 	UIMode            string   `json:"ui_mode"`              // "modern" or "legacy"
 	ThemeMode         string   `json:"theme_mode"`           // theme ID or "custom"
 	FontSize          float32  `json:"font_size"`            // 15, 17, 19

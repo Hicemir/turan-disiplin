@@ -46,27 +46,101 @@ func SelectExcelFile(w fyne.Window, onSelected func(filePath string)) {
 	}()
 }
 
+// ShowTurkishConfirm displays a confirmation dialog with "Evet" and "Hayır" buttons
+func ShowTurkishConfirm(title, message string, onConfirm func(bool), parent fyne.Window) {
+	d := fyneDialog.NewConfirm(title, message, onConfirm, parent)
+	d.SetConfirmText("Evet")
+	d.SetDismissText("Hayır")
+	d.Show()
+}
+
+// ShowTurkishDangerConfirm displays a danger confirmation dialog with red "Evet, Sil" and "Hayır, İptal" buttons
+func ShowTurkishDangerConfirm(title, message string, onConfirm func(bool), parent fyne.Window) {
+	d := fyneDialog.NewConfirm(title, message, onConfirm, parent)
+	d.SetConfirmText("Evet, Sil")
+	d.SetDismissText("Hayır, İptal")
+	d.SetConfirmImportance(widget.DangerImportance)
+	d.Show()
+}
+
+// ShowTurkishInfo displays an information dialog with "Tamam" button
+func ShowTurkishInfo(title, message string, parent fyne.Window) {
+	d := fyneDialog.NewInformation(title, message, parent)
+	d.SetDismissText("Tamam")
+	d.Show()
+}
+
+// NewSingleLineEntry creates a single-line entry that NEVER intercepts mouse wheel scrolling
+func NewSingleLineEntry() *widget.Entry {
+	e := widget.NewEntry()
+	e.Wrapping = fyne.TextWrapOff
+	e.Scroll = fyne.ScrollNone
+	return e
+}
+
+// SmartMultiLineEntry forwards mouse wheel scrolling to parent scroll container unless focused/clicked
+type SmartMultiLineEntry struct {
+	widget.Entry
+	isFocused    bool
+	ParentScroll *container.Scroll
+}
+
+func NewSmartMultiLineEntry(parent ...*container.Scroll) *SmartMultiLineEntry {
+	e := &SmartMultiLineEntry{}
+	e.MultiLine = true
+	e.Wrapping = fyne.TextWrapWord
+	if len(parent) > 0 {
+		e.ParentScroll = parent[0]
+	}
+	e.ExtendBaseWidget(e)
+	return e
+}
+
+func (e *SmartMultiLineEntry) FocusGained() {
+	e.isFocused = true
+	e.Entry.FocusGained()
+}
+
+func (e *SmartMultiLineEntry) FocusLost() {
+	e.isFocused = false
+	e.Entry.FocusLost()
+}
+
+func (e *SmartMultiLineEntry) Scrolled(ev *fyne.ScrollEvent) {
+	if !e.isFocused && e.ParentScroll != nil {
+		e.ParentScroll.Scrolled(ev)
+		return
+	}
+}
+
+// NewTurkishSelect creates a Select widget with Turkish default placeholder "(Seçiniz)"
+func NewTurkishSelect(options []string, onSelected func(string)) *widget.Select {
+	sel := widget.NewSelect(options, onSelected)
+	sel.PlaceHolder = "(Seçiniz)"
+	return sel
+}
+
 // ShowAcademicYearPicker opens a clean modal allowing switching or adding academic years
 func ShowAcademicYearPicker(state *AppState) {
 	years := state.Store.GetAcademicYears()
 	var selectedYear = state.AcademicYear
 
-	yearSelect := widget.NewSelect(years, func(s string) {
+	yearSelect := NewTurkishSelect(years, func(s string) {
 		selectedYear = s
 	})
 	yearSelect.SetSelected(state.AcademicYear)
 
-	newYearEntry := widget.NewEntry()
+	newYearEntry := NewSingleLineEntry()
 	nextYear := store.GetNextNearestAcademicYear(years)
 	newYearEntry.SetText(nextYear)
 
 	deleteYearBtn := widget.NewButtonWithIcon("Seçili Öğretim Yılını Sil", theme.DeleteIcon(), func() {
 		if len(years) <= 1 {
-			fyneDialog.ShowInformation("Uyarı", "Sistemde en az bir öğretim yılı kalmalıdır. Tek kalan yılı silemezsiniz.", state.Window)
+			ShowTurkishInfo("Uyarı", "Sistemde en az bir öğretim yılı kalmalıdır. Tek kalan yılı silemezsiniz.", state.Window)
 			return
 		}
 
-		fyneDialog.ShowConfirm(
+		ShowTurkishDangerConfirm(
 			"Öğretim Yılını Sil",
 			fmt.Sprintf("DİKKAT:\n'%s' öğretim yılını silmek istediğinize emin misiniz?\n\nBu yıla ait TÜM öğrenci kayıtları, disiplin olayları ve kararları kalıcı olarak silinecektir!\nBu işlem geri alınamaz.", selectedYear),
 			func(confirmed bool) {
@@ -82,7 +156,7 @@ func ShowAcademicYearPicker(state *AppState) {
 				if len(remaining) > 0 {
 					state.SetAcademicYear(remaining[0])
 				}
-				fyneDialog.ShowInformation("Silindi", fmt.Sprintf("'%s' öğretim yılı başarıyla silindi.", toDel), state.Window)
+				ShowTurkishInfo("Silindi", fmt.Sprintf("'%s' öğretim yılı başarıyla silindi.", toDel), state.Window)
 			},
 			state.Window,
 		)

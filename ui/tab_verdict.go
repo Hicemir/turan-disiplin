@@ -23,17 +23,17 @@ func BuildVerdictTab(state *AppState) fyne.CanvasObject {
 	var selectedIncident *model.Incident
 
 	// Selectors
-	incSelect := widget.NewSelect([]string{}, nil)
-	stSelect := widget.NewSelect([]string{}, nil)
+	incSelect := NewTurkishSelect([]string{}, nil)
+	stSelect := NewTurkishSelect([]string{}, nil)
 
 	// Verdict Form Fields
-	verdictNoEntry := widget.NewEntry()
-	verdictDateEntry := widget.NewEntry()
+	verdictNoEntry := NewSingleLineEntry()
+	verdictDateEntry := NewSingleLineEntry()
 	verdictDateEntry.SetText(time.Now().Format("02.01.2006"))
 
-	offensePlaceEntry := widget.NewEntry()
-	offenseDateEntry := widget.NewEntry()
-	offenseCategorySelect := widget.NewSelect([]string{
+	offensePlaceEntry := NewSingleLineEntry()
+	offenseDateEntry := NewSingleLineEntry()
+	offenseCategorySelect := NewTurkishSelect([]string{
 		"DİSİPLİNİ BOZUCU DAVRANIŞLAR",
 		"ŞİDDET VE SALDIRGANLIK",
 		"DEVAMSIZLIK VE OKUL DÜZENİ",
@@ -41,12 +41,12 @@ func BuildVerdictTab(state *AppState) fyne.CanvasObject {
 		"ZARAR VERME / TAHRİBAT",
 		"DİĞER",
 	}, nil)
-	offenseReasonEntry := widget.NewEntry()
+	offenseReasonEntry := NewSingleLineEntry()
 	offenseReasonEntry.SetText("Düşüncesizlik ve kurallara uymama")
 
-	witnessEntry := widget.NewMultiLineEntry()
-	evidenceEntry := widget.NewMultiLineEntry()
-	mitigatingSelect := widget.NewSelect([]string{
+	witnessEntry := NewSmartMultiLineEntry()
+	evidenceEntry := NewSmartMultiLineEntry()
+	mitigatingSelect := NewTurkishSelect([]string{
 		"Daha önce disiplin cezası almamış olması ve pişmanlığı",
 		"Olaydaki samimi itirafı ve davranışı düzeltme gayreti",
 		"Tahrik altında kalmış olması",
@@ -54,7 +54,7 @@ func BuildVerdictTab(state *AppState) fyne.CanvasObject {
 	}, nil)
 	mitigatingSelect.SetSelected("Daha önce disiplin cezası almamış olması ve pişmanlığı")
 
-	aggravatingSelect := widget.NewSelect([]string{
+	aggravatingSelect := NewTurkishSelect([]string{
 		"Herhangi bir ağırlaştırıcı neden bulunmamaktadır",
 		"Benzer fiilin daha önce tekrarlanmış olması",
 		"Toplu olarak veya organize şekilde işlenmiş olması",
@@ -62,7 +62,7 @@ func BuildVerdictTab(state *AppState) fyne.CanvasObject {
 	}, nil)
 	aggravatingSelect.SetSelected("Herhangi bir ağırlaştırıcı neden bulunmamaktadır")
 
-	opinionSelect := widget.NewSelect([]string{
+	opinionSelect := NewTurkishSelect([]string{
 		"SUÇLU OLDUĞU YÖNÜNDE",
 		"SUÇSUZ OLDUĞU YÖNÜNDE",
 		"CEZA TAYİNİNE YER OLMADIĞI YÖNÜNDE",
@@ -83,11 +83,11 @@ func BuildVerdictTab(state *AppState) fyne.CanvasObject {
 		}
 	}
 
-	clauseSelect := widget.NewSelect(clauseOptions, nil)
+	clauseSelect := NewTurkishSelect(clauseOptions, nil)
 
-	clauseCodeEntry := widget.NewEntry()
-	clauseDescEntry := widget.NewMultiLineEntry()
-	penaltySelect := widget.NewSelect([]string{
+	clauseCodeEntry := NewSingleLineEntry()
+	clauseDescEntry := NewSmartMultiLineEntry()
+	penaltySelect := NewTurkishSelect([]string{
 		"Kınama",
 		"Okuldan Kısa Süreli Uzaklaştırma (1-5 Gün)",
 		"Okul Değiştirme",
@@ -96,14 +96,14 @@ func BuildVerdictTab(state *AppState) fyne.CanvasObject {
 		"Okul Değiştirme Yaptırımı",
 	}, nil)
 
-	suspensionDaysEntry := widget.NewEntry()
+	suspensionDaysEntry := NewSingleLineEntry()
 	suspensionDaysEntry.SetPlaceHolder("1-5 gün")
-	suspensionDatesEntry := widget.NewEntry()
+	suspensionDatesEntry := NewSingleLineEntry()
 	suspensionDatesEntry.SetPlaceHolder("Örn: 10.11.2026 - 12.11.2026")
 
-	deductedPointsEntry := widget.NewEntry()
+	deductedPointsEntry := NewSingleLineEntry()
 	deductedPointsEntry.SetText("10")
-	remainingPointsEntry := widget.NewEntry()
+	remainingPointsEntry := NewSingleLineEntry()
 	remainingPointsEntry.SetText("90")
 
 	// Auto-calculate remaining score on deducted change
@@ -117,7 +117,7 @@ func BuildVerdictTab(state *AppState) fyne.CanvasObject {
 		}
 	}
 
-	verdictTextEntry := widget.NewMultiLineEntry()
+	verdictTextEntry := NewSmartMultiLineEntry()
 
 	// Substitute Member Checkboxes
 	subChairCheck := widget.NewCheck("Başkan yerine Yedek Başkan imzalayacak (Taraf / Mazeretli)", nil)
@@ -505,6 +505,11 @@ func BuildVerdictTab(state *AppState) fyne.CanvasObject {
 		verdictTextCard,
 		actionButtons,
 	))
+
+	witnessEntry.ParentScroll = scrollContent
+	evidenceEntry.ParentScroll = scrollContent
+	clauseDescEntry.ParentScroll = scrollContent
+	verdictTextEntry.ParentScroll = scrollContent
 
 	reloadIncidents()
 	return scrollContent

@@ -8,11 +8,85 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
 	"okulevrak/pdf"
 )
+
+// InfoHoverButton displays card description in a pop-up when hovered or clicked
+type InfoHoverButton struct {
+	widget.BaseWidget
+	title       string
+	description string
+	window      fyne.Window
+	popUp       *widget.PopUp
+	icon        *widget.Icon
+}
+
+func newInfoHoverButton(title, desc string, w fyne.Window) *InfoHoverButton {
+	b := &InfoHoverButton{
+		title:       title,
+		description: desc,
+		window:      w,
+		icon:        widget.NewIcon(theme.InfoIcon()),
+	}
+	b.ExtendBaseWidget(b)
+	return b
+}
+
+func (b *InfoHoverButton) CreateRenderer() fyne.WidgetRenderer {
+	return widget.NewSimpleRenderer(b.icon)
+}
+
+func (b *InfoHoverButton) MinSize() fyne.Size {
+	return fyne.NewSize(22, 22)
+}
+
+func (b *InfoHoverButton) MouseIn(e *desktop.MouseEvent) {
+	if b.window == nil {
+		return
+	}
+	b.showTip(e.AbsolutePosition)
+}
+
+func (b *InfoHoverButton) MouseOut() {
+	b.hideTip()
+}
+
+func (b *InfoHoverButton) MouseMoved(e *desktop.MouseEvent) {}
+
+func (b *InfoHoverButton) Tapped(e *fyne.PointEvent) {
+	if b.popUp != nil {
+		b.hideTip()
+	} else {
+		b.showTip(e.AbsolutePosition)
+	}
+}
+
+func (b *InfoHoverButton) showTip(pos fyne.Position) {
+	if b.popUp != nil {
+		return
+	}
+	titleLbl := widget.NewLabelWithStyle(b.title, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	descLbl := widget.NewLabel(b.description)
+	descLbl.Wrapping = fyne.TextWrapWord
+
+	content := container.NewVBox(titleLbl, widget.NewSeparator(), descLbl)
+	padded := container.NewPadded(content)
+	padded.Resize(fyne.NewSize(320, 100))
+
+	b.popUp = widget.NewPopUp(padded, b.window.Canvas())
+	b.popUp.ShowAtPosition(pos.Add(fyne.NewPos(12, 12)))
+}
+
+func (b *InfoHoverButton) hideTip() {
+	if b.popUp != nil {
+		b.popUp.Hide()
+		b.popUp = nil
+	}
+}
 
 // BuildHubView renders either the Modern Dashboard Hub or the 1:1 Legacy replica
 func BuildHubView(state *AppState) fyne.CanvasObject {
@@ -29,8 +103,8 @@ func BuildHubView(state *AppState) fyne.CanvasObject {
 func buildModernHub(state *AppState) fyne.CanvasObject {
 	header := BuildHeader(state)
 
-	createNavCard := func(title, desc string, icon fyne.Resource, isPrimary bool, targetView string) fyne.CanvasObject {
-		btn := widget.NewButtonWithIcon("Aç", theme.NavigateNextIcon(), func() {
+	createNavCard := func(title, desc string, isPrimary bool, targetView string) fyne.CanvasObject {
+		btn := widget.NewButton("Aç  →", func() {
 			state.NavigateTo(targetView)
 		})
 		if isPrimary {
@@ -38,12 +112,12 @@ func buildModernHub(state *AppState) fyne.CanvasObject {
 		}
 
 		titleLabel := widget.NewLabelWithStyle(title, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
-		descLabel := widget.NewLabel(desc)
-		descLabel.Wrapping = fyne.TextWrapWord
+
+		infoBtn := newInfoHoverButton(title, desc, state.Window)
+		topRow := container.NewBorder(nil, nil, nil, infoBtn, titleLabel)
 
 		cardContent := container.NewVBox(
-			container.NewHBox(widget.NewIcon(icon), titleLabel),
-			descLabel,
+			topRow,
 			btn,
 		)
 		return widget.NewCard("", "", cardContent)
@@ -52,30 +126,28 @@ func buildModernHub(state *AppState) fyne.CanvasObject {
 	// Column 1: Girişler & Tanımlar
 	col1 := container.NewVBox(
 		widget.NewLabelWithStyle("📝 GİRİŞLER & YÖNETİM", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
-		createNavCard("🏛️ Kurum ve Kurul Bilgileri", "Okul müdürü, asil ve yedek kurul üyeleri, resmi yazı kodları ve antet ayarları.", theme.HomeIcon(), false, "school"),
-		createNavCard("👥 Öğrenci İşlemleri & Excel", "Öğrenci listesi, e-Okul / e-Mesem'den 3 modlu Excel aktarımı, öğrenci arama ve düzenleme.", theme.AccountIcon(), false, "students"),
-		createNavCard("🐞 Olay Girişi & Soruşturma", "İncelenen disiplin olayları, öğrenci rolleri ve sosyo-ekonomik inceleme profilleri.", theme.WarningIcon(), false, "incidents"),
-		createNavCard("💬 Öğrenci Yazılı Uyarı", "MEB Yönetmeliği 163/2 uyarınca resmi öğrenci yazılı uyarı tutanağı oluşturma.", theme.MailComposeIcon(), false, "written_warning"),
+		createNavCard("🏛️ Kurum ve Kurul Bilgileri", "Okul müdürü, asil ve yedek kurul üyeleri, resmi yazı kodları ve antet ayarları.", false, "school"),
+		createNavCard("👥 Öğrenci İşlemleri & Excel", "Öğrenci listesi, e-Okul / e-Mesem'den 3 modlu Excel aktarımı, öğrenci arama ve düzenleme.", false, "students"),
+		createNavCard("🐞 Olay Girişi & Soruşturma", "İncelenen disiplin olayları, öğrenci rolleri ve sosyo-ekonomik inceleme profilleri.", false, "incidents"),
+		createNavCard("💬 Öğrenci Yazılı Uyarı", "MEB Yönetmeliği 163/2 uyarınca resmi öğrenci yazılı uyarı tutanağı oluşturma.", false, "written_warning"),
 	)
 
 	// Column 2: Kararlar & Resmi Evraklar
 	col2 := container.NewVBox(
 		widget.NewLabelWithStyle("📜 KARARLAR & EVRAKLAR", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
-		createNavCard("⚖️ DİSİPLİN KURULU KARARI (EK-1 / EK-10)", "21/17 satırlı resmi karar tutanağı, puan hesaplama, otomatik gerekçeli karar ve PDF.", theme.DocumentIcon(), true, "verdict"),
-		createNavCard("📨 Çağrı Pusulaları", "Öğrenci savunma ve ifade çağrı pusulaları, tebellüğ bloğu ve kurul üye toplantı çağrısı.", theme.MailSendIcon(), false, "summons"),
-		createNavCard("📝 Tutanak ve Formlar", "İfade, savunma, bilgi toplama (5 tür), ek süre, şikayet ve rehberlik formları.", theme.FileTextIcon(), false, "forms"),
-		createNavCard("📬 Ceza Tebligatları", "Öğrenci ve veli karar tebligat pusulaları (5 günlük yasal itiraz hakkı ile).", theme.FolderIcon(), false, "notices"),
-		createNavCard("☀️ Sene Başı / Sonu Kurul Tutanağı", "Dönem başı ve sonu resmi disiplin kurulu toplantı tutanakları.", theme.ContentPasteIcon(), false, "minutes"),
+		createNavCard("⚖️ DİSİPLİN KURULU KARARI (EK-1 / EK-10)", "21/17 satırlı resmi karar tutanağı, puan hesaplama, otomatik gerekçeli karar ve PDF.", true, "verdict"),
+		createNavCard("📨 Çağrı Pusulaları", "Öğrenci savunma ve ifade çağrı pusulaları, tebellüğ bloğu ve kurul üye toplantı çağrısı.", false, "summons"),
+		createNavCard("📝 Tutanak ve Formlar", "İfade, savunma, bilgi toplama (5 tür), ek süre, şikayet ve rehberlik formları.", false, "forms"),
+		createNavCard("📬 Ceza Tebligatları", "Öğrenci ve veli karar tebligat pusulaları (5 günlük yasal itiraz hakkı ile).", false, "notices"),
 	)
 
 	// Column 3: Raporlar & İnceleme
 	col3 := container.NewVBox(
 		widget.NewLabelWithStyle("📊 RAPORLAR & İSTATİSTİKLER", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
-		createNavCard("🔄 Puan İadesi / Yaptırım Kaldırma", "Lise için Madde 171/2 Sene Sonu Puan İade Çizelgesi, Ortaokul için Yaptırım Kaldırma Raporu.", theme.ViewRefreshIcon(), false, "restoration"),
-		createNavCard("📊 Ceza İstatistikleri Raporu", "1. ve 2. Dönem ceza dağılımları ve okul disiplin analiz raporları.", theme.GridIcon(), false, "stats"),
-		createNavCard("📚 Dizi Pusulası (Dosya İndeksi)", "Soruşturma dosyasında yer alan evrakların resmi dizi pusulası.", theme.FolderNewIcon(), false, "dizi"),
-		createNavCard("🗂️ Yönetmelik & Şablon Düzenle", "Yeni suç ve ceza maddeleri ekleme, mevcut yönetmelik maddelerini düzenleme.", theme.SettingsIcon(), false, "yonetmelik"),
-		createNavCard("🎨 Ayarlar & Tema Tercihleri", "Modern/Klasik arayüz seçimi, renk teması ve yazı boyutu.", theme.ColorPaletteIcon(), false, "settings"),
+		createNavCard("🔄 Puan İadesi / Yaptırım Kaldırma", "Lise için Madde 171/2 Sene Sonu Puan İade Çizelgesi, Ortaokul için Yaptırım Kaldırma Raporu.", false, "restoration"),
+		createNavCard("📊 Ceza İstatistikleri Raporu", "1. ve 2. Dönem ceza dağılımları ve okul disiplin analiz raporları.", false, "stats"),
+		createNavCard("📚 Dizi Pusulası (Dosya İndeksi)", "Soruşturma dosyasında yer alan evrakların resmi dizi pusulası.", false, "dizi"),
+		createNavCard("☀️ Sene Başı / Sonu Kurul Tutanağı", "Dönem başı ve sonu resmi disiplin kurulu toplantı tutanakları.", false, "minutes"),
 	)
 
 	statsCard := buildLiveStatsCard(state, false)

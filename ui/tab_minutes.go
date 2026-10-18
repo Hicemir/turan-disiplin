@@ -22,17 +22,17 @@ func BuildMinutesTab(state *AppState) fyne.CanvasObject {
 	meetingTypeRadio.Horizontal = true
 	meetingTypeRadio.SetSelected("SENE BAŞI")
 
-	mDateEntry := widget.NewEntry()
+	mDateEntry := NewSingleLineEntry()
 	mDateEntry.SetText(time.Now().Format("02.01.2006"))
-	mTimeEntry := widget.NewEntry()
+	mTimeEntry := NewSingleLineEntry()
 	mTimeEntry.SetText("14:00")
-	mPlaceEntry := widget.NewEntry()
+	mPlaceEntry := NewSingleLineEntry()
 	mPlaceEntry.SetText("Öğretmenler Odası")
-	mChairEntry := widget.NewEntry()
+	mChairEntry := NewSingleLineEntry()
 	mChairEntry.SetText(state.SchoolInfo.BoardChair)
 
 	// Decision items entry (multi-line)
-	decisionsText := widget.NewMultiLineEntry()
+	decisionsText := NewSmartMultiLineEntry()
 
 	loadDefaultDecisions := func(mType string) {
 		if mType == "SENE BAŞI" {
@@ -106,7 +106,7 @@ func BuildMinutesTab(state *AppState) fyne.CanvasObject {
 	pdfMeetingBtn.Importance = widget.SuccessImportance
 
 	// --- SECTION 2: Dizi Pusulası (Case File Document Index) ---
-	diziEntries := widget.NewMultiLineEntry()
+	diziEntries := NewSmartMultiLineEntry()
 	diziEntries.SetText(
 		"1. Olay Bildirim / Şikayet Dilekçesi | 1\n" +
 			"2. İfade Tutanağı | 1\n" +

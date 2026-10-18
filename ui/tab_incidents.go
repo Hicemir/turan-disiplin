@@ -7,14 +7,14 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/dialog"
+	fyneDialog "fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
 	"okulevrak/model"
 )
 
-// BuildIncidentsTab creates the Incident Management & Student Assignment UI
+// BuildIncidentsTab creates a clean 2-panel Incident Management UI
 func BuildIncidentsTab(state *AppState) fyne.CanvasObject {
 	var currentIncidents []model.Incident
 	var selectedIncident *model.Incident
@@ -22,39 +22,25 @@ func BuildIncidentsTab(state *AppState) fyne.CanvasObject {
 	var incidentStudents []model.IncidentStudent
 	var selectedIncStudent *model.IncidentStudent
 
-	// Incident Form Inputs
-	codeEntry := widget.NewEntry()
-	titleEntry := widget.NewEntry()
-	dateEntry := widget.NewEntry()
+	// Incident Form Inputs (Single-line entries to prevent trapping mouse scroll)
+	codeEntry := NewSingleLineEntry()
+	titleEntry := NewSingleLineEntry()
+	dateEntry := NewSingleLineEntry()
 	dateEntry.SetText(time.Now().Format("02.01.2006"))
-	timeEntry := widget.NewEntry()
+	timeEntry := NewSingleLineEntry()
 	timeEntry.SetText(time.Now().Format("15:04"))
-	locationEntry := widget.NewEntry()
+	locationEntry := NewSingleLineEntry()
 	locationEntry.SetPlaceHolder("Örn: Okul Bahçesi, 10/B Sınıfı")
-	complainantEntry := widget.NewEntry()
+	complainantEntry := NewSingleLineEntry()
 	complainantEntry.SetPlaceHolder("Örn: Nöbetçi Öğretmen Ahmet Yılmaz")
-	petitionEntry := widget.NewEntry()
-	summaryEntry := widget.NewMultiLineEntry()
+	petitionEntry := NewSingleLineEntry()
+	summaryEntry := NewSmartMultiLineEntry()
 	summaryEntry.SetPlaceHolder("Olayın detaylı açıklaması...")
 
-	// Attached Student Inputs
-	stRoleSelect := widget.NewSelect([]string{
-		"SUÇLANAN ÖĞRENCİ",
-		"MAĞDUR / ŞİKAYETÇİ ÖĞRENCİ",
-		"BİLGİSİNE BAŞVURULACAK ÖĞRENCİ",
-	}, nil)
-	stRoleSelect.SetSelected("SUÇLANAN ÖĞRENCİ")
-
-	stAcademicSelect := widget.NewSelect([]string{"ÇOK İYİ", "İYİ", "ORTA", "ZAYIF"}, nil)
-	stHealthSelect := widget.NewSelect([]string{"SAĞLAM", "KRONİK RAHATSIZLIĞI VAR", "ENGELLİ", "DİĞER"}, nil)
-	stEconomicSelect := widget.NewSelect([]string{"İYİ", "ORTA", "DAR GELİRLİ", "ÇOK DÜŞÜK"}, nil)
-	stLivingSelect := widget.NewSelect([]string{"AİLESİYLE BİRLİKTE", "YALNIZ ANNESİYLE", "YALNIZ BABASIYLA", "AKRABALARIYLA", "YURTTA / PANSİYONDA", "YALNIZ"}, nil)
-	stParentsLivingSelect := widget.NewSelect([]string{"HER İKİSİ DE SAĞ", "BABA VEFAT ETMİŞ", "ANNE VEFAT ETMİŞ", "HER İKİSİ DE VEFAT ETMİŞ"}, nil)
-	stParentsBioSelect := widget.NewSelect([]string{"ÖZ VE BİRLİKTE YAŞIYORLAR", "BOŞANMIŞLAR / AYRI YAŞIYORLAR", "ÜVEY ANNE", "ÜVEY BABA"}, nil)
-	stEnvSelect := widget.NewSelect([]string{"BÜYÜKŞEHİR", "İL / İLÇE MERKEZİ", "KASABA / BELDE", "KÖY"}, nil)
-	stPriorPenaltySelect := widget.NewSelect([]string{"DAHA ÖNCE CEZA ALMAMIŞTIR", "UYARMA CEZASI ALMIŞTIR", "KINAMA CEZASI ALMIŞTIR", "OKULDAN KISA SÜRELİ UZAKLAŞTIRMA ALMIŞTIR"}, nil)
-	stStatementEntry := widget.NewMultiLineEntry()
-	stStatementEntry.SetPlaceHolder("Öğrencinin olayla ilgili sözlü / yazılı ifadesi...")
+	var incStudentsList *widget.List
+	var incidentList *widget.List
+	var editStudentProfileBtn *widget.Button
+	var removeStudentFromIncBtn *widget.Button
 
 	clearIncidentForm := func() {
 		selectedIncident = nil
@@ -71,40 +57,64 @@ func BuildIncidentsTab(state *AppState) fyne.CanvasObject {
 		incidentStudents = nil
 		selectedIncStudent = nil
 		state.SelectedIncStudentID = 0
+		if incStudentsList != nil {
+			incStudentsList.Refresh()
+		}
+		if editStudentProfileBtn != nil {
+			editStudentProfileBtn.Disable()
+		}
+		if removeStudentFromIncBtn != nil {
+			removeStudentFromIncBtn.Disable()
+		}
 	}
 
-	clearStudentForm := func() {
+	reloadIncStudents := func() {
+		if selectedIncident == nil {
+			incidentStudents = nil
+			if incStudentsList != nil {
+				incStudentsList.Refresh()
+			}
+			return
+		}
+		list, err := state.Store.GetIncidentStudents(state.AcademicYear, selectedIncident.IncidentCode)
+		if err == nil {
+			incidentStudents = list
+			if incStudentsList != nil {
+				incStudentsList.Refresh()
+			}
+		}
+	}
+
+	selectIncident := func(inc *model.Incident) {
+		if inc == nil {
+			return
+		}
+		selectedIncident = inc
+		state.SelectedIncidentCode = inc.IncidentCode
+
+		codeEntry.SetText(inc.IncidentCode)
+		titleEntry.SetText(inc.Title)
+		dateEntry.SetText(inc.Date)
+		timeEntry.SetText(inc.Time)
+		locationEntry.SetText(inc.Location)
+		complainantEntry.SetText(inc.Complainant)
+		petitionEntry.SetText(inc.PetitionRef)
+		summaryEntry.SetText(inc.Summary)
+
 		selectedIncStudent = nil
 		state.SelectedIncStudentID = 0
-		stRoleSelect.SetSelected("SUÇLANAN ÖĞRENCİ")
-		stAcademicSelect.ClearSelected()
-		stHealthSelect.ClearSelected()
-		stEconomicSelect.ClearSelected()
-		stLivingSelect.ClearSelected()
-		stParentsLivingSelect.ClearSelected()
-		stParentsBioSelect.ClearSelected()
-		stEnvSelect.ClearSelected()
-		stPriorPenaltySelect.ClearSelected()
-		stStatementEntry.SetText("")
-	}
+		if editStudentProfileBtn != nil {
+			editStudentProfileBtn.Disable()
+		}
+		if removeStudentFromIncBtn != nil {
+			removeStudentFromIncBtn.Disable()
+		}
 
-	populateStudentForm := func(is *model.IncidentStudent) {
-		selectedIncStudent = is
-		state.SelectedIncStudentID = is.ID
-		stRoleSelect.SetSelected(is.Role)
-		stAcademicSelect.SetSelected(is.AcademicStanding)
-		stHealthSelect.SetSelected(is.HealthStatus)
-		stEconomicSelect.SetSelected(is.EconomicStatus)
-		stLivingSelect.SetSelected(is.LivingWith)
-		stParentsLivingSelect.SetSelected(is.ParentsLivingStatus)
-		stParentsBioSelect.SetSelected(is.ParentsBioStatus)
-		stEnvSelect.SetSelected(is.EnvironmentRaised)
-		stPriorPenaltySelect.SetSelected(is.PriorPenaltyStatus)
-		stStatementEntry.SetText(is.StatementText)
+		reloadIncStudents()
 	}
 
 	// Attached Student List
-	incStudentsList := widget.NewList(
+	incStudentsList = widget.NewList(
 		func() int {
 			return len(incidentStudents)
 		},
@@ -112,7 +122,9 @@ func BuildIncidentsTab(state *AppState) fyne.CanvasObject {
 			return container.NewHBox(
 				widget.NewLabelWithStyle("No", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 				widget.NewSeparator(),
-				widget.NewLabel("Öğrenci Adı"),
+				widget.NewLabel("Öğrenci Adı Soyadı"),
+				widget.NewSeparator(),
+				widget.NewLabel("Sınıf"),
 				widget.NewSeparator(),
 				widget.NewLabelWithStyle("Rol", fyne.TextAlignLeading, fyne.TextStyle{Italic: true}),
 			)
@@ -125,36 +137,18 @@ func BuildIncidentsTab(state *AppState) fyne.CanvasObject {
 			box := o.(*fyne.Container)
 			noLbl := box.Objects[0].(*widget.Label)
 			nameLbl := box.Objects[2].(*widget.Label)
-			roleLbl := box.Objects[4].(*widget.Label)
+			classLbl := box.Objects[4].(*widget.Label)
+			roleLbl := box.Objects[6].(*widget.Label)
 
 			noLbl.SetText(fmt.Sprintf("%-5s", is.SchoolNo))
 			nameLbl.SetText(is.FullName)
+			classLbl.SetText(is.ClassSection)
 			roleLbl.SetText(is.Role)
 		},
 	)
 
-	reloadIncStudents := func() {
-		if selectedIncident == nil {
-			incidentStudents = nil
-			incStudentsList.Refresh()
-			return
-		}
-		list, err := state.Store.GetIncidentStudents(state.AcademicYear, selectedIncident.IncidentCode)
-		if err == nil {
-			incidentStudents = list
-			incStudentsList.Refresh()
-		}
-	}
-
-	incStudentsList.OnSelected = func(id widget.ListItemID) {
-		if id >= 0 && id < len(incidentStudents) {
-			is := incidentStudents[id]
-			populateStudentForm(&is)
-		}
-	}
-
 	// Incident List
-	incidentList := widget.NewList(
+	incidentList = widget.NewList(
 		func() int {
 			return len(currentIncidents)
 		},
@@ -188,29 +182,25 @@ func BuildIncidentsTab(state *AppState) fyne.CanvasObject {
 		if err == nil {
 			currentIncidents = list
 			incidentList.Refresh()
+
+			// Maintain active selection
+			if selectedIncident != nil {
+				for idx, inc := range currentIncidents {
+					if inc.IncidentCode == selectedIncident.IncidentCode {
+						incidentList.Select(idx)
+						break
+					}
+				}
+			}
 		}
 	}
 
 	incidentList.OnSelected = func(id widget.ListItemID) {
 		if id >= 0 && id < len(currentIncidents) {
 			inc := currentIncidents[id]
-			selectedIncident = &inc
-			state.SelectedIncidentCode = inc.IncidentCode
-
-			codeEntry.SetText(inc.IncidentCode)
-			titleEntry.SetText(inc.Title)
-			dateEntry.SetText(inc.Date)
-			timeEntry.SetText(inc.Time)
-			locationEntry.SetText(inc.Location)
-			complainantEntry.SetText(inc.Complainant)
-			petitionEntry.SetText(inc.PetitionRef)
-			summaryEntry.SetText(inc.Summary)
-
-			clearStudentForm()
-			reloadIncStudents()
+			selectIncident(&inc)
 		}
 	}
-
 
 	// Buttons
 	saveIncidentBtn := widget.NewButtonWithIcon("Olayı Kaydet", theme.DocumentSaveIcon(), func() {
@@ -245,11 +235,10 @@ func BuildIncidentsTab(state *AppState) fyne.CanvasObject {
 			return
 		}
 
-		showInfo(state.Window, "Başarılı", "Olay kaydı başarıyla kaydedildi.")
+		ShowTurkishInfo("Başarılı", "Olay kaydı başarıyla kaydedildi.", state.Window)
 		selectedIncident = inc
 		state.SelectedIncidentCode = code
 		reloadIncidents()
-		state.NotifyChange()
 	})
 	saveIncidentBtn.Importance = widget.HighImportance
 
@@ -258,12 +247,19 @@ func BuildIncidentsTab(state *AppState) fyne.CanvasObject {
 			showError(state.Window, fmt.Errorf("Silinecek olay seçilmedi"))
 			return
 		}
-		showConfirm(state.Window, "Olay Sil", fmt.Sprintf("'%s' olayını ve bu olaya bağlı tüm öğrenci/karar kayıtlarını silmek istediğinize emin misiniz?", selectedIncident.Title), func() {
-			_ = state.Store.DeleteIncident(state.AcademicYear, selectedIncident.IncidentCode)
-			clearIncidentForm()
-			reloadIncidents()
-			state.NotifyChange()
-		})
+		ShowTurkishDangerConfirm(
+			"Olay Sil",
+			fmt.Sprintf("'%s' olayını ve bu olaya bağlı tüm öğrenci/karar kayıtlarını silmek istediğinize emin misiniz?", selectedIncident.Title),
+			func(confirmed bool) {
+				if !confirmed {
+					return
+				}
+				_ = state.Store.DeleteIncident(state.AcademicYear, selectedIncident.IncidentCode)
+				clearIncidentForm()
+				reloadIncidents()
+			},
+			state.Window,
+		)
 	})
 	deleteIncidentBtn.Importance = widget.DangerImportance
 
@@ -279,16 +275,18 @@ func BuildIncidentsTab(state *AppState) fyne.CanvasObject {
 		}
 
 		// Searchable student picker
-		stSearch := widget.NewEntry()
-		stSearch.SetPlaceHolder("Öğrenci ara...")
+		stSearch := NewSingleLineEntry()
+		stSearch.SetPlaceHolder("Öğrenci ara (No veya İsim)...")
 		var foundList []model.Student
 
 		pickList := widget.NewList(
 			func() int { return len(foundList) },
 			func() fyne.CanvasObject {
 				return container.NewHBox(
-					widget.NewLabel("00000"),
+					widget.NewLabelWithStyle("00000", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+					widget.NewSeparator(),
 					widget.NewLabel("Ad Soyad"),
+					widget.NewSeparator(),
 					widget.NewLabel("Sınıf"),
 				)
 			},
@@ -299,8 +297,8 @@ func BuildIncidentsTab(state *AppState) fyne.CanvasObject {
 				s := foundList[i]
 				box := o.(*fyne.Container)
 				box.Objects[0].(*widget.Label).SetText(s.SchoolNo)
-				box.Objects[1].(*widget.Label).SetText(s.FullName)
-				box.Objects[2].(*widget.Label).SetText(s.ClassSection)
+				box.Objects[2].(*widget.Label).SetText(s.FullName)
+				box.Objects[4].(*widget.Label).SetText(s.ClassSection)
 			},
 		)
 
@@ -325,7 +323,7 @@ func BuildIncidentsTab(state *AppState) fyne.CanvasObject {
 		pickerContent := container.NewBorder(stSearch, nil, nil, nil, pickList)
 		pickerContent.Resize(fyne.NewSize(500, 350))
 
-		d := dialog.NewCustomConfirm("Olaya Öğrenci Ekle", "Ekle", "İptal", pickerContent, func(ok bool) {
+		d := fyneDialog.NewCustomConfirm("Olaya Öğrenci Ekle", "Ekle", "İptal", pickerContent, func(ok bool) {
 			if !ok || chosen == nil {
 				return
 			}
@@ -366,58 +364,146 @@ func BuildIncidentsTab(state *AppState) fyne.CanvasObject {
 
 			_ = state.Store.SaveIncidentStudent(is)
 			reloadIncStudents()
-			showInfo(state.Window, "Öğrenci Eklendi", fmt.Sprintf("%s (%s) olaya eklendi.", chosen.FullName, chosen.SchoolNo))
-			state.NotifyChange()
+			ShowTurkishInfo("Öğrenci Eklendi", fmt.Sprintf("%s (%s) başarıyla olaya eklendi.", chosen.FullName, chosen.SchoolNo), state.Window)
 		}, state.Window)
 
-		d.Resize(fyne.NewSize(500, 400))
+		d.Resize(fyne.NewSize(520, 420))
 		updatePickList()
 		d.Show()
 	})
 	addStudentToIncBtn.Importance = widget.MediumImportance
 
-	saveStudentProfileBtn := widget.NewButtonWithIcon("Öğrenci Profilini Kaydet", theme.DocumentSaveIcon(), func() {
-		if selectedIncStudent == nil {
-			showError(state.Window, fmt.Errorf("Kaydedilecek öğrenci seçilmedi"))
+	// Edit Student Profile & Statement Modal
+	showStudentProfileModal := func(is *model.IncidentStudent) {
+		if is == nil {
 			return
 		}
 
-		selectedIncStudent.Role = stRoleSelect.Selected
-		selectedIncStudent.AcademicStanding = stAcademicSelect.Selected
-		selectedIncStudent.HealthStatus = stHealthSelect.Selected
-		selectedIncStudent.EconomicStatus = stEconomicSelect.Selected
-		selectedIncStudent.LivingWith = stLivingSelect.Selected
-		selectedIncStudent.ParentsLivingStatus = stParentsLivingSelect.Selected
-		selectedIncStudent.ParentsBioStatus = stParentsBioSelect.Selected
-		selectedIncStudent.EnvironmentRaised = stEnvSelect.Selected
-		selectedIncStudent.PriorPenaltyStatus = stPriorPenaltySelect.Selected
-		selectedIncStudent.StatementText = stStatementEntry.Text
+		stRoleSelect := NewTurkishSelect([]string{
+			"SUÇLANAN ÖĞRENCİ",
+			"MAĞDUR / ŞİKAYETÇİ ÖĞRENCİ",
+			"BİLGİSİNE BAŞVURULACAK ÖĞRENCİ (TANIK)",
+		}, nil)
+		stRoleSelect.SetSelected(is.Role)
 
-		err := state.Store.SaveIncidentStudent(selectedIncStudent)
-		if err != nil {
-			showError(state.Window, err)
-			return
+		stAcademicSelect := NewTurkishSelect([]string{"ÇOK İYİ", "İYİ", "ORTA", "ZAYIF"}, nil)
+		stAcademicSelect.SetSelected(is.AcademicStanding)
+
+		stHealthSelect := NewTurkishSelect([]string{"SAĞLAM", "KRONİK RAHATSIZLIĞI VAR", "ENGELLİ", "DİĞER"}, nil)
+		stHealthSelect.SetSelected(is.HealthStatus)
+
+		stEconomicSelect := NewTurkishSelect([]string{"İYİ", "ORTA", "DAR GELİRLİ", "ÇOK DÜŞÜK"}, nil)
+		stEconomicSelect.SetSelected(is.EconomicStatus)
+
+		stLivingSelect := NewTurkishSelect([]string{"AİLESİYLE BİRLİKTE", "YALNIZ ANNESİYLE", "YALNIZ BABASIYLA", "AKRABALARIYLA", "YURTTA / PANSİYONDA", "YALNIZ"}, nil)
+		stLivingSelect.SetSelected(is.LivingWith)
+
+		stParentsLivingSelect := NewTurkishSelect([]string{"HER İKİSİ DE SAĞ", "BABA VEFAT ETMİŞ", "ANNE VEFAT ETMİŞ", "HER İKİSİ DE VEFAT ETMİŞ"}, nil)
+		stParentsLivingSelect.SetSelected(is.ParentsLivingStatus)
+
+		stParentsBioSelect := NewTurkishSelect([]string{"ÖZ VE BİRLİKTE YAŞIYORLAR", "BOŞANMIŞLAR / AYRI YAŞIYORLAR", "ÜVEY ANNE", "ÜVEY BABA"}, nil)
+		stParentsBioSelect.SetSelected(is.ParentsBioStatus)
+
+		stEnvSelect := NewTurkishSelect([]string{"BÜYÜKŞEHİR", "İL / İLÇE MERKEZİ", "KASABA / BELDE", "KÖY"}, nil)
+		stEnvSelect.SetSelected(is.EnvironmentRaised)
+
+		stPriorPenaltySelect := NewTurkishSelect([]string{"DAHA ÖNCE CEZA ALMAMIŞTIR", "UYARMA CEZASI ALMIŞTIR", "KINAMA CEZASI ALMIŞTIR", "OKULDAN KISA SÜRELİ UZAKLAŞTIRMA ALMIŞTIR"}, nil)
+		stPriorPenaltySelect.SetSelected(is.PriorPenaltyStatus)
+
+		stStatementEntry := NewSmartMultiLineEntry()
+		stStatementEntry.SetText(is.StatementText)
+		stStatementEntry.SetPlaceHolder("Öğrencinin olayla ilgili sözlü / yazılı ifadesi ve savunması...")
+
+		form := widget.NewForm(
+			widget.NewFormItem("Olaydaki Rolü *", stRoleSelect),
+			widget.NewFormItem("Başarı Durumu", stAcademicSelect),
+			widget.NewFormItem("Sağlık Durumu", stHealthSelect),
+			widget.NewFormItem("Ekonomik Durum", stEconomicSelect),
+			widget.NewFormItem("Kiminle Kaldığı", stLivingSelect),
+			widget.NewFormItem("Anne-Baba Sağlık Durumu", stParentsLivingSelect),
+			widget.NewFormItem("Anne-Baba Birliktelik", stParentsBioSelect),
+			widget.NewFormItem("Büyüdüğü Çevre", stEnvSelect),
+			widget.NewFormItem("Daha Önce Ceza Durumu", stPriorPenaltySelect),
+			widget.NewFormItem("Öğrenci İfadesi / Savunması", stStatementEntry),
+		)
+
+		scrollContent := container.NewVScroll(form)
+		stStatementEntry.ParentScroll = scrollContent
+		scrollContent.SetMinSize(fyne.NewSize(580, 420))
+
+		d := fyneDialog.NewCustomConfirm(
+			fmt.Sprintf("Öğrenci Rol & İnceleme Profili: %s (%s)", is.FullName, is.SchoolNo),
+			"Profili Kaydet",
+			"İptal",
+			scrollContent,
+			func(ok bool) {
+				if !ok {
+					return
+				}
+				is.Role = stRoleSelect.Selected
+				is.AcademicStanding = stAcademicSelect.Selected
+				is.HealthStatus = stHealthSelect.Selected
+				is.EconomicStatus = stEconomicSelect.Selected
+				is.LivingWith = stLivingSelect.Selected
+				is.ParentsLivingStatus = stParentsLivingSelect.Selected
+				is.ParentsBioStatus = stParentsBioSelect.Selected
+				is.EnvironmentRaised = stEnvSelect.Selected
+				is.PriorPenaltyStatus = stPriorPenaltySelect.Selected
+				is.StatementText = stStatementEntry.Text
+
+				err := state.Store.SaveIncidentStudent(is)
+				if err != nil {
+					showError(state.Window, err)
+					return
+				}
+				reloadIncStudents()
+				ShowTurkishInfo("Başarılı", "Öğrenci rol ve profil bilgileri kaydedildi.", state.Window)
+			},
+			state.Window,
+		)
+		d.Resize(fyne.NewSize(620, 520))
+		d.Show()
+	}
+
+	editStudentProfileBtn = widget.NewButtonWithIcon("Öğrenci Rol & İnceleme Profili", theme.DocumentCreateIcon(), func() {
+		if selectedIncStudent != nil {
+			showStudentProfileModal(selectedIncStudent)
 		}
-
-		showInfo(state.Window, "Başarılı", "Öğrenci rol ve sosyo-ekonomik inceleme bilgileri kaydedildi.")
-		reloadIncStudents()
-		state.NotifyChange()
 	})
-	saveStudentProfileBtn.Importance = widget.HighImportance
+	editStudentProfileBtn.Disable()
 
-	removeStudentFromIncBtn := widget.NewButtonWithIcon("Öğrenciyi Olaydan Çıkar", theme.DeleteIcon(), func() {
+	removeStudentFromIncBtn = widget.NewButtonWithIcon("Öğrenciyi Olaydan Çıkar", theme.DeleteIcon(), func() {
 		if selectedIncStudent == nil {
 			showError(state.Window, fmt.Errorf("Çıkarılacak öğrenci seçilmedi"))
 			return
 		}
-		showConfirm(state.Window, "Öğrenciyi Çıkar", fmt.Sprintf("%s adlı öğrenciyi bu olaydan çıkarmak istiyor musunuz?", selectedIncStudent.FullName), func() {
-			_ = state.Store.DeleteIncidentStudent(selectedIncStudent.ID)
-			clearStudentForm()
-			reloadIncStudents()
-			state.NotifyChange()
-		})
+		ShowTurkishDangerConfirm(
+			"Öğrenciyi Çıkar",
+			fmt.Sprintf("%s adlı öğrenciyi bu olaydan çıkarmak istiyor musunuz?", selectedIncStudent.FullName),
+			func(ok bool) {
+				if !ok {
+					return
+				}
+				_ = state.Store.DeleteIncidentStudent(selectedIncStudent.ID)
+				selectedIncStudent = nil
+				editStudentProfileBtn.Disable()
+				removeStudentFromIncBtn.Disable()
+				reloadIncStudents()
+			},
+			state.Window,
+		)
 	})
 	removeStudentFromIncBtn.Importance = widget.DangerImportance
+	removeStudentFromIncBtn.Disable()
+
+	incStudentsList.OnSelected = func(id widget.ListItemID) {
+		if id >= 0 && id < len(incidentStudents) {
+			is := incidentStudents[id]
+			selectedIncStudent = &is
+			editStudentProfileBtn.Enable()
+			removeStudentFromIncBtn.Enable()
+		}
+	}
 
 	// Forms Assembly
 	incidentForm := widget.NewForm(
@@ -434,53 +520,57 @@ func BuildIncidentsTab(state *AppState) fyne.CanvasObject {
 	incidentCard := widget.NewCard("Olay Bilgileri", "İncelenen disiplin olayının genel tanımı", incidentForm)
 	incidentBtns := container.NewHBox(saveIncidentBtn, deleteIncidentBtn, newIncidentBtn)
 
-	studentProfileForm := widget.NewForm(
-		widget.NewFormItem("Olaydaki Rolü *", stRoleSelect),
-		widget.NewFormItem("Başarı Durumu", stAcademicSelect),
-		widget.NewFormItem("Sağlık Durumu", stHealthSelect),
-		widget.NewFormItem("Ekonomik Durum", stEconomicSelect),
-		widget.NewFormItem("Kiminle Kaldığı", stLivingSelect),
-		widget.NewFormItem("Anne-Baba Sağlık Durumu", stParentsLivingSelect),
-		widget.NewFormItem("Anne-Baba Birliktelik", stParentsBioSelect),
-		widget.NewFormItem("Büyüdüğü Çevre", stEnvSelect),
-		widget.NewFormItem("Daha Önce Ceza Durumu", stPriorPenaltySelect),
-		widget.NewFormItem("Öğrenci İfadesi / Savunması", stStatementEntry),
+	studentsHeader := container.NewHBox(
+		widget.NewLabelWithStyle("👥 Olaya Bağlı Öğrenciler", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+		addStudentToIncBtn,
+		editStudentProfileBtn,
+		removeStudentFromIncBtn,
 	)
 
-	studentCard := widget.NewCard("Öğrenci Rol & İnceleme Profili", "Karar tutanağı ve evraklara girecek detaylı profil", studentProfileForm)
-	studentBtns := container.NewHBox(saveStudentProfileBtn, removeStudentFromIncBtn)
+	// Wrap students list in a fixed-height container so it displays cleanly in the vertical form
+	studentsScroll := container.NewVScroll(incStudentsList)
+	studentsScroll.SetMinSize(fyne.NewSize(500, 220))
 
-	// Layout Structure
+	studentsCard := widget.NewCard("Olaya Bağlı Öğrenci Listesi", "Soruşturmaya dahil edilen öğrenciler ve rolleri", container.NewVBox(
+		studentsHeader,
+		studentsScroll,
+	))
+
+	// Layout Structure: 2-Panel Layout (Left: Incidents List, Right: Incident Form & Students)
 	leftIncList := container.NewBorder(
 		widget.NewLabelWithStyle("⚖️ Kayıtlı Olaylar", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 		newIncidentBtn, nil, nil,
 		incidentList,
 	)
 
-	middleIncDetails := container.NewVScroll(container.NewVBox(
+	rightPanelContent := container.NewVBox(
 		incidentCard,
 		incidentBtns,
 		widget.NewSeparator(),
-		container.NewHBox(
-			widget.NewLabelWithStyle("👥 Olaya Bağlı Öğrenciler", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
-			addStudentToIncBtn,
-		),
-		incStudentsList,
-	))
+		studentsCard,
+	)
 
-	rightStudentDetails := container.NewVScroll(container.NewVBox(
-		studentCard,
-		studentBtns,
-	))
+	rightPanelScroll := container.NewVScroll(rightPanelContent)
+	summaryEntry.ParentScroll = rightPanelScroll
 
-	splitRight := container.NewHSplit(middleIncDetails, rightStudentDetails)
-	splitRight.SetOffset(0.5)
-
-	splitMain := container.NewHSplit(leftIncList, splitRight)
-	splitMain.SetOffset(0.25)
+	splitMain := container.NewHSplit(leftIncList, rightPanelScroll)
+	splitMain.SetOffset(0.28)
 
 	reloadIncidents()
-	clearIncidentForm()
+
+	// Automatically select the active or first incident if available
+	if state.SelectedIncidentCode != "" {
+		for idx, inc := range currentIncidents {
+			if inc.IncidentCode == state.SelectedIncidentCode {
+				incidentList.Select(idx)
+				break
+			}
+		}
+	} else if len(currentIncidents) > 0 {
+		incidentList.Select(0)
+	} else {
+		clearIncidentForm()
+	}
 
 	return splitMain
 }

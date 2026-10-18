@@ -22,10 +22,10 @@ func BuildFormsTab(state *AppState) fyne.CanvasObject {
 	var selectedStudent *model.Student
 	var selectedIncident *model.Incident
 
-	stSelect := widget.NewSelect([]string{}, nil)
-	incSelect := widget.NewSelect([]string{}, nil)
+	stSelect := NewTurkishSelect([]string{}, nil)
+	incSelect := NewTurkishSelect([]string{}, nil)
 
-	docTypeSelect := widget.NewSelect([]string{
+	docTypeSelect := NewTurkishSelect([]string{
 		"1. İfade Tutanağı",
 		"2. Savunma Tutanağı",
 		"3. Bilgi Toplama Formu - Olay",
@@ -47,35 +47,35 @@ func BuildFormsTab(state *AppState) fyne.CanvasObject {
 	extraBox := container.NewVBox()
 
 	// Reusable inputs
-	statementEntry := widget.NewMultiLineEntry()
+	statementEntry := NewSmartMultiLineEntry()
 	statementEntry.SetPlaceHolder("Yazılı ifade / savunma metni (boş bırakılırsa elle yazmak için çizgili alan oluşturulur)...")
 
-	extraDaysEntry := widget.NewEntry()
+	extraDaysEntry := NewSingleLineEntry()
 	extraDaysEntry.SetText("7")
-	extraReasonEntry := widget.NewEntry()
+	extraReasonEntry := NewSingleLineEntry()
 	extraReasonEntry.SetText("Delillerin ve tanık ifadelerinin toplanmasının tamamlanamaması")
 
-	sozluKonuEntry := widget.NewEntry()
+	sozluKonuEntry := NewSingleLineEntry()
 	sozluKonuEntry.SetText("Kılık kıyafet ve ders düzeni kurallarına uyulmaması")
-	sozluDetayEntry := widget.NewMultiLineEntry()
+	sozluDetayEntry := NewSmartMultiLineEntry()
 	sozluDetayEntry.SetPlaceHolder("Öğrenciye yapılan sözlü uyarının detayları...")
-	sozluOgretmenEntry := widget.NewEntry()
+	sozluOgretmenEntry := NewSingleLineEntry()
 	sozluOgretmenEntry.SetText(state.SchoolInfo.PrincipalName)
 
-	veliGorusenEntry := widget.NewEntry()
+	veliGorusenEntry := NewSingleLineEntry()
 	veliGorusenEntry.SetText(state.SchoolInfo.BoardChair)
-	veliKonuEntry := widget.NewEntry()
+	veliKonuEntry := NewSingleLineEntry()
 	veliKonuEntry.SetText("Öğrencinin devamsızlık ve ders içi davranışları")
-	veliNotlarEntry := widget.NewMultiLineEntry()
-	veliKararEntry := widget.NewMultiLineEntry()
+	veliNotlarEntry := NewSmartMultiLineEntry()
+	veliKararEntry := NewSmartMultiLineEntry()
 
-	rehber1Entry := widget.NewMultiLineEntry()
+	rehber1Entry := NewSmartMultiLineEntry()
 	rehber1Entry.SetPlaceHolder("1- Öğrencinin Ailevi Durumu...")
-	rehber2Entry := widget.NewMultiLineEntry()
+	rehber2Entry := NewSmartMultiLineEntry()
 	rehber2Entry.SetPlaceHolder("2- Öğrencinin Psikolojik ve Sosyal Özellikleri...")
-	rehber3Entry := widget.NewMultiLineEntry()
+	rehber3Entry := NewSmartMultiLineEntry()
 	rehber3Entry.SetPlaceHolder("3- Olayın Nedenleri Hakkındaki Görüşler...")
-	rehber4Entry := widget.NewMultiLineEntry()
+	rehber4Entry := NewSmartMultiLineEntry()
 	rehber4Entry.SetPlaceHolder("4- Uygulanabilecek Yaptırım veya Rehberlik Önerileri...")
 
 	updateExtraInputs := func(formName string) {

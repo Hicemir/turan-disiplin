@@ -35,7 +35,7 @@ func BuildHeader(state *AppState) fyne.CanvasObject {
 		yearOptions = append([]string{state.AcademicYear}, yearOptions...)
 	}
 
-	yearSelect := widget.NewSelect(yearOptions, func(selected string) {
+	yearSelect := NewTurkishSelect(yearOptions, func(selected string) {
 		if selected != "" && selected != state.AcademicYear {
 			state.SetAcademicYear(selected)
 		}
@@ -44,7 +44,7 @@ func BuildHeader(state *AppState) fyne.CanvasObject {
 
 	// Add Custom Year Button with auto-filled next year
 	addYearBtn := widget.NewButtonWithIcon("Yeni Yıl", theme.ContentAddIcon(), func() {
-		entry := widget.NewEntry()
+		entry := NewSingleLineEntry()
 		nextYear := store.GetNextNearestAcademicYear(yearOptions)
 		entry.SetText(nextYear)
 		dialog.ShowCustomConfirm("Yeni Öğretim Yılı Ekle", "Ekle", "İptal", entry, func(ok bool) {
@@ -58,10 +58,10 @@ func BuildHeader(state *AppState) fyne.CanvasObject {
 	// Delete Active Year Button with confirmation
 	deleteYearBtn := widget.NewButtonWithIcon("Yılı Sil", theme.DeleteIcon(), func() {
 		if len(yearOptions) <= 1 {
-			dialog.ShowInformation("Uyarı", "Sistemde en az bir öğretim yılı kalmalıdır. Tek kalan yılı silemezsiniz.", state.Window)
+			ShowTurkishInfo("Uyarı", "Sistemde en az bir öğretim yılı kalmalıdır. Tek kalan yılı silemezsiniz.", state.Window)
 			return
 		}
-		dialog.ShowConfirm(
+		ShowTurkishDangerConfirm(
 			"Öğretim Yılını Sil",
 			fmt.Sprintf("DİKKAT:\n'%s' öğretim yılını silmek istediğinize emin misiniz?\n\nBu yıla ait TÜM öğrenci, olay ve disiplin kararları kalıcı olarak silinecektir!\nBu işlem geri alınamaz.", state.AcademicYear),
 			func(ok bool) {
@@ -77,7 +77,7 @@ func BuildHeader(state *AppState) fyne.CanvasObject {
 				if len(remaining) > 0 {
 					state.SetAcademicYear(remaining[0])
 				}
-				dialog.ShowInformation("Silindi", fmt.Sprintf("'%s' öğretim yılı başarıyla silindi.", toDelete), state.Window)
+				ShowTurkishInfo("Silindi", fmt.Sprintf("'%s' öğretim yılı başarıyla silindi.", toDelete), state.Window)
 			},
 			state.Window,
 		)
@@ -93,11 +93,17 @@ func BuildHeader(state *AppState) fyne.CanvasObject {
 	schoolTypeRadio.SetSelected(state.SchoolInfo.SchoolType)
 
 	// Open Output Folder Button
-	openFolderBtn := widget.NewButtonWithIcon("Çıktı Klasörü", theme.FolderOpenIcon(), func() {
+	openFolderBtn := widget.NewButtonWithIcon("Belgeler Klasörü", theme.FolderOpenIcon(), func() {
 		home, err := os.UserHomeDir()
 		outDir := "."
 		if err == nil {
-			outDir = filepath.Join(home, "OkulEvrak_Ciktilar")
+			outDir = filepath.Join(home, "OkulEvrak_belgeler")
+			oldDir := filepath.Join(home, "OkulEvrak_Ciktilar")
+			if _, errOld := os.Stat(oldDir); errOld == nil {
+				if _, errNew := os.Stat(outDir); os.IsNotExist(errNew) {
+					_ = os.Rename(oldDir, outDir)
+				}
+			}
 		}
 		_ = os.MkdirAll(outDir, 0755)
 		_ = pdf.OpenPDF(outDir)
@@ -106,6 +112,11 @@ func BuildHeader(state *AppState) fyne.CanvasObject {
 	// Backup Database Button
 	backupBtn := widget.NewButtonWithIcon("Yedekleme", theme.DownloadIcon(), func() {
 		BackupDatabase(state)
+	})
+
+	// Regulations (Yönetmelik) Button in Top Bar
+	yonetmelikBtn := widget.NewButtonWithIcon("Yönetmelik & Şablon", theme.DocumentIcon(), func() {
+		state.NavigateTo("yonetmelik")
 	})
 
 	// Settings Button
@@ -127,6 +138,7 @@ func BuildHeader(state *AppState) fyne.CanvasObject {
 		openFolderBtn,
 		backupBtn,
 		widget.NewSeparator(),
+		yonetmelikBtn,
 		settingsBtn,
 	)
 
@@ -137,7 +149,7 @@ func BuildHeader(state *AppState) fyne.CanvasObject {
 }
 
 func showInfo(w fyne.Window, title, msg string) {
-	dialog.ShowInformation(title, msg, w)
+	ShowTurkishInfo(title, msg, w)
 }
 
 func showError(w fyne.Window, err error) {
@@ -147,7 +159,7 @@ func showError(w fyne.Window, err error) {
 }
 
 func showConfirm(w fyne.Window, title, msg string, onConfirm func()) {
-	dialog.ShowConfirm(title, msg, func(ok bool) {
+	ShowTurkishConfirm(title, msg, func(ok bool) {
 		if ok {
 			onConfirm()
 		}

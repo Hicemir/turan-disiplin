@@ -14,88 +14,88 @@ func BuildSchoolInfoTab(state *AppState) fyne.CanvasObject {
 	info := state.SchoolInfo
 
 	// School General Details
-	schoolNameEntry := widget.NewEntry()
+	schoolNameEntry := NewSingleLineEntry()
 	schoolNameEntry.SetText(info.SchoolName)
 
-	instCodeEntry := widget.NewEntry()
+	instCodeEntry := NewSingleLineEntry()
 	instCodeEntry.SetText(info.InstitutionCode)
 
-	provEntry := widget.NewEntry()
+	provEntry := NewSingleLineEntry()
 	provEntry.SetText(info.Province)
 
-	distEntry := widget.NewEntry()
+	distEntry := NewSingleLineEntry()
 	distEntry.SetText(info.District)
 
-	principalEntry := widget.NewEntry()
+	principalEntry := NewSingleLineEntry()
 	principalEntry.SetText(info.PrincipalName)
 
-	letterheadEntry := widget.NewMultiLineEntry()
+	letterheadEntry := NewSmartMultiLineEntry()
 	letterheadEntry.SetText(info.Letterhead)
 	letterheadEntry.SetPlaceHolder("Boş bırakılırsa il/ilçe ve okul adından otomatik oluşturulur.")
 
-	officialCodeEntry := widget.NewEntry()
+	officialCodeEntry := NewSingleLineEntry()
 	officialCodeEntry.SetText(info.OfficialCode)
 	officialCodeEntry.SetPlaceHolder("Örn: E-12345678-020-")
 
-	phoneEntry := widget.NewEntry()
+	phoneEntry := NewSingleLineEntry()
 	phoneEntry.SetText(info.Phone)
 
-	faxEntry := widget.NewEntry()
+	faxEntry := NewSingleLineEntry()
 	faxEntry.SetText(info.Fax)
 
-	addressEntry := widget.NewEntry()
+	addressEntry := NewSingleLineEntry()
 	addressEntry.SetText(info.Address)
 
 	// Primary Board Members
-	chairName := widget.NewEntry()
+	chairName := NewSingleLineEntry()
 	chairName.SetText(info.BoardChair)
-	chairTitle := widget.NewEntry()
+	chairTitle := NewSingleLineEntry()
 	chairTitle.SetText(info.BoardChairTitle)
 
-	m1Name := widget.NewEntry()
+	m1Name := NewSingleLineEntry()
 	m1Name.SetText(info.Member1)
-	m1Title := widget.NewEntry()
+	m1Title := NewSingleLineEntry()
 	m1Title.SetText(info.Member1Title)
 
-	m2Name := widget.NewEntry()
+	m2Name := NewSingleLineEntry()
 	m2Name.SetText(info.Member2)
-	m2Title := widget.NewEntry()
+	m2Title := NewSingleLineEntry()
 	m2Title.SetText(info.Member2Title)
 
-	m3Name := widget.NewEntry()
+	m3Name := NewSingleLineEntry()
 	m3Name.SetText(info.Member3)
-	m3Title := widget.NewEntry()
+	m3Title := NewSingleLineEntry()
 	m3Title.SetText(info.Member3Title)
 
-	m4Name := widget.NewEntry()
+	m4Name := NewSingleLineEntry()
 	m4Name.SetText(info.Member4)
-	m4Title := widget.NewEntry()
+	m4Title := NewSingleLineEntry()
 	m4Title.SetText(info.Member4Title)
 
 	// Substitute Board Members
-	subChairName := widget.NewEntry()
+	subChairName := NewSingleLineEntry()
 	subChairName.SetText(info.SubBoardChair)
-	subChairTitle := widget.NewEntry()
+	subChairTitle := NewSingleLineEntry()
 	subChairTitle.SetText(info.SubBoardChairTitle)
 
-	subM1Name := widget.NewEntry()
+	subM1Name := NewSingleLineEntry()
 	subM1Name.SetText(info.SubMember1)
-	subM1Title := widget.NewEntry()
+	subM1Title := NewSingleLineEntry()
 	subM1Title.SetText(info.SubMember1Title)
 
-	subM2Name := widget.NewEntry()
+	subM2Name := NewSingleLineEntry()
 	subM2Name.SetText(info.SubMember2)
-	subM2Title := widget.NewEntry()
+	subM2Title := NewSingleLineEntry()
 	subM2Title.SetText(info.SubMember2Title)
 
-	subM3Name := widget.NewEntry()
+	subM3Name := NewSingleLineEntry()
 	subM3Name.SetText(info.SubMember3)
-	subM3Title := widget.NewEntry()
+	subM3Title := NewSingleLineEntry()
 	subM3Title.SetText(info.SubMember3Title)
 
-	subM4Name := widget.NewEntry()
+	subM4Name := NewSingleLineEntry()
 	subM4Name.SetText(info.SubMember4)
-	subM4Title := widget.NewEntry()
+	subM4Title := NewSingleLineEntry()
 	subM4Title.SetText(info.SubMember4Title)
 
 
@@ -204,5 +204,7 @@ func BuildSchoolInfoTab(state *AppState) fyne.CanvasObject {
 		saveBtn,
 	)
 
-	return container.NewVScroll(content)
+	pageScroll := container.NewVScroll(content)
+	letterheadEntry.ParentScroll = pageScroll
+	return pageScroll
 }

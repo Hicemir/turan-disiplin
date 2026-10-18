@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 
+	"okulevrak/config"
 	"okulevrak/ui"
 )
 
@@ -36,6 +37,10 @@ func main() {
 }
 
 func showYearSelectionModal(w fyne.Window, state *ui.AppState) {
+	if state.Config.RememberYear && state.AcademicYear != "" {
+		return
+	}
+
 	yearOptions := state.Store.GetAcademicYears()
 	foundCurrent := false
 	for _, y := range yearOptions {
@@ -48,20 +53,24 @@ func showYearSelectionModal(w fyne.Window, state *ui.AppState) {
 		yearOptions = append([]string{state.AcademicYear}, yearOptions...)
 	}
 
-	yearSelect := widget.NewSelect(yearOptions, nil)
+	yearSelect := ui.NewTurkishSelect(yearOptions, nil)
 	yearSelect.SetSelected(state.AcademicYear)
 
-	newYearEntry := widget.NewEntry()
+	newYearEntry := ui.NewSingleLineEntry()
 	newYearEntry.SetPlaceHolder("veya yeni öğretim yılı yazınız (örn: 2027 - 2028)")
 
 	schoolTypeRadio := widget.NewRadioGroup([]string{"LİSE", "ORTAOKUL"}, nil)
 	schoolTypeRadio.Horizontal = true
 	schoolTypeRadio.SetSelected(state.SchoolInfo.SchoolType)
 
+	rememberCheck := widget.NewCheck("Bu seçimi hatırla ve açılışta tekrar sorma", nil)
+	rememberCheck.SetChecked(state.Config.RememberYear)
+
 	form := widget.NewForm(
 		widget.NewFormItem("Öğretim Yılı Seçin", yearSelect),
 		widget.NewFormItem("Yeni Öğretim Yılı", newYearEntry),
 		widget.NewFormItem("Okul Kademesi", schoolTypeRadio),
+		widget.NewFormItem("", rememberCheck),
 	)
 
 	d := dialog.NewCustomConfirm(
@@ -81,9 +90,15 @@ func showYearSelectionModal(w fyne.Window, state *ui.AppState) {
 				state.SetAcademicYear(chosenYear)
 			}
 			state.SetSchoolType(schoolTypeRadio.Selected)
+
+			state.Config.RememberYear = rememberCheck.Checked
+			if rememberCheck.Checked {
+				state.Config.DefaultYear = chosenYear
+			}
+			_ = config.SaveConfig(state.Config)
 		},
 		w,
 	)
-	d.Resize(fyne.NewSize(540, 280))
+	d.Resize(fyne.NewSize(540, 310))
 	d.Show()
 }

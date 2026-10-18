@@ -22,10 +22,10 @@ func BuildRestorationTab(state *AppState) fyne.CanvasObject {
 
 	isOrta := strings.ToUpper(state.SchoolInfo.SchoolType) == "ORTAOKUL"
 
-	refundDateEntry := widget.NewEntry()
+	refundDateEntry := NewSingleLineEntry()
 	refundDateEntry.SetText(time.Now().Format("02.01.2006"))
 
-	refundPointsEntry := widget.NewEntry()
+	refundPointsEntry := NewSingleLineEntry()
 	refundPointsEntry.SetText("10")
 
 	statusLabel := widget.NewLabelWithStyle("Bir öğrenci seçiniz.", fyne.TextAlignLeading, fyne.TextStyle{Italic: true})

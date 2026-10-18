@@ -274,7 +274,14 @@ func GenerateUniquePDFPath(baseDir string, prefix string) (string, error) {
 		if err != nil {
 			baseDir = "."
 		} else {
-			baseDir = filepath.Join(home, "OkulEvrak_Ciktilar")
+			baseDir = filepath.Join(home, "OkulEvrak_belgeler")
+			// Migrate legacy folder if exists and new folder does not
+			oldDir := filepath.Join(home, "OkulEvrak_Ciktilar")
+			if _, errOld := os.Stat(oldDir); errOld == nil {
+				if _, errNew := os.Stat(baseDir); os.IsNotExist(errNew) {
+					_ = os.Rename(oldDir, baseDir)
+				}
+			}
 		}
 	}
 

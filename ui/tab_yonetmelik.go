@@ -29,13 +29,13 @@ func BuildYonetmelikTab(state *AppState) fyne.CanvasObject {
 	countLabel := widget.NewLabelWithStyle("Kayıt: 0 madde", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
 
 	// Form Inputs
-	schoolTypeSelect := widget.NewSelect([]string{"LİSE", "ORTAOKUL"}, nil)
+	schoolTypeSelect := NewTurkishSelect([]string{"LİSE", "ORTAOKUL"}, nil)
 	schoolTypeSelect.SetSelected(state.SchoolInfo.SchoolType)
 
-	articleEntry := widget.NewEntry()
+	articleEntry := NewSingleLineEntry()
 	articleEntry.SetPlaceHolder("Örn: Madde 164/1-a")
 
-	penaltySelect := widget.NewSelect([]string{
+	penaltySelect := NewTurkishSelect([]string{
 		"Kınama",
 		"Okuldan Kısa Süreli Uzaklaştırma",
 		"Okul Değiştirme",
@@ -44,7 +44,7 @@ func BuildYonetmelikTab(state *AppState) fyne.CanvasObject {
 		"Okul Değiştirme Yaptırımı",
 	}, nil)
 
-	descEntry := widget.NewMultiLineEntry()
+	descEntry := NewSmartMultiLineEntry()
 	descEntry.SetPlaceHolder("Yönetmelikte belirtilen eylem ve suç tanımı...")
 
 	clearForm := func() {

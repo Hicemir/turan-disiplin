@@ -25,18 +25,18 @@ func BuildNoticesTab(state *AppState) fyne.CanvasObject {
 	searchEntry.SetPlaceHolder("Öğrenci no veya ad soyad ile ara...")
 
 	classes := append([]string{"Tüm Sınıflar"}, state.Store.GetClasses(state.AcademicYear)...)
-	classSelect := widget.NewSelect(classes, nil)
+	classSelect := NewTurkishSelect(classes, nil)
 	classSelect.SetSelected("Tüm Sınıflar")
 
 	penalties := []string{"Tüm Cezalar", "Kınama", "Okuldan Kısa Süreli Uzaklaştırma", "Okul Değiştirme", "Örgün Eğitim Dışına Çıkarma", "Uyarma"}
-	penaltySelect := widget.NewSelect(penalties, nil)
+	penaltySelect := NewTurkishSelect(penalties, nil)
 	penaltySelect.SetSelected("Tüm Cezalar")
 
 	// Notice Controls
-	sayiEntry := widget.NewEntry()
+	sayiEntry := NewSingleLineEntry()
 	sayiEntry.SetText(fmt.Sprintf("%s%d", state.SchoolInfo.OfficialCode, 100))
 
-	tebligTarihiEntry := widget.NewEntry()
+	tebligTarihiEntry := NewSingleLineEntry()
 	tebligTarihiEntry.SetText(time.Now().Format("02.01.2006"))
 
 	// Verdict Summary Labels

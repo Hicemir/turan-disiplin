@@ -18,10 +18,10 @@ func BuildStatsTab(state *AppState) fyne.CanvasObject {
 	var currentList []model.IncidentStudent
 	var semesterStats []model.RewardPenaltyCount
 
-	classSelect := widget.NewSelect(append([]string{"Tüm Sınıflar"}, state.Store.GetClasses(state.AcademicYear)...), nil)
+	classSelect := NewTurkishSelect(append([]string{"Tüm Sınıflar"}, state.Store.GetClasses(state.AcademicYear)...), nil)
 	classSelect.SetSelected("Tüm Sınıflar")
 
-	penaltySelect := widget.NewSelect([]string{"Tüm Cezalar", "Kınama", "Okuldan Kısa Süreli Uzaklaştırma", "Okul Değiştirme", "Örgün Eğitim Dışına Çıkarma", "Uyarma"}, nil)
+	penaltySelect := NewTurkishSelect([]string{"Tüm Cezalar", "Kınama", "Okuldan Kısa Süreli Uzaklaştırma", "Okul Değiştirme", "Örgün Eğitim Dışına Çıkarma", "Uyarma"}, nil)
 	penaltySelect.SetSelected("Tüm Cezalar")
 
 	totalLabel := widget.NewLabelWithStyle("Kayıt: 0", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})

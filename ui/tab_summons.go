@@ -21,16 +21,16 @@ func BuildSummonsTab(state *AppState) fyne.CanvasObject {
 	var selectedIncident *model.Incident
 
 	// --- 1. Student Summons Controls ---
-	incSelect := widget.NewSelect([]string{}, nil)
+	incSelect := NewTurkishSelect([]string{}, nil)
 	callTypeRadio := widget.NewRadioGroup([]string{"Savunma Çağrı Pusulası", "İfade Çağrı Pusulası"}, nil)
 	callTypeRadio.Horizontal = true
 	callTypeRadio.SetSelected("Savunma Çağrı Pusulası")
 
-	placeEntry := widget.NewEntry()
+	placeEntry := NewSingleLineEntry()
 	placeEntry.SetText("Disiplin Kurulu Odası")
-	dateEntry := widget.NewEntry()
+	dateEntry := NewSingleLineEntry()
 	dateEntry.SetText(time.Now().Format("02.01.2006"))
-	timeEntry := widget.NewEntry()
+	timeEntry := NewSingleLineEntry()
 	timeEntry.SetText("10:00")
 
 	// Multi-student selection checklist
@@ -157,19 +157,19 @@ func BuildSummonsTab(state *AppState) fyne.CanvasObject {
 	})
 
 	// --- 2. Board Member Summons Controls ---
-	sayiEntry := widget.NewEntry()
+	sayiEntry := NewSingleLineEntry()
 	sayiEntry.SetText(state.SchoolInfo.OfficialCode + "100")
-	konuEntry := widget.NewEntry()
+	konuEntry := NewSingleLineEntry()
 	konuEntry.SetText("Disiplin Kurulu Toplantı Çağrısı")
-	uyeTarihEntry := widget.NewEntry()
+	uyeTarihEntry := NewSingleLineEntry()
 	uyeTarihEntry.SetText(time.Now().Format("02.01.2006"))
-	uyeSaatEntry := widget.NewEntry()
+	uyeSaatEntry := NewSingleLineEntry()
 	uyeSaatEntry.SetText("11:00")
-	uyeYerEntry := widget.NewEntry()
+	uyeYerEntry := NewSingleLineEntry()
 	uyeYerEntry.SetText("Toplantı Salonu")
 
 	// Agenda Items
-	agendaText := widget.NewMultiLineEntry()
+	agendaText := NewSmartMultiLineEntry()
 	agendaText.SetText("1. Açılış ve yoklama\n2. Hakkında soruşturma açılan öğrencilerin durumlarının görüşülmesi\n3. Kararların alınması ve imzalanması\n4. Kapanış")
 
 	pdfMemberSummonsBtn := widget.NewButtonWithIcon("PDF OLUŞTUR VE AÇ (ÜYE ÇAĞRI PUSULASI)", theme.DocumentIcon(), func() {
@@ -234,6 +234,8 @@ func BuildSummonsTab(state *AppState) fyne.CanvasObject {
 		widget.NewSeparator(),
 		cardMember,
 	))
+
+	agendaText.ParentScroll = content
 
 	reloadIncidents()
 	_ = currentStudents
