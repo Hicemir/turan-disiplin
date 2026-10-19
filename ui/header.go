@@ -33,7 +33,7 @@ func BuildHeader(state *AppState) fyne.CanvasObject {
 		yearOptions = append([]string{state.AcademicYear}, yearOptions...)
 	}
 
-	title := widget.NewLabelWithStyle("🏛️ TURANDİSİPLİN", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	title := widget.NewLabelWithStyle("🏛️ TURANDİSİPLİN "+config.AppVersion, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
 
 	yearSelect := NewTurkishSelect(yearOptions, func(selected string) {
 		if selected != "" && selected != state.AcademicYear {

@@ -50,14 +50,16 @@ func GenerateIfadeSavunmaTutanagi(school *model.SchoolInfo, student *model.Stude
 	}
 
 	for _, row := range infoRows {
+		rowY := doc.PDF.GetY()
 		doc.SetBoldFont(8.5)
 		doc.PDF.SetX(doc.MarginLeft)
+		doc.PDF.SetY(rowY)
 		_ = doc.PDF.CellWithOption(&gopdf.Rect{W: lblW, H: 13}, row[0], gopdf.CellOption{Align: gopdf.Left})
 
 		doc.SetRegularFont(8.5)
-		doc.PDF.SetX(doc.MarginLeft + lblW)
-		_ = doc.PDF.CellWithOption(&gopdf.Rect{W: valW, H: 13}, row[1], gopdf.CellOption{Align: gopdf.Left})
-		doc.PDF.Br(14)
+		valLines := doc.SplitLines(row[1], valW)
+		doc.DrawWrappedCellLines(doc.MarginLeft+lblW, rowY, valW, 13.0, valLines, gopdf.Left)
+		doc.PDF.SetY(rowY + float64(len(valLines))*13.0 + 1.0)
 	}
 
 	doc.PDF.Br(6)
@@ -74,7 +76,6 @@ func GenerateIfadeSavunmaTutanagi(school *model.SchoolInfo, student *model.Stude
 	doc.PDF.Br(12)
 
 	doc.SetRegularFont(8.0)
-	doc.PDF.SetX(doc.MarginLeft)
 	eventSummary := ""
 	if incident != nil {
 		eventSummary = incident.Summary
@@ -82,7 +83,7 @@ func GenerateIfadeSavunmaTutanagi(school *model.SchoolInfo, student *model.Stude
 			eventSummary = incident.Title
 		}
 	}
-	_ = doc.PDF.MultiCell(&gopdf.Rect{W: doc.UsableWidth, H: 12}, eventSummary)
+	doc.DrawWrappedText(doc.MarginLeft, doc.UsableWidth, 12.0, eventSummary, gopdf.Left)
 	doc.PDF.Br(4)
 
 	yLineBot := doc.PDF.GetY()
@@ -92,8 +93,7 @@ func GenerateIfadeSavunmaTutanagi(school *model.SchoolInfo, student *model.Stude
 	// If statement text is provided, render it, otherwise render ruled lines
 	if strings.TrimSpace(statementText) != "" {
 		doc.SetRegularFont(8.5)
-		doc.PDF.SetX(doc.MarginLeft)
-		_ = doc.PDF.MultiCell(&gopdf.Rect{W: doc.UsableWidth, H: 14}, statementText)
+		doc.DrawWrappedText(doc.MarginLeft, doc.UsableWidth, 13.5, statementText, gopdf.Left)
 		doc.PDF.Br(15)
 	} else {
 		// Calculate remaining space for ruled lines (up to ~22 lines so signatures fit comfortably)
@@ -247,10 +247,9 @@ func renderStudentMiniHeader(doc *DocWrapper, student *model.Student) {
 		return
 	}
 	doc.SetBoldFont(8.5)
-	doc.PDF.SetX(doc.MarginLeft)
 	info := fmt.Sprintf("Öğrencinin Adı Soyadı: %s      Sınıfı / Okul No: %s - %s", student.FullName, student.ClassSection, student.SchoolNo)
-	_ = doc.PDF.CellWithOption(&gopdf.Rect{W: doc.UsableWidth, H: 14}, info, gopdf.CellOption{Align: gopdf.Left})
-	doc.PDF.Br(16)
+	doc.DrawWrappedText(doc.MarginLeft, doc.UsableWidth, 14.0, info, gopdf.Left)
+	doc.PDF.Br(4)
 }
 
 // GenerateEkSureTalepFormu generates the 7-day investigation extension request.
@@ -293,10 +292,13 @@ func GenerateEkSureTalepFormu(school *model.SchoolInfo, student *model.Student, 
 		{"Tarih", time.Now().Format("02/01/2006")},
 	}
 
+	lineH := 12.0
 	for _, r := range rows {
-		h := 22.0
-		if len(r[1]) > 50 {
-			h = 32.0
+		doc.SetRegularFont(8.0)
+		valLines := doc.SplitLines(r[1], valW-8)
+		h := float64(len(valLines))*lineH + 8.0
+		if h < 20.0 {
+			h = 20.0
 		}
 		y := doc.PDF.GetY()
 
@@ -309,9 +311,7 @@ func GenerateEkSureTalepFormu(school *model.SchoolInfo, student *model.Student, 
 		_ = doc.PDF.CellWithOption(&gopdf.Rect{W: lblW - 8, H: 12}, r[0], gopdf.CellOption{Align: gopdf.Left})
 
 		doc.SetRegularFont(8.0)
-		doc.PDF.SetX(doc.MarginLeft + lblW + 4)
-		doc.PDF.SetY(y + 4)
-		_ = doc.PDF.MultiCell(&gopdf.Rect{W: valW - 8, H: 12}, r[1])
+		doc.DrawWrappedCellLines(doc.MarginLeft+lblW+4, y+4, valW-8, lineH, valLines, gopdf.Left)
 
 		doc.PDF.SetY(y + h)
 	}
@@ -319,16 +319,12 @@ func GenerateEkSureTalepFormu(school *model.SchoolInfo, student *model.Student, 
 	doc.PDF.Br(25)
 
 	// Petition block
-	doc.SetBoldFont(10)
-	doc.PDF.SetX(doc.MarginLeft)
-	_ = doc.PDF.CellWithOption(&gopdf.Rect{W: doc.UsableWidth, H: 14}, strings.ToUpper(school.SchoolName)+" MÜDÜRLÜĞÜNE", gopdf.CellOption{Align: gopdf.Center})
-	doc.PDF.Br(20)
+	doc.DrawTitle(strings.ToUpper(school.SchoolName)+" MÜDÜRLÜĞÜNE", 10, 14)
 
 	doc.SetRegularFont(8.5)
-	doc.PDF.SetX(doc.MarginLeft)
 	petitionText := "Yukarıda belirtilen olay ve öğrenci ile ilgili yürütülen disiplin / davranış değerlendirme incelemesinin sağlıklı bir şekilde tamamlanabilmesi için ilgili mevzuat gereğince belirtilen sürenin ek süre olarak kurulumuza verilmesini arz ederim."
-	_ = doc.PDF.MultiCell(&gopdf.Rect{W: doc.UsableWidth, H: 14}, petitionText)
-	doc.PDF.Br(25)
+	doc.DrawWrappedText(doc.MarginLeft, doc.UsableWidth, 13.5, petitionText, gopdf.Left)
+	doc.PDF.Br(20)
 
 	// Board Chair Signature
 	doc.SetBoldFont(8.0)
@@ -369,8 +365,14 @@ func GenerateSikayetFormu(school *model.SchoolInfo, complainant, reported, witne
 		{"Olayın Konusu", topic},
 	}
 
+	lineH := 11.5
 	for _, r := range rows {
-		h := 20.0
+		doc.SetRegularFont(7.5)
+		valLines := doc.SplitLines(r[1], valW-8)
+		h := float64(len(valLines))*lineH + 7.0
+		if h < 20.0 {
+			h = 20.0
+		}
 		y := doc.PDF.GetY()
 		doc.DrawRect(doc.MarginLeft, y, lblW, h)
 		doc.DrawRect(doc.MarginLeft+lblW, y, valW, h)
@@ -381,9 +383,7 @@ func GenerateSikayetFormu(school *model.SchoolInfo, complainant, reported, witne
 		_ = doc.PDF.CellWithOption(&gopdf.Rect{W: lblW - 8, H: 11}, r[0], gopdf.CellOption{Align: gopdf.Left})
 
 		doc.SetRegularFont(7.5)
-		doc.PDF.SetX(doc.MarginLeft + lblW + 4)
-		doc.PDF.SetY(y + 4)
-		_ = doc.PDF.CellWithOption(&gopdf.Rect{W: valW - 8, H: 11}, r[1], gopdf.CellOption{Align: gopdf.Left})
+		doc.DrawWrappedCellLines(doc.MarginLeft+lblW+4, y+4, valW-8, lineH, valLines, gopdf.Left)
 
 		doc.PDF.SetY(y + h)
 	}
@@ -396,8 +396,7 @@ func GenerateSikayetFormu(school *model.SchoolInfo, complainant, reported, witne
 
 	if strings.TrimSpace(description) != "" {
 		doc.SetRegularFont(8.0)
-		doc.PDF.SetX(doc.MarginLeft)
-		_ = doc.PDF.MultiCell(&gopdf.Rect{W: doc.UsableWidth, H: 13}, description)
+		doc.DrawWrappedText(doc.MarginLeft, doc.UsableWidth, 13.0, description, gopdf.Left)
 		doc.PDF.Br(10)
 	} else {
 		doc.DrawDottedLines(5, 14)
@@ -411,8 +410,7 @@ func GenerateSikayetFormu(school *model.SchoolInfo, complainant, reported, witne
 
 	if strings.TrimSpace(guidanceNotes) != "" {
 		doc.SetRegularFont(8.0)
-		doc.PDF.SetX(doc.MarginLeft)
-		_ = doc.PDF.MultiCell(&gopdf.Rect{W: doc.UsableWidth, H: 13}, guidanceNotes)
+		doc.DrawWrappedText(doc.MarginLeft, doc.UsableWidth, 13.0, guidanceNotes, gopdf.Left)
 		doc.PDF.Br(10)
 	} else {
 		doc.DrawDottedLines(6, 14)
@@ -456,8 +454,14 @@ func GenerateSozluUyariTutanagi(school *model.SchoolInfo, student *model.Student
 		{"Konu", topic},
 	}
 
+	lineH := 12.0
 	for _, r := range rows {
-		h := 20.0
+		doc.SetRegularFont(8.0)
+		valLines := doc.SplitLines(r[1], valW-8)
+		h := float64(len(valLines))*lineH + 8.0
+		if h < 20.0 {
+			h = 20.0
+		}
 		y := doc.PDF.GetY()
 		doc.DrawRect(doc.MarginLeft, y, lblW, h)
 		doc.DrawRect(doc.MarginLeft+lblW, y, valW, h)
@@ -468,9 +472,7 @@ func GenerateSozluUyariTutanagi(school *model.SchoolInfo, student *model.Student
 		_ = doc.PDF.CellWithOption(&gopdf.Rect{W: lblW - 8, H: 12}, r[0], gopdf.CellOption{Align: gopdf.Left})
 
 		doc.SetRegularFont(8.0)
-		doc.PDF.SetX(doc.MarginLeft + lblW + 4)
-		doc.PDF.SetY(y + 4)
-		_ = doc.PDF.CellWithOption(&gopdf.Rect{W: valW - 8, H: 12}, r[1], gopdf.CellOption{Align: gopdf.Left})
+		doc.DrawWrappedCellLines(doc.MarginLeft+lblW+4, y+4, valW-8, lineH, valLines, gopdf.Left)
 
 		doc.PDF.SetY(y + h)
 	}
@@ -483,8 +485,7 @@ func GenerateSozluUyariTutanagi(school *model.SchoolInfo, student *model.Student
 
 	if strings.TrimSpace(details) != "" {
 		doc.SetRegularFont(8.5)
-		doc.PDF.SetX(doc.MarginLeft)
-		_ = doc.PDF.MultiCell(&gopdf.Rect{W: doc.UsableWidth, H: 14}, details)
+		doc.DrawWrappedText(doc.MarginLeft, doc.UsableWidth, 13.5, details, gopdf.Left)
 		doc.PDF.Br(15)
 	} else {
 		doc.DrawRuledLines(10, 16)
@@ -548,9 +549,8 @@ func GenerateOgrenciSozlesmesi(school *model.SchoolInfo, student *model.Student,
 	pledge := "Okul kurallarına, öğretmenlerime ve arkadaşlarıma saygılı davranacağıma, derslerimi ve ödevlerimi aksatmadan takip edeceğime, okul araç ve gereçlerini koruyacağıma, huzur ve disiplini bozacak hiçbir tutum ve davranış içerisinde bulunmayacağıma; aksi takdirde ilgili mevzuat hükümlerinin uygulanacağını bildiğimi beyan ve taahhüt ederim."
 
 	doc.SetRegularFont(9.0)
-	doc.PDF.SetX(doc.MarginLeft)
-	_ = doc.PDF.MultiCell(&gopdf.Rect{W: doc.UsableWidth, H: 16}, pledge)
-	doc.PDF.Br(35)
+	doc.DrawWrappedText(doc.MarginLeft, doc.UsableWidth, 15.0, pledge, gopdf.Left)
+	doc.PDF.Br(30)
 
 	doc.SetBoldFont(8.5)
 	doc.PDF.SetX(doc.MarginLeft)
@@ -595,6 +595,9 @@ func GenerateVeliGorusmeTutanagi(school *model.SchoolInfo, student *model.Studen
 	if student != nil {
 		stName = student.FullName
 		stClass = fmt.Sprintf("%s - %s", student.ClassSection, student.SchoolNo)
+		if !isBlank && strings.TrimSpace(parentName) == "" {
+			parentName = model.EffectiveGuardianName(student.FullName, student.FatherName, student.GuardianName)
+		}
 	}
 
 	rows := [][2]string{
@@ -605,8 +608,17 @@ func GenerateVeliGorusmeTutanagi(school *model.SchoolInfo, student *model.Studen
 		{"Görüşme Konusu", topic},
 	}
 
+	lineH := 12.0
 	for _, r := range rows {
-		h := 20.0
+		doc.SetRegularFont(8.0)
+		valLines := []string{""}
+		if strings.TrimSpace(r[1]) != "" {
+			valLines = doc.SplitLines(r[1], valW-8)
+		}
+		h := float64(len(valLines))*lineH + 8.0
+		if h < 20.0 {
+			h = 20.0
+		}
 		y := doc.PDF.GetY()
 		doc.DrawRect(doc.MarginLeft, y, lblW, h)
 		doc.DrawRect(doc.MarginLeft+lblW, y, valW, h)
@@ -617,9 +629,7 @@ func GenerateVeliGorusmeTutanagi(school *model.SchoolInfo, student *model.Studen
 		_ = doc.PDF.CellWithOption(&gopdf.Rect{W: lblW - 8, H: 12}, r[0], gopdf.CellOption{Align: gopdf.Left})
 
 		doc.SetRegularFont(8.0)
-		doc.PDF.SetX(doc.MarginLeft + lblW + 4)
-		doc.PDF.SetY(y + 4)
-		_ = doc.PDF.CellWithOption(&gopdf.Rect{W: valW - 8, H: 12}, r[1], gopdf.CellOption{Align: gopdf.Left})
+		doc.DrawWrappedCellLines(doc.MarginLeft+lblW+4, y+4, valW-8, lineH, valLines, gopdf.Left)
 
 		doc.PDF.SetY(y + h)
 	}
@@ -632,8 +642,7 @@ func GenerateVeliGorusmeTutanagi(school *model.SchoolInfo, student *model.Studen
 
 	if strings.TrimSpace(notes) != "" {
 		doc.SetRegularFont(8.0)
-		doc.PDF.SetX(doc.MarginLeft)
-		_ = doc.PDF.MultiCell(&gopdf.Rect{W: doc.UsableWidth, H: 13}, notes)
+		doc.DrawWrappedText(doc.MarginLeft, doc.UsableWidth, 13.0, notes, gopdf.Left)
 		doc.PDF.Br(12)
 	} else {
 		doc.DrawDottedLines(7, 14)
@@ -647,8 +656,7 @@ func GenerateVeliGorusmeTutanagi(school *model.SchoolInfo, student *model.Studen
 
 	if strings.TrimSpace(decision) != "" {
 		doc.SetRegularFont(8.0)
-		doc.PDF.SetX(doc.MarginLeft)
-		_ = doc.PDF.MultiCell(&gopdf.Rect{W: doc.UsableWidth, H: 13}, decision)
+		doc.DrawWrappedText(doc.MarginLeft, doc.UsableWidth, 13.0, decision, gopdf.Left)
 		doc.PDF.Br(12)
 	} else {
 		doc.DrawDottedLines(5, 14)
@@ -716,9 +724,8 @@ func GenerateRehberlikGorusFormu(school *model.SchoolInfo, student *model.Studen
 	}
 
 	doc.SetRegularFont(8.5)
-	doc.PDF.SetX(doc.MarginLeft)
-	_ = doc.PDF.MultiCell(&gopdf.Rect{W: doc.UsableWidth, H: 13}, stText)
-	doc.PDF.Br(14)
+	doc.DrawWrappedText(doc.MarginLeft, doc.UsableWidth, 13.0, stText, gopdf.Left)
+	doc.PDF.Br(12)
 
 	sections := []string{
 		"1- Öğrencinin Ailevi Durumu:",
@@ -729,15 +736,13 @@ func GenerateRehberlikGorusFormu(school *model.SchoolInfo, student *model.Studen
 
 	for i, sec := range sections {
 		doc.SetBoldFont(8.0)
-		doc.PDF.SetX(doc.MarginLeft)
-		_ = doc.PDF.CellWithOption(&gopdf.Rect{W: doc.UsableWidth, H: 12}, sec, gopdf.CellOption{Align: gopdf.Left})
-		doc.PDF.Br(12)
+		doc.DrawWrappedText(doc.MarginLeft, doc.UsableWidth, 12.0, sec, gopdf.Left)
+		doc.PDF.Br(2)
 
 		note := counselorNotes[i]
 		if strings.TrimSpace(note) != "" {
 			doc.SetRegularFont(8.0)
-			doc.PDF.SetX(doc.MarginLeft)
-			_ = doc.PDF.MultiCell(&gopdf.Rect{W: doc.UsableWidth, H: 12}, note)
+			doc.DrawWrappedText(doc.MarginLeft, doc.UsableWidth, 12.5, note, gopdf.Left)
 			doc.PDF.Br(8)
 		} else {
 			doc.DrawDottedLines(5, 13)

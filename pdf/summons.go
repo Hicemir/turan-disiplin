@@ -65,14 +65,20 @@ func GenerateCagriPusulasi(school *model.SchoolInfo, students []*model.Student, 
 		}
 
 		for _, br := range boxRows {
+			rowY := doc.PDF.GetY()
 			doc.SetBoldFont(8.0)
 			doc.PDF.SetX(doc.MarginLeft + indent)
+			doc.PDF.SetY(rowY)
 			_ = doc.PDF.CellWithOption(&gopdf.Rect{W: lblW, H: 14}, br[0], gopdf.CellOption{Align: gopdf.Left})
 
 			doc.SetRegularFont(8.0)
-			doc.PDF.SetX(doc.MarginLeft + indent + lblW)
-			_ = doc.PDF.CellWithOption(&gopdf.Rect{W: valW, H: 14}, br[1], gopdf.CellOption{Align: gopdf.Left})
-			doc.PDF.Br(14)
+			valLines := doc.SplitLines(br[1], valW)
+			doc.DrawWrappedCellLines(doc.MarginLeft+indent+lblW, rowY, valW, 13.0, valLines, gopdf.Left)
+			rowH := float64(len(valLines)) * 13.0
+			if rowH < 14.0 {
+				rowH = 14.0
+			}
+			doc.PDF.SetY(rowY + rowH)
 		}
 
 		doc.PDF.Br(2)
@@ -103,10 +109,9 @@ func GenerateCagriPusulasi(school *model.SchoolInfo, students []*model.Student, 
 
 		// Table 4: Summons paragraph
 		doc.SetRegularFont(8.0)
-		doc.PDF.SetX(doc.MarginLeft + 15)
 		para := fmt.Sprintf("Hakkınızda açılmış bulunan inceleme / soruşturma nedeniyle %s, yukarıda belirtilen gün ve saatte %snızı vermek üzere hazır bulunmanız rica olunur.", citation, strings.ToLower(callType))
-		_ = doc.PDF.MultiCell(&gopdf.Rect{W: doc.UsableWidth - 30, H: 14}, para)
-		doc.PDF.Br(25)
+		doc.DrawWrappedText(doc.MarginLeft+15, doc.UsableWidth-30, 13.0, para, gopdf.Left)
+		doc.PDF.Br(20)
 
 		// Chair signature
 		doc.SetBoldFont(8.0)
@@ -196,10 +201,9 @@ func GenerateUyeCagriPusulasi(school *model.SchoolInfo, sayi, konu, dateStr, tim
 
 	// Body invitation
 	doc.SetRegularFont(8.5)
-	doc.PDF.SetX(doc.MarginLeft)
 	body := fmt.Sprintf("Kurulumuz aşağıda belirtilen gündem maddelerini görüşmek üzere %s günü saat %s'de %s toplanacaktır. Belirtilen gün ve saatte toplantıda hazır bulunmanızı rica ederim.", dateStr, timeStr, place)
-	_ = doc.PDF.MultiCell(&gopdf.Rect{W: doc.UsableWidth, H: 14}, body)
-	doc.PDF.Br(22)
+	doc.DrawWrappedText(doc.MarginLeft, doc.UsableWidth, 13.5, body, gopdf.Left)
+	doc.PDF.Br(18)
 
 	// Dual signatures: Left Chair, Right Principal
 	colW := doc.UsableWidth / 2.0
@@ -237,13 +241,12 @@ func GenerateUyeCagriPusulasi(school *model.SchoolInfo, sayi, konu, dateStr, tim
 		if item == "" {
 			continue
 		}
-		doc.PDF.SetX(doc.MarginLeft + 20)
 		txt := fmt.Sprintf("%d) %s", i+1, item)
-		_ = doc.PDF.MultiCell(&gopdf.Rect{W: doc.UsableWidth - 40, H: 13}, txt)
-		doc.PDF.Br(4)
+		doc.DrawWrappedText(doc.MarginLeft+20, doc.UsableWidth-40, 12.5, txt, gopdf.Left)
+		doc.PDF.Br(3)
 	}
 
-	doc.PDF.Br(18)
+	doc.PDF.Br(16)
 
 	// Members signature table
 	indentM := 60.0
@@ -329,6 +332,11 @@ func GenerateCagriOgrenciListesi(school *model.SchoolInfo, students []*model.Stu
 	doc.SetRegularFont(8.0)
 
 	for i, st := range students {
+		if curY+18 > PageHeightPortrait-doc.MarginBottom-50 {
+			doc.PDF.AddPage()
+			curY = doc.MarginTop
+			doc.SetRegularFont(8.0)
+		}
 		doc.DrawRect(doc.MarginLeft, curY, wSira, 18)
 		doc.DrawRect(doc.MarginLeft+wSira, curY, wName, 18)
 		doc.DrawRect(doc.MarginLeft+wSira+wName, curY, wClass, 18)
@@ -422,10 +430,9 @@ func GenerateYaziliUyariTutanagi(school *model.SchoolInfo, student *model.Studen
 
 	doc.PDF.Br(18)
 	doc.SetRegularFont(8.5)
-	doc.PDF.SetX(doc.MarginLeft)
 	warnText := fmt.Sprintf("Milli Eğitim Bakanlığı Ortaöğretim Kurumları Yönetmeliğinin 163/2 maddesi ve %s maddesi (%s) kapsamında gösterdiğiniz olumsuz davranış nedeniyle işbu yazılı uyarı tarafınıza tebliğ edilmiştir. Aynı veya benzer olumsuz davranışların tekrarlanması durumunda disiplin işlemi uygulanacağı hususunda bilginizi ve gereğini rica ederim.", clause, explanation)
-	_ = doc.PDF.MultiCell(&gopdf.Rect{W: doc.UsableWidth, H: 14}, warnText)
-	doc.PDF.Br(30)
+	doc.DrawWrappedText(doc.MarginLeft, doc.UsableWidth, 13.5, warnText, gopdf.Left)
+	doc.PDF.Br(24)
 
 	// Principal
 	doc.SetBoldFont(8.0)
@@ -439,10 +446,9 @@ func GenerateYaziliUyariTutanagi(school *model.SchoolInfo, student *model.Studen
 
 	// Acknowledgement
 	doc.SetRegularFont(8.0)
-	doc.PDF.SetX(doc.MarginLeft)
 	ack := "Yukarıdaki yazılı uyarıyı okudum ve bir nüshasını elden teslim aldım."
-	_ = doc.PDF.CellWithOption(&gopdf.Rect{W: doc.UsableWidth, H: 12}, ack, gopdf.CellOption{Align: gopdf.Left})
-	doc.PDF.Br(20)
+	doc.DrawWrappedText(doc.MarginLeft, doc.UsableWidth, 12.0, ack, gopdf.Left)
+	doc.PDF.Br(16)
 
 	colW := doc.UsableWidth / 2.0
 	yAck := doc.PDF.GetY()

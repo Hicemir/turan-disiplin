@@ -106,6 +106,66 @@ func (d *DocWrapper) SetItalicFont(size float64) {
 	_ = d.PDF.SetFont(FontFamily, "I", size)
 }
 
+// SplitLines splits text by newlines and wraps each paragraph to fit within maxWidth using the currently active font.
+func (d *DocWrapper) SplitLines(text string, maxWidth float64) []string {
+	text = strings.ReplaceAll(text, "\r\n", "\n")
+	text = strings.TrimSpace(text)
+	if text == "" {
+		return []string{"—"}
+	}
+	if maxWidth <= 10 {
+		return []string{text}
+	}
+	paragraphs := strings.Split(text, "\n")
+	var out []string
+	for _, p := range paragraphs {
+		p = strings.TrimSpace(p)
+		if p == "" {
+			continue
+		}
+		wrapped, err := d.PDF.SplitTextWithWordWrap(p, maxWidth)
+		if err != nil || len(wrapped) == 0 {
+			out = append(out, p)
+		} else {
+			out = append(out, wrapped...)
+		}
+	}
+	if len(out) == 0 {
+		return []string{"—"}
+	}
+	return out
+}
+
+// DrawWrappedText word-wraps text within width at horizontal offset x, advancing Y by lineH per line.
+func (d *DocWrapper) DrawWrappedText(x, width, lineH float64, text string, align int) {
+	if strings.TrimSpace(text) == "" {
+		return
+	}
+	pageH := PageHeightPortrait
+	if d.Landscape {
+		pageH = PageHeightLandscape
+	}
+	lines := d.SplitLines(text, width)
+	for _, line := range lines {
+		if d.PDF.GetY()+lineH > pageH-d.MarginBottom-25 {
+			d.PDF.AddPage()
+			d.PDF.SetY(d.MarginTop)
+		}
+		d.PDF.SetX(x)
+		_ = d.PDF.CellWithOption(&gopdf.Rect{W: width, H: lineH}, line, gopdf.CellOption{Align: align})
+		d.PDF.Br(lineH)
+	}
+}
+
+// DrawWrappedCellLines renders pre-wrapped lines inside a table cell starting at (x, startY).
+func (d *DocWrapper) DrawWrappedCellLines(x, startY, width, lineH float64, lines []string, align int) {
+	for i, line := range lines {
+		d.PDF.SetX(x)
+		d.PDF.SetY(startY + float64(i)*lineH)
+		_ = d.PDF.CellWithOption(&gopdf.Rect{W: width, H: lineH}, line, gopdf.CellOption{Align: align})
+	}
+}
+
 // DrawAntet draws the official school header (TC, MEB, Valilik/Kaymakamlık, Okul Adı)
 func (d *DocWrapper) DrawAntet(school *model.SchoolInfo) {
 	d.SetBoldFont(9)
@@ -135,23 +195,33 @@ func (d *DocWrapper) DrawAntet(school *model.SchoolInfo) {
 	}
 
 	for _, line := range lines {
-		d.PDF.SetX(d.MarginLeft)
-		_ = d.PDF.CellWithOption(&gopdf.Rect{W: d.UsableWidth, H: 14}, line, gopdf.CellOption{
-			Align: gopdf.Center,
-		})
-		d.PDF.Br(14)
+		wrapped := d.SplitLines(line, d.UsableWidth)
+		for _, wLine := range wrapped {
+			d.PDF.SetX(d.MarginLeft)
+			_ = d.PDF.CellWithOption(&gopdf.Rect{W: d.UsableWidth, H: 13}, wLine, gopdf.CellOption{
+				Align: gopdf.Center,
+			})
+			d.PDF.Br(13)
+		}
 	}
 	d.PDF.Br(4)
 }
 
-// DrawTitle draws a centered bold title.
+// DrawTitle draws a centered bold title (supports multi-line \n and automatic word-wrapping).
 func (d *DocWrapper) DrawTitle(title string, size float64, spacingAfter float64) {
 	d.SetBoldFont(size)
-	d.PDF.SetX(d.MarginLeft)
-	_ = d.PDF.CellWithOption(&gopdf.Rect{W: d.UsableWidth, H: size * 1.5}, title, gopdf.CellOption{
-		Align: gopdf.Center,
-	})
-	d.PDF.Br(size*1.5 + spacingAfter)
+	lineH := size * 1.35
+	wrapped := d.SplitLines(title, d.UsableWidth)
+	for _, line := range wrapped {
+		d.PDF.SetX(d.MarginLeft)
+		_ = d.PDF.CellWithOption(&gopdf.Rect{W: d.UsableWidth, H: lineH}, line, gopdf.CellOption{
+			Align: gopdf.Center,
+		})
+		d.PDF.Br(lineH)
+	}
+	if spacingAfter > 0 {
+		d.PDF.Br(spacingAfter)
+	}
 }
 
 // DrawRect draws a border rectangle from top-left.
@@ -208,23 +278,30 @@ func (d *DocWrapper) DrawSignatures5(school *model.SchoolInfo, titleLabel string
 
 	// Names & Titles
 	d.SetRegularFont(7.0)
+	maxEndY := startY + 55
 	for i, m := range members {
-		nameStr := m.Name
+		nameStr := strings.TrimSpace(m.Name)
 		if nameStr == "" {
 			nameStr = "........................"
 		}
-		titleStr := m.Title
+		titleStr := strings.TrimSpace(m.Title)
 
-		d.PDF.SetX(d.MarginLeft + float64(i)*colW)
-		d.PDF.SetY(startY + 32)
-		_ = d.PDF.CellWithOption(&gopdf.Rect{W: colW, H: 10}, nameStr, gopdf.CellOption{Align: gopdf.Center})
+		colX := d.MarginLeft + float64(i)*colW + 2
+		nameLines := d.SplitLines(nameStr, colW-4)
+		d.DrawWrappedCellLines(colX, startY+30, colW-4, 9.5, nameLines, gopdf.Center)
 
-		d.PDF.SetX(d.MarginLeft + float64(i)*colW)
-		d.PDF.SetY(startY + 43)
-		_ = d.PDF.CellWithOption(&gopdf.Rect{W: colW, H: 10}, titleStr, gopdf.CellOption{Align: gopdf.Center})
+		titleY := startY + 30 + float64(len(nameLines))*9.5 + 1
+		if titleStr != "" {
+			titleLines := d.SplitLines(titleStr, colW-4)
+			d.DrawWrappedCellLines(colX, titleY, colW-4, 9.5, titleLines, gopdf.Center)
+			endY := titleY + float64(len(titleLines))*9.5
+			if endY > maxEndY {
+				maxEndY = endY
+			}
+		}
 	}
 
-	d.PDF.SetY(startY + 60)
+	d.PDF.SetY(maxEndY + 6)
 }
 
 // DrawPrincipalApproval draws the centered "UYGUNDUR / Okul Müdürü" block.
@@ -261,11 +338,21 @@ func (d *DocWrapper) DrawFooterAddress(school *model.SchoolInfo) {
 	d.PDF.Line(d.MarginLeft, footerY, d.MarginLeft+d.UsableWidth, footerY)
 
 	d.SetItalicFont(6.5)
-	d.PDF.SetX(d.MarginLeft)
-	d.PDF.SetY(footerY + 3)
-
-	contact := fmt.Sprintf("Adres: %s   |   Tel: %s   |   Fax: %s", school.Address, school.Phone, school.Fax)
-	_ = d.PDF.CellWithOption(&gopdf.Rect{W: d.UsableWidth, H: 10}, contact, gopdf.CellOption{Align: gopdf.Center})
+	var parts []string
+	if strings.TrimSpace(school.Address) != "" {
+		parts = append(parts, "Adres: "+strings.TrimSpace(school.Address))
+	}
+	if strings.TrimSpace(school.Phone) != "" {
+		parts = append(parts, "Tel: "+strings.TrimSpace(school.Phone))
+	}
+	if strings.TrimSpace(school.Fax) != "" {
+		parts = append(parts, "Fax: "+strings.TrimSpace(school.Fax))
+	}
+	contact := strings.Join(parts, "   |   ")
+	if contact != "" {
+		lines := d.SplitLines(contact, d.UsableWidth)
+		d.DrawWrappedCellLines(d.MarginLeft, footerY+3, d.UsableWidth, 9.0, lines, gopdf.Center)
+	}
 }
 
 // GenerateUniquePDFPath returns an available file path avoiding collision.

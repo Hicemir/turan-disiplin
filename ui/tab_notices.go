@@ -84,10 +84,23 @@ func BuildNoticesTab(state *AppState) fyne.CanvasObject {
 		vNo, _ := strconv.Atoi(selectedStudent.VerdictNo)
 		suspDays, _ := strconv.Atoi(selectedStudent.SuspensionDays)
 
+		inc, _ := state.Store.GetIncidentByCode(state.AcademicYear, selectedStudent.IncidentCode)
+
+		offenseType := strings.TrimSpace(selectedStudent.OffenseCategory)
+		if offenseType == "" && inc != nil && strings.TrimSpace(inc.Title) != "" {
+			offenseType = strings.TrimSpace(inc.Title)
+		}
+		if offenseType == "" && strings.TrimSpace(selectedStudent.IncidentTitle) != "" {
+			offenseType = strings.TrimSpace(selectedStudent.IncidentTitle)
+		}
+		if offenseType == "" {
+			offenseType = strings.TrimSpace(selectedStudent.ClauseDescription)
+		}
+
 		verdict := &model.Verdict{
 			DecisionNo:      vNo,
 			DecisionDate:    selectedStudent.VerdictDate,
-			OffenseType:     selectedStudent.OffenseCategory,
+			OffenseType:     offenseType,
 			RegClause:       selectedStudent.ClauseCode,
 			RegClauseDesc:   selectedStudent.ClauseDescription,
 			PenaltyName:     selectedStudent.ImposedPenalty,
@@ -103,10 +116,15 @@ func BuildNoticesTab(state *AppState) fyne.CanvasObject {
 				SchoolNo:     selectedStudent.SchoolNo,
 				FullName:     selectedStudent.FullName,
 				ClassSection: selectedStudent.ClassSection,
+				FatherName:   selectedStudent.FatherName,
+				GuardianName: model.EffectiveGuardianName(selectedStudent.FullName, selectedStudent.FatherName, selectedStudent.GuardianName),
 			}
+		} else {
+			if mStudent.FatherName == "" {
+				mStudent.FatherName = selectedStudent.FatherName
+			}
+			mStudent.GuardianName = model.EffectiveGuardianName(mStudent.FullName, mStudent.FatherName, mStudent.GuardianName)
 		}
-
-		inc, _ := state.Store.GetIncidentByCode(state.AcademicYear, selectedStudent.IncidentCode)
 
 		outPath, err := pdf.GenerateUniquePDFPath("", fmt.Sprintf("Ogrenci_Tebligat_%s_%s", selectedStudent.SchoolNo, strings.ReplaceAll(selectedStudent.FullName, " ", "_")))
 		if err != nil {
@@ -134,10 +152,23 @@ func BuildNoticesTab(state *AppState) fyne.CanvasObject {
 		vNo, _ := strconv.Atoi(selectedStudent.VerdictNo)
 		suspDays, _ := strconv.Atoi(selectedStudent.SuspensionDays)
 
+		inc, _ := state.Store.GetIncidentByCode(state.AcademicYear, selectedStudent.IncidentCode)
+
+		offenseType := strings.TrimSpace(selectedStudent.OffenseCategory)
+		if offenseType == "" && inc != nil && strings.TrimSpace(inc.Title) != "" {
+			offenseType = strings.TrimSpace(inc.Title)
+		}
+		if offenseType == "" && strings.TrimSpace(selectedStudent.IncidentTitle) != "" {
+			offenseType = strings.TrimSpace(selectedStudent.IncidentTitle)
+		}
+		if offenseType == "" {
+			offenseType = strings.TrimSpace(selectedStudent.ClauseDescription)
+		}
+
 		verdict := &model.Verdict{
 			DecisionNo:      vNo,
 			DecisionDate:    selectedStudent.VerdictDate,
-			OffenseType:     selectedStudent.OffenseCategory,
+			OffenseType:     offenseType,
 			RegClause:       selectedStudent.ClauseCode,
 			RegClauseDesc:   selectedStudent.ClauseDescription,
 			PenaltyName:     selectedStudent.ImposedPenalty,
@@ -151,12 +182,15 @@ func BuildNoticesTab(state *AppState) fyne.CanvasObject {
 				SchoolNo:     selectedStudent.SchoolNo,
 				FullName:     selectedStudent.FullName,
 				ClassSection: selectedStudent.ClassSection,
-				GuardianName: selectedStudent.GuardianName,
 				FatherName:   selectedStudent.FatherName,
+				GuardianName: model.EffectiveGuardianName(selectedStudent.FullName, selectedStudent.FatherName, selectedStudent.GuardianName),
 			}
+		} else {
+			if mStudent.FatherName == "" {
+				mStudent.FatherName = selectedStudent.FatherName
+			}
+			mStudent.GuardianName = model.EffectiveGuardianName(mStudent.FullName, mStudent.FatherName, mStudent.GuardianName)
 		}
-
-		inc, _ := state.Store.GetIncidentByCode(state.AcademicYear, selectedStudent.IncidentCode)
 
 		outPath, err := pdf.GenerateUniquePDFPath("", fmt.Sprintf("Veli_Tebligat_%s_%s", selectedStudent.SchoolNo, strings.ReplaceAll(selectedStudent.FullName, " ", "_")))
 		if err != nil {

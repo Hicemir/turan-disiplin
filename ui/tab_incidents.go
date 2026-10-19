@@ -362,7 +362,7 @@ func BuildIncidentsTab(state *AppState) fyne.CanvasObject {
 				BirthDate:           chosen.BirthDate,
 				FatherName:          chosen.FatherName,
 				MotherName:          chosen.MotherName,
-				GuardianName:        chosen.GuardianName,
+				GuardianName:        model.EffectiveGuardianName(chosen.FullName, chosen.FatherName, chosen.GuardianName),
 				GuardianPhone:       chosen.GuardianPhone,
 				GuardianAddr:        chosen.GuardianAddr,
 				BoardingStatus:      chosen.BoardingStatus,

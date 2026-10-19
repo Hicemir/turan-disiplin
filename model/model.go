@@ -1,6 +1,9 @@
 package model
 
-import "time"
+import (
+	"strings"
+	"time"
+)
 
 // SchoolInfo stores the general school and board settings
 type SchoolInfo struct {
@@ -302,3 +305,48 @@ type Verdict struct {
 	M3IsSubstitute     bool   `json:"m3_is_substitute"`
 	M4IsSubstitute     bool   `json:"m4_is_substitute"`
 }
+
+// EffectiveGuardianName returns guardianName if explicitly specified; otherwise defaults to FatherName + Student's Surname.
+func EffectiveGuardianName(fullName, fatherName, guardianName string) string {
+	g := strings.TrimSpace(guardianName)
+	f := strings.TrimSpace(fatherName)
+	full := strings.TrimSpace(fullName)
+
+	var surname string
+	if parts := strings.Fields(full); len(parts) >= 2 {
+		surname = parts[len(parts)-1]
+	}
+
+	if g != "" {
+		// If guardianName was set to just the father's first name without surname, append surname
+		if f != "" && strings.EqualFold(g, f) && surname != "" && !strings.HasSuffix(strings.ToUpper(g), strings.ToUpper(surname)) {
+			return g + " " + surname
+		}
+		return g
+	}
+
+	if f == "" {
+		return ""
+	}
+	if surname != "" && !strings.HasSuffix(strings.ToUpper(f), strings.ToUpper(surname)) {
+		return f + " " + surname
+	}
+	return f
+}
+
+// EffectiveGuardianContact formats GuardianPhone and GuardianAddr cleanly without dangling separators.
+func EffectiveGuardianContact(phone, addr string) string {
+	p := strings.TrimSpace(phone)
+	a := strings.TrimSpace(addr)
+	if p != "" && a != "" {
+		return p + "  |  " + a
+	}
+	if p != "" {
+		return p
+	}
+	if a != "" {
+		return a
+	}
+	return "—"
+}
+

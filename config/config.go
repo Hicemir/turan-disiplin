@@ -13,6 +13,8 @@ import (
 	"turandisiplin/model"
 )
 
+const AppVersion = "v0.7"
+
 var (
 	currentYonetmelik *model.YonetmelikData
 	yonetmelikMutex   sync.RWMutex

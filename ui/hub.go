@@ -12,6 +12,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
+	"turandisiplin/config"
 	"turandisiplin/pdf"
 )
 
@@ -178,6 +179,8 @@ func buildLegacyHub(state *AppState) fyne.CanvasObject {
 	yearText.TextStyle = fyne.TextStyle{Bold: true}
 	yearText.Alignment = fyne.TextAlignCenter
 
+	verLabel := widget.NewLabelWithStyle("Sürüm: "+config.AppVersion, fyne.TextAlignCenter, fyne.TextStyle{Italic: true})
+
 	leftBtn := func(label string, icon fyne.Resource, action func()) fyne.CanvasObject {
 		btn := widget.NewButtonWithIcon(label, icon, action)
 		btn.Alignment = widget.ButtonAlignLeading
@@ -203,6 +206,7 @@ func buildLegacyHub(state *AppState) fyne.CanvasObject {
 	leftCol := container.NewVBox(
 		brandLogo,
 		yearText,
+		verLabel,
 		widget.NewSeparator(),
 		backupBtn,
 		restoreBtn,
@@ -288,7 +292,7 @@ func buildLegacyHub(state *AppState) fyne.CanvasObject {
 	// Top Bar in Legacy Mode: "TURANDİSİPLİN" Title & Quick Actions
 	topBar := container.NewBorder(
 		nil, nil,
-		widget.NewLabelWithStyle("TURANDİSİPLİN", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+		widget.NewLabelWithStyle("TURANDİSİPLİN "+config.AppVersion, fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 		container.NewHBox(
 			widget.NewButtonWithIcon("Öğretim Yılı: "+state.AcademicYear, theme.HistoryIcon(), func() {
 				ShowAcademicYearPicker(state)
@@ -396,6 +400,8 @@ func buildLiveStatsCard(state *AppState, isLegacy bool) fyne.CanvasObject {
 		statRow("ÖRGÜN EĞİTİM DIŞINA ÇIKARMA", orgunDis),
 		widget.NewSeparator(),
 		statRow("TOPLAM CEZA", len(penalized)),
+		widget.NewSeparator(),
+		widget.NewLabelWithStyle("TuranDisiplin "+config.AppVersion, fyne.TextAlignCenter, fyne.TextStyle{Italic: true}),
 	}
 
 	card := container.NewPadded(widget.NewCard("", "", container.NewVBox(items...)))

@@ -516,6 +516,7 @@ func parseCardBasedStudents(rows [][]string, schoolYear string) []*model.Student
 			if current.BoardingStatus == "" {
 				current.BoardingStatus = "GÜNDÜZLÜ"
 			}
+			current.GuardianName = model.EffectiveGuardianName(current.FullName, current.FatherName, current.GuardianName)
 			list = append(list, current)
 		}
 	}
@@ -749,6 +750,8 @@ func detectHeaderMapping(row []string) map[string]int {
 			m["dogumtarihi"] = idx
 		} else if strings.Contains(c, "DOGUM YERI") {
 			m["dogumyeri"] = idx
+		} else if strings.Contains(c, "VELI") {
+			m["veli"] = idx
 		}
 	}
 	return m
@@ -839,14 +842,21 @@ func studentFromMappedRow(row []string, m map[string]int, defaultClass string, s
 		}
 	}
 
+	fatherName := getCell(row, m["baba"])
+	veliName := ""
+	if idx, ok := m["veli"]; ok {
+		veliName = getCell(row, idx)
+	}
+
 	return &model.Student{
 		AcademicYear:   schoolYear,
 		SchoolNo:       okulNo,
 		TCNo:           getCell(row, m["tcno"]),
 		ClassSection:   classStr,
 		FullName:       fullName,
-		FatherName:     getCell(row, m["baba"]),
+		FatherName:     fatherName,
 		MotherName:     getCell(row, m["anne"]),
+		GuardianName:   model.EffectiveGuardianName(fullName, fatherName, veliName),
 		Gender:         gender,
 		BirthDate:      model.NormalizeBirthDate(getCell(row, m["dogumtarihi"])),
 		BirthPlace:     getCell(row, m["dogumyeri"]),

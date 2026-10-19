@@ -49,13 +49,31 @@ func BuildStudentsTab(state *AppState) fyne.CanvasObject {
 	fatherEntry := NewSingleLineEntry()
 	motherEntry := NewSingleLineEntry()
 	guardianEntry := NewSingleLineEntry()
+	guardianEntry.SetPlaceHolder("Varsayılan: Baba Adı + Öğrenci Soyadı")
 	phoneEntry := NewSingleLineEntry()
 	addrEntry := NewSingleLineEntry()
 	boardingSelect := NewTurkishSelect([]string{"GÜNDÜZLÜ", "PANSİYON / YATILI"}, nil)
 	scoreEntry := NewSingleLineEntry()
 	scoreEntry.SetText("100")
 
+	var lastAutoGuardian string
+	var suppressGuardianSync bool
+	syncDefaultGuardian := func() {
+		if suppressGuardianSync {
+			return
+		}
+		auto := model.EffectiveGuardianName(fullNameEntry.Text, fatherEntry.Text, "")
+		cur := strings.TrimSpace(guardianEntry.Text)
+		if cur == "" || cur == lastAutoGuardian {
+			lastAutoGuardian = auto
+			guardianEntry.SetText(auto)
+		}
+	}
+	fullNameEntry.OnChanged = func(_ string) { syncDefaultGuardian() }
+	fatherEntry.OnChanged = func(_ string) { syncDefaultGuardian() }
+
 	clearForm := func() {
+		suppressGuardianSync = true
 		selectedStudent = nil
 		idEntry.SetText("")
 		schoolNoEntry.SetText("")
@@ -68,14 +86,17 @@ func BuildStudentsTab(state *AppState) fyne.CanvasObject {
 		fatherEntry.SetText("")
 		motherEntry.SetText("")
 		guardianEntry.SetText("")
+		lastAutoGuardian = ""
 		phoneEntry.SetText("")
 		addrEntry.SetText("")
 		boardingSelect.SetSelected("GÜNDÜZLÜ")
 		scoreEntry.SetText("100")
+		suppressGuardianSync = false
 		studentRolesLabel.SetText("Seçili öğrencinin olay / disiplin geçmişi ve rolleri burada görüntülenir.")
 	}
 
 	populateForm := func(st *model.Student) {
+		suppressGuardianSync = true
 		selectedStudent = st
 		idEntry.SetText(fmt.Sprintf("%d", st.ID))
 		schoolNoEntry.SetText(st.SchoolNo)
@@ -87,11 +108,14 @@ func BuildStudentsTab(state *AppState) fyne.CanvasObject {
 		birthDateEntry.SetText(model.NormalizeBirthDate(st.BirthDate))
 		fatherEntry.SetText(st.FatherName)
 		motherEntry.SetText(st.MotherName)
-		guardianEntry.SetText(st.GuardianName)
+		effGuardian := model.EffectiveGuardianName(st.FullName, st.FatherName, st.GuardianName)
+		lastAutoGuardian = model.EffectiveGuardianName(st.FullName, st.FatherName, "")
+		guardianEntry.SetText(effGuardian)
 		phoneEntry.SetText(st.GuardianPhone)
 		addrEntry.SetText(st.GuardianAddr)
 		boardingSelect.SetSelected(st.BoardingStatus)
 		scoreEntry.SetText(fmt.Sprintf("%d", st.BehaviorScore))
+		suppressGuardianSync = false
 
 		// Review student's roles in incidents & disciplinary history
 		records, _ := state.Store.GetIncidentStudentsBySchoolNo(state.AcademicYear, st.SchoolNo)
@@ -289,7 +313,7 @@ func BuildStudentsTab(state *AppState) fyne.CanvasObject {
 			BirthDate:      strings.TrimSpace(birthDateEntry.Text),
 			FatherName:     strings.TrimSpace(fatherEntry.Text),
 			MotherName:     strings.TrimSpace(motherEntry.Text),
-			GuardianName:   strings.TrimSpace(guardianEntry.Text),
+			GuardianName:   model.EffectiveGuardianName(name, fatherEntry.Text, guardianEntry.Text),
 			GuardianPhone:  strings.TrimSpace(phoneEntry.Text),
 			GuardianAddr:   strings.TrimSpace(addrEntry.Text),
 			BoardingStatus: boardingSelect.Selected,

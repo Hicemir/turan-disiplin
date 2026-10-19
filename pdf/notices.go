@@ -59,8 +59,23 @@ func GenerateCezaTebligatiOgrenci(school *model.SchoolInfo, student *model.Stude
 		if verdict.SuspensionDates != "" {
 			cezaUygTarihi = verdict.SuspensionDates
 		}
-		cezaNedeni = verdict.OffenseType
-		yonMadde = fmt.Sprintf("%s (%s)", verdict.RegClause, verdict.RegClauseDesc)
+		cezaNedeni = strings.TrimSpace(verdict.OffenseType)
+		yonMadde = strings.TrimSpace(fmt.Sprintf("%s (%s)", verdict.RegClause, verdict.RegClauseDesc))
+	}
+	if cezaNedeni == "" && incStudent != nil && strings.TrimSpace(incStudent.OffenseCategory) != "" {
+		cezaNedeni = strings.TrimSpace(incStudent.OffenseCategory)
+	}
+	if cezaNedeni == "" && incident != nil && strings.TrimSpace(incident.Title) != "" {
+		cezaNedeni = strings.TrimSpace(incident.Title)
+	}
+	if cezaNedeni == "" && incStudent != nil && strings.TrimSpace(incStudent.IncidentTitle) != "" {
+		cezaNedeni = strings.TrimSpace(incStudent.IncidentTitle)
+	}
+	if cezaNedeni == "" && verdict != nil && strings.TrimSpace(verdict.RegClauseDesc) != "" {
+		cezaNedeni = strings.TrimSpace(verdict.RegClauseDesc)
+	}
+	if cezaNedeni == "" {
+		cezaNedeni = "—"
 	}
 
 	stName := ""
@@ -82,27 +97,32 @@ func GenerateCezaTebligatiOgrenci(school *model.SchoolInfo, student *model.Stude
 	}
 
 	for _, r := range rows {
+		rowY := doc.PDF.GetY()
 		doc.SetBoldFont(8.0)
 		doc.PDF.SetX(doc.MarginLeft + indent)
-		_ = doc.PDF.CellWithOption(&gopdf.Rect{W: lblW, H: 14}, r[0], gopdf.CellOption{Align: gopdf.Left})
+		doc.PDF.SetY(rowY)
+		_ = doc.PDF.CellWithOption(&gopdf.Rect{W: lblW, H: 13}, r[0], gopdf.CellOption{Align: gopdf.Left})
 
 		doc.SetRegularFont(8.0)
-		doc.PDF.SetX(doc.MarginLeft + indent + lblW)
-		_ = doc.PDF.CellWithOption(&gopdf.Rect{W: valW, H: 14}, r[1], gopdf.CellOption{Align: gopdf.Left})
-		doc.PDF.Br(14)
+		valLines := doc.SplitLines(r[1], valW)
+		doc.DrawWrappedCellLines(doc.MarginLeft+indent+lblW, rowY, valW, 12.0, valLines, gopdf.Left)
+		rowH := float64(len(valLines)) * 12.0
+		if rowH < 14.0 {
+			rowH = 14.0
+		}
+		doc.PDF.SetY(rowY + rowH)
 	}
 
-	doc.PDF.Br(2)
+	doc.PDF.Br(4)
 	boxBotY := doc.PDF.GetY()
 	doc.PDF.Line(doc.MarginLeft+indent, boxBotY, doc.MarginLeft+indent+innerW, boxBotY)
 	doc.PDF.Br(16)
 
 	// Notice text
 	doc.SetRegularFont(8.5)
-	doc.PDF.SetX(doc.MarginLeft + 15)
 	nText := fmt.Sprintf("%s, hakkınızda kurul tarafından verilen yukarıdaki ceza/yaptırım kararı tarafınıza tebliğ edilmiştir. Karara karşı süresi içinde itiraz hakkınız bulunmaktadır.", noticeLaw)
-	_ = doc.PDF.MultiCell(&gopdf.Rect{W: doc.UsableWidth - 30, H: 14}, nText)
-	doc.PDF.Br(25)
+	doc.DrawWrappedText(doc.MarginLeft+15, doc.UsableWidth-30, 13.0, nText, gopdf.Left)
+	doc.PDF.Br(18)
 
 	// Principal signature
 	doc.SetBoldFont(8.0)
@@ -195,12 +215,12 @@ func GenerateCezaTebligatiVeli(school *model.SchoolInfo, student *model.Student,
 	stName := ""
 	stClass := ""
 	if student != nil {
-		parentName = student.GuardianName
-		if parentName == "" {
-			parentName = student.FatherName
-		}
+		parentName = model.EffectiveGuardianName(student.FullName, student.FatherName, student.GuardianName)
 		stName = student.FullName
 		stClass = fmt.Sprintf("%s sınıfı %s numaralı", student.ClassSection, student.SchoolNo)
+	}
+	if parentName == "" && incStudent != nil {
+		parentName = model.EffectiveGuardianName(incStudent.FullName, incStudent.FatherName, incStudent.GuardianName)
 	}
 
 	doc.SetBoldFont(9.0)
@@ -214,10 +234,9 @@ func GenerateCezaTebligatiVeli(school *model.SchoolInfo, student *model.Student,
 	}
 
 	doc.SetRegularFont(8.5)
-	doc.PDF.SetX(doc.MarginLeft)
 	letterBody := fmt.Sprintf("Okulumuz %s öğrencisi %s hakkında aşağıda belirtilen disiplin kararı alınmıştır. %s Bilgilerinize rica ederim.", stClass, stName, appealText)
-	_ = doc.PDF.MultiCell(&gopdf.Rect{W: doc.UsableWidth, H: 14}, letterBody)
-	doc.PDF.Br(25)
+	doc.DrawWrappedText(doc.MarginLeft, doc.UsableWidth, 13.0, letterBody, gopdf.Left)
+	doc.PDF.Br(18)
 
 	// Principal
 	doc.SetBoldFont(8.0)
@@ -227,13 +246,13 @@ func GenerateCezaTebligatiVeli(school *model.SchoolInfo, student *model.Student,
 	doc.SetRegularFont(7.5)
 	doc.PDF.SetX(doc.MarginLeft)
 	_ = doc.PDF.CellWithOption(&gopdf.Rect{W: doc.UsableWidth - 20, H: 11}, "Okul Müdürü", gopdf.CellOption{Align: gopdf.Right})
-	doc.PDF.Br(25)
+	doc.PDF.Br(22)
 
 	// 4-Column Table: [Karar Tarih ve No, Verilen Ceza, Yönetmelik Maddesi, Ceza Nedeni]
-	w1 := doc.UsableWidth * 0.20
+	w1 := doc.UsableWidth * 0.18
 	w2 := doc.UsableWidth * 0.22
-	w3 := doc.UsableWidth * 0.28
-	w4 := doc.UsableWidth * 0.30
+	w3 := doc.UsableWidth * 0.32
+	w4 := doc.UsableWidth * 0.28
 
 	yT := doc.PDF.GetY()
 	doc.DrawRect(doc.MarginLeft, yT, w1, 20)
@@ -262,43 +281,72 @@ func GenerateCezaTebligatiVeli(school *model.SchoolInfo, student *model.Student,
 	kararTarihNo := "—"
 	verilenCeza := "—"
 	yonMadde := "—"
-	cezaNedeni := "—"
+	cezaNedeni := ""
 	if verdict != nil {
 		kararTarihNo = fmt.Sprintf("%s / %d", verdict.DecisionDate, verdict.DecisionNo)
 		verilenCeza = verdict.PenaltyName
-		yonMadde = fmt.Sprintf("%s (%s)", verdict.RegClause, verdict.RegClauseDesc)
-		cezaNedeni = verdict.OffenseType
+		yonMadde = strings.TrimSpace(fmt.Sprintf("%s (%s)", verdict.RegClause, verdict.RegClauseDesc))
+		cezaNedeni = strings.TrimSpace(verdict.OffenseType)
+	}
+	if cezaNedeni == "" && incStudent != nil && strings.TrimSpace(incStudent.OffenseCategory) != "" {
+		cezaNedeni = strings.TrimSpace(incStudent.OffenseCategory)
+	}
+	if cezaNedeni == "" && incident != nil && strings.TrimSpace(incident.Title) != "" {
+		cezaNedeni = strings.TrimSpace(incident.Title)
+	}
+	if cezaNedeni == "" && incStudent != nil && strings.TrimSpace(incStudent.IncidentTitle) != "" {
+		cezaNedeni = strings.TrimSpace(incStudent.IncidentTitle)
+	}
+	if cezaNedeni == "" && verdict != nil && strings.TrimSpace(verdict.RegClauseDesc) != "" {
+		cezaNedeni = strings.TrimSpace(verdict.RegClauseDesc)
+	}
+	if cezaNedeni == "" {
+		cezaNedeni = "—"
+	}
+
+	lineH := 10.5
+	doc.SetRegularFont(7.0)
+	lines1 := doc.SplitLines(kararTarihNo, w1-6)
+	doc.SetBoldFont(7.0)
+	lines2 := doc.SplitLines(verilenCeza, w2-6)
+	doc.SetRegularFont(6.8)
+	lines3 := doc.SplitLines(yonMadde, w3-6)
+	lines4 := doc.SplitLines(cezaNedeni, w4-6)
+
+	maxLines := len(lines1)
+	if len(lines2) > maxLines {
+		maxLines = len(lines2)
+	}
+	if len(lines3) > maxLines {
+		maxLines = len(lines3)
+	}
+	if len(lines4) > maxLines {
+		maxLines = len(lines4)
 	}
 
 	curY := yT + 20
-	hData := 28.0
+	hData := float64(maxLines)*lineH + 8.0
+	if hData < 28.0 {
+		hData = 28.0
+	}
 	doc.DrawRect(doc.MarginLeft, curY, w1, hData)
 	doc.DrawRect(doc.MarginLeft+w1, curY, w2, hData)
 	doc.DrawRect(doc.MarginLeft+w1+w2, curY, w3, hData)
 	doc.DrawRect(doc.MarginLeft+w1+w2+w3, curY, w4, hData)
 
 	doc.SetRegularFont(7.0)
-	doc.PDF.SetX(doc.MarginLeft + 2)
-	doc.PDF.SetY(curY + 4)
-	_ = doc.PDF.CellWithOption(&gopdf.Rect{W: w1 - 4, H: 12}, kararTarihNo, gopdf.CellOption{Align: gopdf.Center})
+	doc.DrawWrappedCellLines(doc.MarginLeft+3, curY+4, w1-6, lineH, lines1, gopdf.Center)
 
 	doc.SetBoldFont(7.0)
-	doc.PDF.SetX(doc.MarginLeft + w1 + 2)
-	doc.PDF.SetY(curY + 4)
-	_ = doc.PDF.CellWithOption(&gopdf.Rect{W: w2 - 4, H: 12}, verilenCeza, gopdf.CellOption{Align: gopdf.Center})
+	doc.DrawWrappedCellLines(doc.MarginLeft+w1+3, curY+4, w2-6, lineH, lines2, gopdf.Center)
 
-	doc.SetRegularFont(6.5)
-	doc.PDF.SetX(doc.MarginLeft + w1 + w2 + 3)
-	doc.PDF.SetY(curY + 2)
-	_ = doc.PDF.MultiCell(&gopdf.Rect{W: w3 - 6, H: 10}, yonMadde)
-
-	doc.PDF.SetX(doc.MarginLeft + w1 + w2 + w3 + 3)
-	doc.PDF.SetY(curY + 2)
-	_ = doc.PDF.MultiCell(&gopdf.Rect{W: w4 - 6, H: 10}, cezaNedeni)
+	doc.SetRegularFont(6.8)
+	doc.DrawWrappedCellLines(doc.MarginLeft+w1+w2+3, curY+4, w3-6, lineH, lines3, gopdf.Left)
+	doc.DrawWrappedCellLines(doc.MarginLeft+w1+w2+w3+3, curY+4, w4-6, lineH, lines4, gopdf.Left)
 
 	// Dual signature block
 	colW := doc.UsableWidth / 2.0
-	yAck := curY + hData + 35
+	yAck := curY + hData + 30
 
 	doc.SetBoldFont(8.0)
 	doc.PDF.SetX(doc.MarginLeft)
@@ -360,9 +408,9 @@ func GenerateDavranisPuaniIadeCizelgesi(school *model.SchoolInfo, rows []model.B
 
 	curY += 18
 	doc.SetRegularFont(6.0)
+	lineH := 8.5
 
 	for i, r := range rows {
-		x = doc.MarginLeft
 		vals := []string{
 			fmt.Sprintf("%d", i+1),
 			r.FullName,
@@ -380,18 +428,37 @@ func GenerateDavranisPuaniIadeCizelgesi(school *model.SchoolInfo, rows []model.B
 			r.Status,
 		}
 
+		wrappedCols := make([][]string, len(colWidths))
+		maxLines := 1
 		for j, w := range colWidths {
-			doc.DrawRect(x, curY, w, 16)
-			doc.PDF.SetX(x + 2)
-			doc.PDF.SetY(curY + 2)
+			wrappedCols[j] = doc.SplitLines(vals[j], w-4)
+			if len(wrappedCols[j]) > maxLines {
+				maxLines = len(wrappedCols[j])
+			}
+		}
+
+		rowH := float64(maxLines)*lineH + 5.0
+		if rowH < 16.0 {
+			rowH = 16.0
+		}
+
+		if curY+rowH > PageHeightLandscape-doc.MarginBottom-30 {
+			doc.PDF.AddPage()
+			curY = doc.MarginTop
+			doc.SetRegularFont(6.0)
+		}
+
+		x = doc.MarginLeft
+		for j, w := range colWidths {
+			doc.DrawRect(x, curY, w, rowH)
 			align := gopdf.Center
 			if j == 1 || j == 4 || j == 7 {
 				align = gopdf.Left
 			}
-			_ = doc.PDF.CellWithOption(&gopdf.Rect{W: w - 4, H: 12}, vals[j], gopdf.CellOption{Align: align})
+			doc.DrawWrappedCellLines(x+2, curY+2.5, w-4, lineH, wrappedCols[j], align)
 			x += w
 		}
-		curY += 16
+		curY += rowH
 	}
 
 	doc.PDF.SetY(curY + 10)
@@ -431,9 +498,9 @@ func GenerateYaptirimKaldirmaRaporu(school *model.SchoolInfo, rows []model.Sanct
 
 	curY += 18
 	doc.SetRegularFont(6.0)
+	lineH := 8.5
 
 	for i, r := range rows {
-		x = doc.MarginLeft
 		vals := []string{
 			fmt.Sprintf("%d", i+1),
 			r.FullName,
@@ -448,18 +515,37 @@ func GenerateYaptirimKaldirmaRaporu(school *model.SchoolInfo, rows []model.Sanct
 			r.Status,
 		}
 
+		wrappedCols := make([][]string, len(colWidths))
+		maxLines := 1
 		for j, w := range colWidths {
-			doc.DrawRect(x, curY, w, 16)
-			doc.PDF.SetX(x + 2)
-			doc.PDF.SetY(curY + 2)
+			wrappedCols[j] = doc.SplitLines(vals[j], w-4)
+			if len(wrappedCols[j]) > maxLines {
+				maxLines = len(wrappedCols[j])
+			}
+		}
+
+		rowH := float64(maxLines)*lineH + 5.0
+		if rowH < 16.0 {
+			rowH = 16.0
+		}
+
+		if curY+rowH > PageHeightLandscape-doc.MarginBottom-30 {
+			doc.PDF.AddPage()
+			curY = doc.MarginTop
+			doc.SetRegularFont(6.0)
+		}
+
+		x = doc.MarginLeft
+		for j, w := range colWidths {
+			doc.DrawRect(x, curY, w, rowH)
 			align := gopdf.Center
 			if j == 1 || j == 4 || j == 7 {
 				align = gopdf.Left
 			}
-			_ = doc.PDF.CellWithOption(&gopdf.Rect{W: w - 4, H: 12}, vals[j], gopdf.CellOption{Align: align})
+			doc.DrawWrappedCellLines(x+2, curY+2.5, w-4, lineH, wrappedCols[j], align)
 			x += w
 		}
-		curY += 16
+		curY += rowH
 	}
 
 	doc.PDF.SetY(curY + 10)
@@ -512,26 +598,31 @@ func GenerateDiziPusulasi(school *model.SchoolInfo, items []model.DiziItem, outp
 	curY += 20
 	doc.SetRegularFont(8.0)
 	totalCount := 0
+	lineH := 11.5
 
 	for i, item := range items {
-		doc.DrawRect(doc.MarginLeft+indent, curY, wSira, 18)
-		doc.DrawRect(doc.MarginLeft+indent+wSira, curY, wSubject, 18)
-		doc.DrawRect(doc.MarginLeft+indent+wSira+wSubject, curY, wCount, 18)
+		subLines := doc.SplitLines(item.Subject, wSubject-10)
+		rowH := float64(len(subLines))*lineH + 6.0
+		if rowH < 18.0 {
+			rowH = 18.0
+		}
+
+		doc.DrawRect(doc.MarginLeft+indent, curY, wSira, rowH)
+		doc.DrawRect(doc.MarginLeft+indent+wSira, curY, wSubject, rowH)
+		doc.DrawRect(doc.MarginLeft+indent+wSira+wSubject, curY, wCount, rowH)
 
 		doc.PDF.SetX(doc.MarginLeft + indent)
 		doc.PDF.SetY(curY + 3)
 		_ = doc.PDF.CellWithOption(&gopdf.Rect{W: wSira, H: 12}, fmt.Sprintf("%d", i+1), gopdf.CellOption{Align: gopdf.Center})
 
-		doc.PDF.SetX(doc.MarginLeft + indent + wSira + 5)
-		doc.PDF.SetY(curY + 3)
-		_ = doc.PDF.CellWithOption(&gopdf.Rect{W: wSubject - 10, H: 12}, item.Subject, gopdf.CellOption{Align: gopdf.Left})
+		doc.DrawWrappedCellLines(doc.MarginLeft+indent+wSira+5, curY+3, wSubject-10, lineH, subLines, gopdf.Left)
 
 		doc.PDF.SetX(doc.MarginLeft + indent + wSira + wSubject)
 		doc.PDF.SetY(curY + 3)
 		_ = doc.PDF.CellWithOption(&gopdf.Rect{W: wCount, H: 12}, fmt.Sprintf("%d", item.Count), gopdf.CellOption{Align: gopdf.Center})
 
 		totalCount += item.Count
-		curY += 18
+		curY += rowH
 	}
 
 	// Total Row
@@ -605,24 +696,25 @@ func GenerateSeneBasiSonuKarar(school *model.SchoolInfo, meetingType string, dat
 	}
 
 	for _, r := range rows {
+		rowY := doc.PDF.GetY()
 		doc.SetBoldFont(8.0)
 		doc.PDF.SetX(doc.MarginLeft)
+		doc.PDF.SetY(rowY)
 		_ = doc.PDF.CellWithOption(&gopdf.Rect{W: lblW, H: 13}, r[0], gopdf.CellOption{Align: gopdf.Left})
 
 		doc.SetRegularFont(8.0)
-		doc.PDF.SetX(doc.MarginLeft + lblW)
-		_ = doc.PDF.CellWithOption(&gopdf.Rect{W: valW, H: 13}, r[1], gopdf.CellOption{Align: gopdf.Left})
-		doc.PDF.Br(14)
+		valLines := doc.SplitLines(r[1], valW)
+		doc.DrawWrappedCellLines(doc.MarginLeft+lblW, rowY, valW, 13.0, valLines, gopdf.Left)
+		doc.PDF.SetY(rowY + float64(len(valLines))*13.0 + 1.0)
 	}
 
 	doc.PDF.Br(10)
 
 	// Statutory intro
 	doc.SetRegularFont(8.5)
-	doc.PDF.SetX(doc.MarginLeft)
 	intro := fmt.Sprintf("%s kurulumuz yukarıda belirtilen yer ve zamanda toplanarak gündemdeki maddeleri görüşmüş ve aşağıdaki kararları almıştır:", statute)
-	_ = doc.PDF.MultiCell(&gopdf.Rect{W: doc.UsableWidth, H: 14}, intro)
-	doc.PDF.Br(16)
+	doc.DrawWrappedText(doc.MarginLeft, doc.UsableWidth, 13.5, intro, gopdf.Left)
+	doc.PDF.Br(10)
 
 	// Numbered Decisions
 	for i, d := range decisions {
@@ -635,27 +727,28 @@ func GenerateSeneBasiSonuKarar(school *model.SchoolInfo, meetingType string, dat
 			doc.PDF.AddPage()
 		}
 
+		itemY := doc.PDF.GetY()
 		doc.SetBoldFont(8.0)
 		doc.PDF.SetX(doc.MarginLeft + 10)
+		doc.PDF.SetY(itemY)
 		_ = doc.PDF.CellWithOption(&gopdf.Rect{W: 30, H: 13}, fmt.Sprintf("%d.)", i+1), gopdf.CellOption{Align: gopdf.Right})
 
 		doc.SetRegularFont(8.0)
-		doc.PDF.SetX(doc.MarginLeft + 45)
-		_ = doc.PDF.MultiCell(&gopdf.Rect{W: doc.UsableWidth - 55, H: 13}, d)
-		doc.PDF.Br(6)
+		doc.PDF.SetY(itemY)
+		doc.DrawWrappedText(doc.MarginLeft+45, doc.UsableWidth-55, 13.0, d, gopdf.Left)
+		doc.PDF.Br(4)
 	}
 
-	doc.PDF.Br(12)
+	doc.PDF.Br(10)
 
 	// Closing clause
 	doc.SetBoldFont(9.0)
-	doc.PDF.SetX(doc.MarginLeft)
 	closing := "OY BİRLİĞİ İLE KARAR VERİLDİ."
 	if strings.Contains(strings.ToUpper(meetingType), "SONU") {
 		closing = "İŞ BU KURUL TUTANAĞININ SENE SONU ÖĞRETMENLER KURULUNDA OKUNMASI TALEBİYLE OKUL MÜDÜRLÜĞÜNÜN ONAYINA SUNULMASINA OY BİRLİĞİ İLE KARAR VERİLDİ."
 	}
-	_ = doc.PDF.MultiCell(&gopdf.Rect{W: doc.UsableWidth, H: 14}, closing)
-	doc.PDF.Br(15)
+	doc.DrawWrappedText(doc.MarginLeft, doc.UsableWidth, 14.0, closing, gopdf.Left)
+	doc.PDF.Br(12)
 
 	doc.DrawSignatures5(school, boardName)
 	doc.DrawPrincipalApproval(school.PrincipalName)
@@ -699,26 +792,37 @@ func GenerateCezaIstatistikRaporu(school *model.SchoolInfo, title string, stats 
 	curY += 20
 	doc.SetRegularFont(8.0)
 	total := 0
+	lineH := 11.5
 
 	for i, s := range stats {
-		doc.DrawRect(doc.MarginLeft, curY, wSira, 18)
-		doc.DrawRect(doc.MarginLeft+wSira, curY, wName, 18)
-		doc.DrawRect(doc.MarginLeft+wSira+wName, curY, wCount, 18)
+		nameLines := doc.SplitLines(s.Name, wName-10)
+		rowH := float64(len(nameLines))*lineH + 6.0
+		if rowH < 18.0 {
+			rowH = 18.0
+		}
+
+		if curY+rowH > PageHeightPortrait-doc.MarginBottom-60 {
+			doc.PDF.AddPage()
+			curY = doc.MarginTop
+			doc.SetRegularFont(8.0)
+		}
+
+		doc.DrawRect(doc.MarginLeft, curY, wSira, rowH)
+		doc.DrawRect(doc.MarginLeft+wSira, curY, wName, rowH)
+		doc.DrawRect(doc.MarginLeft+wSira+wName, curY, wCount, rowH)
 
 		doc.PDF.SetX(doc.MarginLeft)
 		doc.PDF.SetY(curY + 3)
 		_ = doc.PDF.CellWithOption(&gopdf.Rect{W: wSira, H: 12}, fmt.Sprintf("%d", i+1), gopdf.CellOption{Align: gopdf.Center})
 
-		doc.PDF.SetX(doc.MarginLeft + wSira + 5)
-		doc.PDF.SetY(curY + 3)
-		_ = doc.PDF.CellWithOption(&gopdf.Rect{W: wName - 10, H: 12}, s.Name, gopdf.CellOption{Align: gopdf.Left})
+		doc.DrawWrappedCellLines(doc.MarginLeft+wSira+5, curY+3, wName-10, lineH, nameLines, gopdf.Left)
 
 		doc.PDF.SetX(doc.MarginLeft + wSira + wName)
 		doc.PDF.SetY(curY + 3)
 		_ = doc.PDF.CellWithOption(&gopdf.Rect{W: wCount, H: 12}, fmt.Sprintf("%d", s.Count), gopdf.CellOption{Align: gopdf.Center})
 
 		total += s.Count
-		curY += 18
+		curY += rowH
 	}
 
 	// Total Row

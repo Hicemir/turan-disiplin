@@ -312,7 +312,8 @@ func BuildFormsTab(state *AppState) fyne.CanvasObject {
 
 		case strings.HasPrefix(docType, "12."): // Veli Görüşme Tutanağı
 			outPath, _ := pdf.GenerateUniquePDFPath("", fmt.Sprintf("Veli_Gorusme_Tutanagi_%s", stNo))
-			err := pdf.GenerateVeliGorusmeTutanagi(state.SchoolInfo, selectedStudent, selectedStudent.GuardianName, time.Now().Format("02.01.2006"), veliKonuEntry.Text, veliNotlarEntry.Text, veliKararEntry.Text, veliGorusenEntry.Text, false, outPath)
+			gName := model.EffectiveGuardianName(selectedStudent.FullName, selectedStudent.FatherName, selectedStudent.GuardianName)
+			err := pdf.GenerateVeliGorusmeTutanagi(state.SchoolInfo, selectedStudent, gName, time.Now().Format("02.01.2006"), veliKonuEntry.Text, veliNotlarEntry.Text, veliKararEntry.Text, veliGorusenEntry.Text, false, outPath)
 			if err != nil {
 				showError(state.Window, err)
 				return

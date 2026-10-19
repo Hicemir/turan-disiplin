@@ -16,7 +16,7 @@ import (
 func main() {
 	a := app.NewWithID("com.turandisiplin.app")
 
-	w := a.NewWindow("TuranDisiplin - MEB Öğrenci Disiplin ve Davranış Değerlendirme Sistemi")
+	w := a.NewWindow("TuranDisiplin " + config.AppVersion + " - MEB Öğrenci Disiplin ve Davranış Değerlendirme Sistemi")
 	w.Resize(fyne.NewSize(1260, 840))
 	w.CenterOnScreen()
 

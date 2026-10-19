@@ -171,27 +171,81 @@ func BuildVerdictTab(state *AppState) fyne.CanvasObject {
 	subM3Check := widget.NewCheck("Üye 3 yerine Yedek Üye imzalayacak", nil)
 	subM4Check := widget.NewCheck("Üye 4 yerine Yedek Üye imzalayacak", nil)
 
+	var selectedClausePenalty string
+
 	generateVerdictText := func() {
 		if selectedIncStudent == nil || selectedIncident == nil {
 			return
 		}
 
-		st := selectedIncStudent
-		inc := selectedIncident
+		isOrta := strings.ToUpper(strings.TrimSpace(state.SchoolInfo.SchoolType)) == "ORTAOKUL"
+		opinion := strings.TrimSpace(opinionSelect.Selected)
 
-		suspText := ""
-		if suspensionDaysEntry.Text != "" {
-			suspText = fmt.Sprintf(" ve %s gün süreyle okuldan uzaklaştırılmasına (%s)", suspensionDaysEntry.Text, suspensionDatesEntry.Text)
+		if strings.Contains(opinion, "SUÇSUZ") || strings.Contains(opinion, "YER OLMADIĞI") || strings.Contains(opinion, "HATALI OLMADIĞI") {
+			if isOrta {
+				verdictTextEntry.SetText("ÖĞRENCİ DAVRANIŞLARINI DEĞERLENDİRME KURULUMUZCA YAPILAN İNCELEME, ARAŞTIRMA VE SORUŞTURMA NETİCESİNDE ÖĞRENCİNİN DAVRANIŞININ HATALI OLMADIĞINA KANAAT GETİRİLMİŞ, HERHANGİ BİR YAPTIRIM UYGULANMAMASINA OY BİRLİĞİ İLE KARAR VERİLMİŞTİR.")
+			} else {
+				verdictTextEntry.SetText("OKUL ÖĞRENCİ ÖDÜL VE DİSİPLİN KURULUMUZCA YAPILAN İNCELEME, ARAŞTIRMA VE SORUŞTURMA NETİCESİNDE SUÇSUZ OLDUĞUNA KANAAT GETİRİLMİŞ, HERHANGİ BİR CEZAİ İŞLEM UYGULANMAMASINA OY BİRLİĞİ İLE KARAR VERİLMİŞTİR.")
+			}
+			return
 		}
 
-		pointText := ""
-		if strings.ToUpper(state.SchoolInfo.SchoolType) == "LİSE" {
-			pointText = fmt.Sprintf(", davranış puanından %s puan indirilerek kalan puanının %s olarak belirlenmesine", deductedPointsEntry.Text, remainingPointsEntry.Text)
+		clauseCode := strings.TrimSpace(clauseCodeEntry.Text)
+		imposedPen := strings.TrimSpace(penaltySelect.Selected)
+		origPen := strings.TrimSpace(selectedClausePenalty)
+		if origPen == "" {
+			origPen = imposedPen
 		}
 
-		text := fmt.Sprintf("Yukarıda açık kimliği yazılı okulumuz %s sınıfı %s numaralı öğrencisi %s'nin, %s tarihinde meydana gelen '%s' olayındaki olumsuz eylemi nedeniyle; savunması, tanık beyanları ve toplanan deliller değerlendirilerek Milli Eğitim Bakanlığı Yönetmeliğinin %s maddesi gereğince '%s' cezası ile cezalandırılmasına%s%s; işbu karara tebliğ tarihinden itibaren 5 iş günü içinde itiraz edilebileceğine oy birliği ile karar verildi.",
-			st.ClassSection, st.SchoolNo, st.FullName, inc.Date, inc.Title, clauseCodeEntry.Text, penaltySelect.Selected, suspText, pointText)
+		mit := strings.TrimSpace(mitigatingSelect.Selected)
+		if strings.EqualFold(mit, "Herhangi bir hafifletici neden bulunmamaktadır") || strings.EqualFold(mit, "Yok") {
+			mit = ""
+		}
 
+		if isOrta {
+			var text string
+			if mit != "" && !strings.EqualFold(origPen, imposedPen) {
+				text = fmt.Sprintf("MEB OKUL ÖNCESİ EĞİTİM VE İLKÖĞRETİM KURUMLARI YÖNETMELİĞİNİN %s BENDİNE GÖRE %s YAPTIRIMINI GEREKTİREN FİİL VE DAVRANIŞLARDAN OLDUĞUNDAN ANCAK %s NEDENLERİ DİKKATE ALINARAK %s YAPTIRIMI UYGULANMASINA OY BİRLİĞİ İLE KARAR VERİLMİŞTİR.",
+					clauseCode, origPen, mit, imposedPen)
+			} else {
+				text = fmt.Sprintf("MEB OKUL ÖNCESİ EĞİTİM VE İLKÖĞRETİM KURUMLARI YÖNETMELİĞİNİN %s BENDİNE GÖRE %s YAPTIRIMI UYGULANMASINA OY BİRLİĞİ İLE KARAR VERİLMİŞTİR.",
+					clauseCode, imposedPen)
+			}
+			verdictTextEntry.SetText(text)
+			return
+		}
+
+		// Lise (EK-1)
+		days := strings.TrimSpace(suspensionDaysEntry.Text)
+		dates := strings.TrimSpace(suspensionDatesEntry.Text)
+		penWithDays := imposedPen
+		if days != "" && strings.Contains(normalizeTurkish(imposedPen), "UZAKLASTIRMA") {
+			penWithDays = fmt.Sprintf("%s GÜN %s", days, imposedPen)
+		}
+
+		if strings.Contains(normalizeTurkish(imposedPen), "SOZLU") {
+			reason := mit
+			if reason == "" {
+				reason = "öğrencinin durumu"
+			}
+			text := fmt.Sprintf("MEB ORTAÖĞRETİM KURUMLARI YÖNETMELİĞİNİN %s BENDİNE GÖRE %s CEZASINI GEREKTİREN FİİL VE DAVRANIŞLARDAN OLDUĞUNDAN ANCAK %s NEDENLERİ DİKKATE ALINARAK SÖZLÜ OLARAK UYARILMASINA OY BİRLİĞİ İLE KARAR VERİLMİŞTİR.",
+				clauseCode, origPen, reason)
+			verdictTextEntry.SetText(text)
+			return
+		}
+
+		var text string
+		if mit != "" && !strings.EqualFold(origPen, imposedPen) {
+			text = fmt.Sprintf("1. MEB ORTAÖĞRETİM KURUMLARI YÖNETMELİĞİNİN %s BENDİNE GÖRE %s CEZASINI GEREKTİREN FİİL VE DAVRANIŞLARDAN OLDUĞUNDAN ANCAK %s NEDENLERİ DİKKATE ALINARAK %s CEZASI VERİLMESİNE,",
+				clauseCode, origPen, mit, penWithDays)
+		} else {
+			text = fmt.Sprintf("1. MEB ORTAÖĞRETİM KURUMLARI YÖNETMELİĞİNİN %s BENDİNE GÖRE %s CEZASINI GEREKTİREN FİİL VE DAVRANIŞLARDAN OLDUĞUNDAN %s CEZASI VERİLMESİNE,",
+				clauseCode, origPen, penWithDays)
+		}
+		if dates != "" {
+			text += fmt.Sprintf("\n2. CEZANIN %s TARİHİNDE/TARİHLERİNDE UYGULANMASINA,", dates)
+		}
+		text += "\nOY BİRLİĞİ İLE KARAR VERİLMİŞTİR."
 		verdictTextEntry.SetText(text)
 	}
 
@@ -201,12 +255,21 @@ func BuildVerdictTab(state *AppState) fyne.CanvasObject {
 		generateVerdictText()
 	}
 
+	opinionSelect.OnChanged = func(_ string) {
+		generateVerdictText()
+	}
+
+	mitigatingSelect.OnChanged = func(_ string) {
+		generateVerdictText()
+	}
+
 	autoFillBtn := widget.NewButtonWithIcon("Metni Otomatik Oluştur", theme.DocumentCreateIcon(), func() {
 		generateVerdictText()
 	})
 
 	clauseSelect.OnChanged = func(selected string) {
 		if c, ok := clauseMap[selected]; ok {
+			selectedClausePenalty = c.Penalty
 			clauseCodeEntry.SetText(c.Article)
 			clauseDescEntry.SetText(c.Description)
 			penaltySelect.SetSelected(c.Penalty)
@@ -450,11 +513,16 @@ func BuildVerdictTab(state *AppState) fyne.CanvasObject {
 				BirthDate:      selectedIncStudent.BirthDate,
 				FatherName:     selectedIncStudent.FatherName,
 				MotherName:     selectedIncStudent.MotherName,
-				GuardianName:   selectedIncStudent.GuardianName,
+				GuardianName:   model.EffectiveGuardianName(selectedIncStudent.FullName, selectedIncStudent.FatherName, selectedIncStudent.GuardianName),
 				GuardianPhone:  selectedIncStudent.GuardianPhone,
 				GuardianAddr:   selectedIncStudent.GuardianAddr,
 				BoardingStatus: selectedIncStudent.BoardingStatus,
 			}
+		} else {
+			if mStudent.FatherName == "" {
+				mStudent.FatherName = selectedIncStudent.FatherName
+			}
+			mStudent.GuardianName = model.EffectiveGuardianName(mStudent.FullName, mStudent.FatherName, mStudent.GuardianName)
 		}
 
 		ekPrefix := "Karar_Tutanağı_EK-1"
