@@ -35,14 +35,14 @@ func BuildHeader(state *AppState) fyne.CanvasObject {
 		yearOptions = append([]string{state.AcademicYear}, yearOptions...)
 	}
 
-	logoImg := canvas.NewImageFromResource(assets.AppIcon)
-	logoImg.SetMinSize(fyne.NewSize(32, 32))
+	isDark := true
+	if state.Config != nil && state.Config.ThemeMode == "light" {
+		isDark = false
+	}
+	logoImg := canvas.NewImageFromResource(assets.GetBrandLogo(isDark))
+	logoImg.SetMinSize(fyne.NewSize(150, 40))
 	logoImg.FillMode = canvas.ImageFillContain
-	logoBtn := widget.NewButton("", func() {
-		state.NavigateTo("hub")
-	})
-	logoBtn.Importance = widget.LowImportance
-	logoWidget := container.NewStack(logoBtn, container.NewCenter(logoImg))
+	logoWidget := container.NewCenter(logoImg)
 
 	yearSelect := NewTurkishSelect(yearOptions, func(selected string) {
 		if selected != "" && selected != state.AcademicYear {

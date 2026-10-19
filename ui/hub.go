@@ -98,14 +98,23 @@ func buildModernHub(state *AppState) fyne.CanvasObject {
 			btn.Importance = widget.HighImportance
 		}
 
-		titleLabel := widget.NewLabelWithStyle(title, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
-		titleLabel.Wrapping = fyne.TextWrapWord
+		titleSeg := &widget.TextSegment{
+			Text: title,
+			Style: widget.RichTextStyle{
+				Alignment: fyne.TextAlignCenter,
+				ColorName: theme.ColorNameForeground,
+				TextStyle: fyne.TextStyle{Bold: true},
+				SizeName:  theme.SizeNameSubHeadingText,
+			},
+		}
+		titleWidget := widget.NewRichText(titleSeg)
+		titleWidget.Wrapping = fyne.TextWrapWord
 
 		infoBtn := newSquareInfoButton(title, desc, state.Window, nil)
 
 		iconWidget := widget.NewIcon(icon)
 
-		topRow := container.NewBorder(nil, nil, iconWidget, infoBtn, titleLabel)
+		topRow := container.NewBorder(nil, nil, container.NewCenter(iconWidget), container.NewCenter(infoBtn), titleWidget)
 
 		cardContent := container.NewBorder(
 			topRow,

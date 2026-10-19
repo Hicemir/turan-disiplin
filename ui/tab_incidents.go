@@ -167,13 +167,12 @@ func BuildIncidentsTab(state *AppState) fyne.CanvasObject {
 			return len(currentIncidents)
 		},
 		func() fyne.CanvasObject {
-			return container.NewHBox(
-				widget.NewLabelWithStyle("KOD", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
-				widget.NewSeparator(),
-				widget.NewLabel("Olay Adı / Başlığı"),
-				widget.NewSeparator(),
-				widget.NewLabel("Tarih"),
-			)
+			codeLbl := widget.NewLabelWithStyle("#000", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+			dateLbl := widget.NewLabel("00.00.0000")
+			titleLbl := widget.NewLabel("Olay Adı / Başlığı")
+			titleLbl.Truncation = fyne.TextTruncateEllipsis
+			leftBox := container.NewHBox(codeLbl, widget.NewSeparator())
+			return container.NewBorder(nil, nil, leftBox, dateLbl, titleLbl)
 		},
 		func(i widget.ListItemID, o fyne.CanvasObject) {
 			if i >= len(currentIncidents) {
@@ -181,11 +180,12 @@ func BuildIncidentsTab(state *AppState) fyne.CanvasObject {
 			}
 			inc := currentIncidents[i]
 			box := o.(*fyne.Container)
-			codeLbl := box.Objects[0].(*widget.Label)
-			titleLbl := box.Objects[2].(*widget.Label)
-			dateLbl := box.Objects[4].(*widget.Label)
+			titleLbl := box.Objects[0].(*widget.Label)
+			leftBox := box.Objects[1].(*fyne.Container)
+			codeLbl := leftBox.Objects[0].(*widget.Label)
+			dateLbl := box.Objects[2].(*widget.Label)
 
-			codeLbl.SetText(fmt.Sprintf("#%-3s", inc.IncidentCode))
+			codeLbl.SetText(fmt.Sprintf("#%s", inc.IncidentCode))
 			titleLbl.SetText(inc.Title)
 			dateLbl.SetText(inc.Date)
 		},
@@ -277,7 +277,7 @@ func BuildIncidentsTab(state *AppState) fyne.CanvasObject {
 	})
 	deleteIncidentBtn.Importance = widget.DangerImportance
 
-	newIncidentBtn := widget.NewButtonWithIcon("Yeni Olay", theme.ContentAddIcon(), func() {
+	formNewIncidentBtn := widget.NewButtonWithIcon("Yeni Olay", theme.ContentAddIcon(), func() {
 		clearIncidentForm()
 	})
 
@@ -606,7 +606,7 @@ func BuildIncidentsTab(state *AppState) fyne.CanvasObject {
 	)
 
 	incidentCard := widget.NewCard("Olay Bilgileri", "İncelenen disiplin olayının genel tanımı", incidentForm)
-	incidentBtns := container.NewHBox(saveIncidentBtn, deleteIncidentBtn, newIncidentBtn)
+	incidentBtns := container.NewHBox(saveIncidentBtn, deleteIncidentBtn, formNewIncidentBtn)
 
 	studentsHeader := container.NewHBox(
 		widget.NewLabelWithStyle("👥 Olaya Bağlı Öğrenciler", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
@@ -618,13 +618,6 @@ func BuildIncidentsTab(state *AppState) fyne.CanvasObject {
 		studentsHeader,
 		incStudentsList.Wrap(),
 	))
-
-	// Layout Structure: 2-Panel Layout (Left: Incidents List, Right: Incident Form & Students)
-	leftIncList := container.NewBorder(
-		widget.NewLabelWithStyle("⚖️ Kayıtlı Olaylar", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
-		newIncidentBtn, nil, nil,
-		incidentList,
-	)
 
 	rightPanelContent := container.NewVBox(
 		incidentCard,
@@ -640,8 +633,69 @@ func BuildIncidentsTab(state *AppState) fyne.CanvasObject {
 	stInlineStatementEntry.ParentScroll = rightPanelScroll
 	incStudentsList.ParentScroll = rightPanelScroll
 
-	splitMain := container.NewHSplit(leftIncList, rightPanelScroll)
-	splitMain.SetOffset(0.28)
+	// Collapsible Sidebar snapped neatly to the left without clipping
+	sidebarCollapsed := false
+
+	var leftPanelHolder *fyne.Container
+	var mainContainer *fyne.Container
+	var updateSidebar func()
+
+	sidebarNewIncidentBtn := widget.NewButtonWithIcon("Yeni Olay Ekle", theme.ContentAddIcon(), func() {
+		clearIncidentForm()
+	})
+	sidebarNewIncidentBtn.Importance = widget.HighImportance
+
+	collapseBtn := widget.NewButtonWithIcon("Gizle", theme.NavigateBackIcon(), func() {
+		sidebarCollapsed = true
+		updateSidebar()
+	})
+	collapseBtn.Importance = widget.LowImportance
+
+	expandBtn := widget.NewButtonWithIcon("Olaylar", theme.NavigateNextIcon(), func() {
+		sidebarCollapsed = false
+		updateSidebar()
+	})
+	expandBtn.Importance = widget.MediumImportance
+
+	sidebarHeader := container.NewBorder(
+		nil, nil,
+		widget.NewLabelWithStyle("⚖️ Kayıtlı Olaylar", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+		collapseBtn,
+	)
+
+	sidebarTop := container.NewVBox(
+		sidebarHeader,
+		sidebarNewIncidentBtn,
+		widget.NewSeparator(),
+	)
+
+	expandedBox := container.New(&fixedWidthLayout{width: 300}, container.NewBorder(
+		sidebarTop,
+		nil, nil, nil,
+		incidentList,
+	))
+
+	collapsedBox := container.NewVBox(
+		expandBtn,
+		widget.NewSeparator(),
+	)
+
+	leftPanelHolder = container.NewStack(expandedBox)
+	leftSideContainer := container.NewHBox(leftPanelHolder, widget.NewSeparator())
+
+	updateSidebar = func() {
+		if sidebarCollapsed {
+			leftPanelHolder.Objects = []fyne.CanvasObject{collapsedBox}
+		} else {
+			leftPanelHolder.Objects = []fyne.CanvasObject{expandedBox}
+		}
+		leftPanelHolder.Refresh()
+		if mainContainer != nil {
+			mainContainer.Refresh()
+		}
+	}
+
+	mainContainer = container.NewBorder(nil, nil, leftSideContainer, nil, rightPanelScroll)
 
 	reloadIncidents()
 
@@ -659,5 +713,26 @@ func BuildIncidentsTab(state *AppState) fyne.CanvasObject {
 		clearIncidentForm()
 	}
 
-	return splitMain
+	return mainContainer
+}
+
+type fixedWidthLayout struct {
+	width float32
+}
+
+func (l *fixedWidthLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
+	for _, o := range objects {
+		o.Resize(size)
+		o.Move(fyne.NewPos(0, 0))
+	}
+}
+
+func (l *fixedWidthLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
+	var maxH float32
+	for _, o := range objects {
+		if o.Visible() && o.MinSize().Height > maxH {
+			maxH = o.MinSize().Height
+		}
+	}
+	return fyne.NewSize(l.width, maxH)
 }
