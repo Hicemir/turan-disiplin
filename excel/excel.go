@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime/debug"
 	"strconv"
 	"strings"
 	"unicode/utf8"
@@ -1001,6 +1002,9 @@ func hasAlphabetic(s string) bool {
 
 // ImportStudentsFromFile opens an excel/html/xml/csv file and extracts students for a given school year.
 func ImportStudentsFromFile(filePath string, schoolYear string) ([]*model.Student, error) {
+	// Return temporary parser buffers to the OS once the import is done.
+	defer func() { go debug.FreeOSMemory() }()
+
 	sheetData, sheets, err := ReadSheetData(filePath)
 	if err != nil {
 		return nil, err

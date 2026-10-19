@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"runtime/debug"
 	"strings"
 	"time"
 
@@ -296,6 +297,9 @@ func GenerateUniquePDFPath(baseDir string, prefix string) (string, error) {
 
 // OpenPDF opens the generated PDF with the default system application.
 func OpenPDF(pdfPath string) error {
+	// The PDF has just been generated; return its temporary buffers to the OS.
+	go debug.FreeOSMemory()
+
 	if _, err := os.Stat(pdfPath); err != nil {
 		return fmt.Errorf("dosya bulunamadı: %w", err)
 	}

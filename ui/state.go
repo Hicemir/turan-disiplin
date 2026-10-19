@@ -4,7 +4,6 @@ import (
 	"image/color"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/theme"
 
 	"turandisiplin/config"
 	"turandisiplin/model"
@@ -81,9 +80,9 @@ func InitState(a fyne.App, w fyne.Window) (*AppState, error) {
 	// Apply configured theme on startup
 	if a != nil {
 		tMode := cfg.ThemeMode
-		if tMode == "" {
-			// First run: detect OS system theme variant
-			if a.Settings().ThemeVariant() == theme.VariantDark {
+		if tMode == "" || !cfg.ThemeUserChosen {
+			// No explicit user choice yet: follow the OS light/dark setting
+			if systemPrefersDark(a) {
 				tMode = "dark"
 			} else {
 				tMode = "light"
@@ -140,6 +139,7 @@ func (s *AppState) SetSchoolType(sType string) {
 // ApplyTheme switches color mode ("light", "cream", "dark", "custom") and font size
 func (s *AppState) ApplyTheme(mode string, fontSize float32) {
 	s.Config.ThemeMode = mode
+	s.Config.ThemeUserChosen = true
 	s.Config.FontSize = fontSize
 	_ = config.SaveConfig(s.Config)
 

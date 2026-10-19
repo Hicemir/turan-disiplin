@@ -461,7 +461,7 @@
     {
       "ceza": "KINAMA",
       "madde": "164.1.b",
-      "açıklama": "Yapması gereken görevleri yapmamak,",
+      "açıklama": "Okul yönetimi veya öğretmenler tarafından verilen eğitim ve öğretime ilişkin görevleri yapmamak,",
       "okultürü": "LİSE"
     },
     {
@@ -473,7 +473,7 @@
     {
       "ceza": "KINAMA",
       "madde": "164.1.ç",
-      "açıklama": "(Değişik:RG-1/7/2015-29403) Tütün ve tütün mamullerini bulundurmak veya kullanmak,",
+      "açıklama": "(Değişik:RG-15/11/2022-32014) Tütün, tütün mamulleri veya tütün içermeyen ancak tütün mamulünü taklit eder tarzda kullanılan her türlü ürünü bulundurmak veya kullanmak,",
       "okultürü": "LİSE"
     },
     {
@@ -503,7 +503,7 @@
     {
       "ceza": "KINAMA",
       "madde": "164.1.ğ",
-      "açıklama": "Kaba ve saygısız davranmak,",
+      "açıklama": "Okul yöneticilerine, öğretmenlerine, çalışanlarına ve arkadaşlarına kaba ve saygısız davranmak,",
       "okultürü": "LİSE"
     },
     {
@@ -521,7 +521,7 @@
     {
       "ceza": "KINAMA",
       "madde": "164.1.i",
-      "açıklama": "(Değişik:RG-1/7/2015-29403) Yatılı okullarda pansiyona geç gelmek,",
+      "açıklama": "(Değişik:RG-15/11/2022-32014) Yatılı okullarda okul yönetimince belirlenen pansiyon kurallarına uymamak,",
       "okultürü": "LİSE"
     },
     {
@@ -539,7 +539,7 @@
     {
       "ceza": "KINAMA",
       "madde": "164.1.l",
-      "açıklama": "Bilişim araçlarını amacı dışında kullanmak,",
+      "açıklama": "Bilişim araçlarını öğretmenler kurulunca belirlenen usul ve esaslara aykırı şekilde kullanmak,",
       "okultürü": "LİSE"
     },
     {
@@ -569,7 +569,7 @@
     {
       "ceza": "OKULDAN KISA SÜRELİ UZAKLAŞTIRMA",
       "madde": "164.2.a",
-      "açıklama": "(Değ: 28/10/2016-29871 RG) Kişilere, arkadaşlarına, okul yöneticilerine, öğretmenlerine ve diğer çalışanlarına karşı okul içinde ve dışında sözle, davranışla veya sosyal medya üzerinden hakaret etmek, hakareti paylaşmak, yaymak veya başkalarını bu davranışa kışkırtmak,",
+      "açıklama": "(Değişik:RG-15/11/2022-32014) Okul yöneticilerine, öğretmenlerine, çalışanlarına, öğrencilere ve eğitim ortamlarında bulunan diğer kişilere sözle, davranışla veya sosyal medya üzerinden hakaret etmek, hakareti paylaşmak, başkalarını bu davranışa kışkırtmak, bu kişileri tehdit etmek,",
       "okultürü": "LİSE"
     },
     {
@@ -587,7 +587,7 @@
     {
       "ceza": "OKULDAN KISA SÜRELİ UZAKLAŞTIRMA",
       "madde": "164.2.ç",
-      "açıklama": "(Değişik:RG-1/7/2015-29403) İzinsiz gösteri, etkinlik ve toplantı düzenlemek, bu tür gösteri, etkinlik ve toplantılara katılmak,",
+      "açıklama": "(Değişik:RG-15/11/2022-32014) Okul binası ve eklentilerinde izinsiz gösteri, etkinlik ve toplantı düzenlemek, bu tür gösteri, etkinlik ve toplantılara katılmak,",
       "okultürü": "LİSE"
     },
     {
@@ -605,19 +605,19 @@
     {
       "ceza": "OKULDAN KISA SÜRELİ UZAKLAŞTIRMA",
       "madde": "164.2.f",
-      "açıklama": "Başkalarına hakaret etmek,",
+      "açıklama": "(Mülga:RG-15/11/2022-32014)",
       "okultürü": "LİSE"
     },
     {
       "ceza": "OKULDAN KISA SÜRELİ UZAKLAŞTIRMA",
       "madde": "164.2.g",
-      "açıklama": "(Değişik:RG-1/7/2015-29403) Müstehcen veya yasaklanmış araç, gereç, doküman ve benzerlerini dağıtmak, duvarlara ve diğer yerlere asmak, yapıştırmak, yazmak; bu amaçlar için okul araç-gerecini ve eklentilerini kullanmak,",
+      "açıklama": "(Değişik:RG-15/11/2022-32014) Siyasi, ideolojik, müstehcen veya yasaklanmış araç, gereç, doküman ve benzerlerini paylaşmak, dağıtmak, duvarlara ve diğer yerlere asmak, yazmak; bu amaçlar için bilişim araçlarını, okul araç-gerecini ve eklentilerini kullanmak,",
       "okultürü": "LİSE"
     },
     {
       "ceza": "OKULDAN KISA SÜRELİ UZAKLAŞTIRMA",
       "madde": "164.2.ğ",
-      "açıklama": "(Değişik:RG-1/7/2015-29403) Bilişim araçları veya sosyal medya yoluyla eğitim ve öğretim faaliyetlerine ve kişilere zarar vermek,",
+      "açıklama": "(Değişik:RG-15/11/2022-32014) Bilişim araçları veya sosyal medya yoluyla eğitim ve öğretim faaliyetlerine, kişilere ve kurumlara zarar vermek,",
       "okultürü": "LİSE"
     },
     {
@@ -797,7 +797,7 @@
     {
       "ceza": "OKUL DEĞİŞTİRME",
       "madde": "164.3.p",
-      "açıklama": "(Ek:RG-1/7/2015-29403) Genel ahlak ve adaba uygun olmayan, yanlış algı oluşturabilecek tutum ve davranışları alışkanlık hâline getirmek,",
+      "açıklama": "(Ek:RG-1/7/2015-29403) Genel ahlak ve adaba uygun olmayan tutum ve davranışları alışkanlık hâline getirmek,",
       "okultürü": "LİSE"
     },
     {
@@ -881,7 +881,7 @@
     {
       "ceza": "ÖRGÜN EĞİTİM DIŞINA ÇIKARMA",
       "madde": "164.4.ı",
-      "açıklama": "Yaralayıcı, öldürücü her türlü alet, silah, patlayıcı maddeleri kullanmak suretiyle bir kimseyi yaralamaya teşebbüs etmek, yaralamak, öldürmek, maddi veya manevi zarara yol açmak,",
+      "açıklama": "Yaralayıcı, öldürücü her türlü alet, silah, patlayıcı maddeleri veya fiziki güç kullanmak suretiyle bir kimseyi yaralamaya teşebbüs etmek, yaralamak, öldürmek, maddi veya manevi zarara yol açmak,",
       "okultürü": "LİSE"
     },
     {
@@ -1056,6 +1056,12 @@
       "ceza": "KINAMA",
       "madde": "55.b.15",
       "açıklama": "(Ek:RG-14 / 10 / 2023 - 32339) Diğer öğrencilerin sosyal veya duygusal gelişimlerini, akran ve arkadaşlık ilişkilerini olumsuz yönde etkileyecek davranışları alışkanlık hâline getirmek.",
+      "okultürü": "ORTAOKUL"
+    },
+    {
+      "ceza": "KINAMA",
+      "madde": "55.b.16",
+      "açıklama": "(Ek:RG-28 / 7 / 2026 - 33323) Bilişim araçlarını okul yönetimince belirlenen usul ve esaslara aykırı şekilde kullanmak",
       "okultürü": "ORTAOKUL"
     },
     {

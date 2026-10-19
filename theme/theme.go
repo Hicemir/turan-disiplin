@@ -85,6 +85,8 @@ func buildDarkPalette(name fyne.ThemeColorName, bg, overlay, button, accent, sep
 		return button
 	case theme.ColorNameSeparator:
 		return separator
+	case theme.ColorNameHover:
+		return color.NRGBA{R: 255, G: 255, B: 255, A: 45}
 	default:
 		return base.Color(name, theme.VariantDark)
 	}
@@ -185,6 +187,8 @@ func (t *TurkishTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant
 				return button
 			case theme.ColorNameSeparator:
 				return separator
+			case theme.ColorNameHover:
+				return color.NRGBA{R: 15, G: 23, B: 42, A: 40}
 			default:
 				return t.base.Color(name, theme.VariantLight)
 			}
@@ -212,6 +216,8 @@ func (t *TurkishTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant
 			return color.NRGBA{R: 255, G: 255, B: 255, A: 255}
 		case theme.ColorNameSeparator:
 			return color.NRGBA{R: 148, G: 163, B: 184, A: 255}
+		case theme.ColorNameHover:
+			return color.NRGBA{R: 15, G: 23, B: 42, A: 40}
 		default:
 			return t.base.Color(name, theme.VariantLight)
 		}

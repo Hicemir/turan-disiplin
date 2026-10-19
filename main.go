@@ -14,15 +14,12 @@ import (
 	"turandisiplin/ui"
 )
 
-func init() {
-	// Proactive memory debloating:
-	// Set target GC percentage to 20 to collect garbage frequently,
-	// and set memory limit to 80MB so Go releases memory aggressively to OS.
-	debug.SetGCPercent(20)
-	debug.SetMemoryLimit(80 * 1024 * 1024)
-}
-
 func main() {
+	// Memory optimization for older school PCs: collect early and keep a soft
+	// 64MB heap target so buffers are returned to the OS aggressively.
+	debug.SetGCPercent(50)
+	debug.SetMemoryLimit(64 * 1024 * 1024)
+
 	a := app.NewWithID("com.turandisiplin.app")
 
 	w := a.NewWindow("TuranDisiplin - MEB Öğrenci Disiplin ve Davranış Değerlendirme Sistemi")

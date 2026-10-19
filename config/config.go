@@ -134,6 +134,7 @@ type AppConfig struct {
 	RememberYear      bool     `json:"remember_year"`        // If true, skip startup year dialog
 	UIMode            string   `json:"ui_mode"`              // "modern" or "legacy"
 	ThemeMode         string   `json:"theme_mode"`           // theme ID or "custom"
+	ThemeUserChosen   bool     `json:"theme_user_chosen,omitempty"` // true once the user picks a theme; otherwise the OS theme is followed
 	FontSize          float32  `json:"font_size"`            // 15, 17, 19
 	DeletedYears      []string `json:"deleted_years,omitempty"`
 	CustomBgColor     string   `json:"custom_bg_color,omitempty"`

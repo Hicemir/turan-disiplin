@@ -50,7 +50,7 @@ func (b *SquareInfoButton) MinSize() fyne.Size {
 }
 
 func (b *SquareInfoButton) MouseIn(_ *desktop.MouseEvent) {
-	b.bg.FillColor = color.NRGBA{R: 255, G: 255, B: 255, A: 35}
+	b.bg.FillColor = theme.Color(theme.ColorNameHover)
 	b.bg.Refresh()
 	if b.onHover != nil {
 		b.onHover(true)
