@@ -1,7 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"runtime"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -15,6 +20,8 @@ import (
 )
 
 func main() {
+	ensureLinuxDesktopIntegration()
+
 	a := app.NewWithID("com.turandisiplin.app")
 	a.SetIcon(assets.AppIcon)
 
@@ -104,4 +111,70 @@ func showYearSelectionModal(w fyne.Window, state *ui.AppState) {
 	)
 	d.Resize(fyne.NewSize(540, 310))
 	d.Show()
+}
+
+func ensureLinuxDesktopIntegration() {
+	if runtime.GOOS != "linux" {
+		return
+	}
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return
+	}
+
+	execPath, err := os.Executable()
+	if err != nil {
+		execPath = "TuranDisiplin-Linux"
+	}
+
+	// 1. Install hicolor and pixmaps icons (Shield emblem)
+	iconDirs := []string{
+		filepath.Join(home, ".local/share/icons/hicolor/512x512/apps"),
+		filepath.Join(home, ".local/share/icons/hicolor/256x256/apps"),
+		filepath.Join(home, ".local/share/icons/hicolor/48x48/apps"),
+		filepath.Join(home, ".local/share/pixmaps"),
+		filepath.Join(home, ".local/share/icons"),
+	}
+	iconNames := []string{"com.turandisiplin.app.png", "TuranDisiplin-Linux.png", "turandisiplin.png"}
+
+	for _, dir := range iconDirs {
+		_ = os.MkdirAll(dir, 0755)
+		for _, name := range iconNames {
+			p := filepath.Join(dir, name)
+			if len(assets.LogoPNG) > 0 {
+				_ = os.WriteFile(p, assets.LogoPNG, 0644)
+			}
+		}
+	}
+
+	// 2. Install desktop files for Wayland and X11 matching
+	appDir := filepath.Join(home, ".local/share/applications")
+	_ = os.MkdirAll(appDir, 0755)
+
+	desktopContent := fmt.Sprintf(`[Desktop Entry]
+Version=1.0
+Type=Application
+Name=TuranDisiplin
+GenericName=MEB Öğrenci Disiplin ve Davranış Değerlendirme Sistemi
+Comment=MEB Öğrenci Disiplin ve Davranış Değerlendirme Sistemi
+Exec=%s
+Icon=com.turandisiplin.app
+Terminal=false
+Categories=Office;Education;
+StartupWMClass=com.turandisiplin.app
+`, execPath)
+
+	desktopFiles := []string{
+		filepath.Join(appDir, "com.turandisiplin.app.desktop"),
+		filepath.Join(appDir, "TuranDisiplin-Linux.desktop"),
+		filepath.Join(appDir, "turandisiplin.desktop"),
+	}
+
+	for _, df := range desktopFiles {
+		_ = os.WriteFile(df, []byte(desktopContent), 0644)
+	}
+
+	// Notify desktop database and icon cache
+	_ = exec.Command("update-desktop-database", appDir).Run()
+	_ = exec.Command("gtk-update-icon-cache", filepath.Join(home, ".local/share/icons/hicolor")).Run()
 }

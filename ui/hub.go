@@ -91,9 +91,10 @@ func buildModernHub(state *AppState) fyne.CanvasObject {
 	header := BuildHeader(state)
 
 	createNavCard := func(title string, icon fyne.Resource, desc string, isPrimary bool, targetView string) fyne.CanvasObject {
-		btn := widget.NewButton("Aç  →", func() {
+		btn := widget.NewButtonWithIcon("Aç", theme.NavigateNextIcon(), func() {
 			state.NavigateTo(targetView)
 		})
+		btn.IconPlacement = widget.ButtonIconTrailingText
 		if isPrimary {
 			btn.Importance = widget.HighImportance
 		}

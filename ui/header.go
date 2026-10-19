@@ -40,7 +40,7 @@ func BuildHeader(state *AppState) fyne.CanvasObject {
 		isDark = false
 	}
 	logoImg := canvas.NewImageFromResource(assets.GetBrandLogo(isDark))
-	logoImg.SetMinSize(fyne.NewSize(150, 40))
+	logoImg.SetMinSize(fyne.NewSize(215, 44))
 	logoImg.FillMode = canvas.ImageFillContain
 	logoWidget := container.NewCenter(logoImg)
 
