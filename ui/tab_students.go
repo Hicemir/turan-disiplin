@@ -84,7 +84,7 @@ func BuildStudentsTab(state *AppState) fyne.CanvasObject {
 		genderSelect.SetSelected(st.Gender)
 		tcEntry.SetText(st.TCNo)
 		birthPlaceEntry.SetText(st.BirthPlace)
-		birthDateEntry.SetText(st.BirthDate)
+		birthDateEntry.SetText(model.NormalizeBirthDate(st.BirthDate))
 		fatherEntry.SetText(st.FatherName)
 		motherEntry.SetText(st.MotherName)
 		guardianEntry.SetText(st.GuardianName)

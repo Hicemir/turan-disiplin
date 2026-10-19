@@ -645,7 +645,7 @@ func parseCardBasedStudents(rows [][]string, schoolYear string) []*model.Student
 			// 8. Doğum Tarihi
 			if strings.Contains(norm, "DOGUM TARIHI") {
 				if current != nil && valStr != "" && !isOnlyPunctuation(valStr) {
-					current.BirthDate = strings.TrimSpace(valStr)
+					current.BirthDate = model.NormalizeBirthDate(valStr)
 				}
 			}
 
@@ -847,7 +847,7 @@ func studentFromMappedRow(row []string, m map[string]int, defaultClass string, s
 		FatherName:     getCell(row, m["baba"]),
 		MotherName:     getCell(row, m["anne"]),
 		Gender:         gender,
-		BirthDate:      getCell(row, m["dogumtarihi"]),
+		BirthDate:      model.NormalizeBirthDate(getCell(row, m["dogumtarihi"])),
 		BirthPlace:     getCell(row, m["dogumyeri"]),
 		BoardingStatus: "GÜNDÜZLÜ",
 		BehaviorScore:  100,

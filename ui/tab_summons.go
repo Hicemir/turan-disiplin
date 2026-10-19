@@ -221,17 +221,27 @@ func BuildSummonsTab(state *AppState) fyne.CanvasObject {
 		widget.NewFormItem("Toplantı Tarihi", uyeTarihEntry),
 		widget.NewFormItem("Toplantı Saati", uyeSaatEntry),
 		widget.NewFormItem("Toplantı Yeri", uyeYerEntry),
-		widget.NewFormItem("Gündem Maddeleri (Her satıra bir madde)", agendaText),
 	)
 
-	cardMember := widget.NewCard("Disiplin / Davranış Kurulu Üyeleri Toplantı Çağrısı", "Gündemli resmi kurul toplantı çağrı pusulası", container.NewVBox(
+	// Agenda sits in the Border center so it absorbs all spare vertical space;
+	// SetMinRowsVisible keeps a usable minimum (the entry scrolls internally).
+	agendaText.SetMinRowsVisible(4)
+	agendaBox := container.NewBorder(
+		widget.NewLabelWithStyle("Gündem Maddeleri (Her satıra bir madde)", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+		nil, nil, nil,
+		agendaText,
+	)
+
+	cardMember := widget.NewCard("Disiplin / Davranış Kurulu Üyeleri Toplantı Çağrısı", "Gündemli resmi kurul toplantı çağrı pusulası", container.NewBorder(
 		memberForm,
 		pdfMemberSummonsBtn,
+		nil, nil,
+		agendaBox,
 	))
 
-	content := container.NewVScroll(container.NewVBox(
-		cardStudent,
-		widget.NewSeparator(),
+	content := container.NewVScroll(container.NewBorder(
+		container.NewVBox(cardStudent, widget.NewSeparator()),
+		nil, nil, nil,
 		cardMember,
 	))
 

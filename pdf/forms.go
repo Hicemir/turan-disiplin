@@ -45,7 +45,7 @@ func GenerateIfadeSavunmaTutanagi(school *model.SchoolInfo, student *model.Stude
 		{"Adı Soyadı", ": " + student.FullName},
 		{"Sınıfı ve Okul No", fmt.Sprintf(": %s  -  %s", student.ClassSection, student.SchoolNo)},
 		{"Baba - Anne Adı", fmt.Sprintf(": %s - %s", student.FatherName, student.MotherName)},
-		{"Doğum Yeri ve Tarihi", fmt.Sprintf(": %s - %s", student.BirthPlace, student.BirthDate)},
+		{"Doğum Yeri ve Tarihi", fmt.Sprintf(": %s - %s", student.BirthPlace, model.NormalizeBirthDate(student.BirthDate))},
 		{choose(isSavunma, "Savunma Tarihi", "İfade Tarihi"), ": " + time.Now().Format("02/01/2006")},
 	}
 

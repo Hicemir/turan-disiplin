@@ -64,7 +64,7 @@ func GenerateKurulKarari(school *model.SchoolInfo, student *model.Student, incid
 		rows = append(rows, tableRow{Label: "Sınıfı ve Numarası", Value: fmt.Sprintf("%s  -  %s", student.ClassSection, student.SchoolNo)})
 		rows = append(rows, tableRow{Label: "Cinsiyeti", Value: student.Gender})
 		rows = append(rows, tableRow{Label: "T.C. Kimlik No", Value: student.TCNo})
-		rows = append(rows, tableRow{Label: "Doğum Yeri ve Tarihi", Value: fmt.Sprintf("%s / %s", student.BirthPlace, student.BirthDate)})
+		rows = append(rows, tableRow{Label: "Doğum Yeri ve Tarihi", Value: fmt.Sprintf("%s / %s", student.BirthPlace, model.NormalizeBirthDate(student.BirthDate))})
 		rows = append(rows, tableRow{Label: "Baba ve Anne Adı", Value: fmt.Sprintf("%s - %s", student.FatherName, student.MotherName)})
 		rows = append(rows, tableRow{Label: "Velisinin Adı Soyadı", Value: student.GuardianName})
 		rows = append(rows, tableRow{Label: "Velisinin Telefon ve Adresi", Value: fmt.Sprintf("%s  |  %s", student.GuardianPhone, student.GuardianAddr)})

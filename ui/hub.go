@@ -106,19 +106,9 @@ func buildModernHub(state *AppState) fyne.CanvasObject {
 		})
 		titleLabel.Wrapping = fyne.TextWrapWord
 
-		descLabel := widget.NewLabel(desc)
-		descLabel.Wrapping = fyne.TextWrapWord
-		descLabel.TextStyle = fyne.TextStyle{Italic: true}
-		descLabel.Alignment = fyne.TextAlignCenter
-		descLabel.Hide()
-
-		infoBtn := newSquareInfoButton(title, desc, state.Window, func(hovered bool) {
-			if hovered {
-				descLabel.Show()
-			} else {
-				descLabel.Hide()
-			}
-		})
+		// Description is shown only via the click popup; revealing it on hover
+		// changed the card height and caused hover flicker.
+		infoBtn := newSquareInfoButton(title, desc, state.Window, nil)
 
 		topRow := container.NewBorder(nil, nil, nil, infoBtn, titleLabel)
 
@@ -126,7 +116,7 @@ func buildModernHub(state *AppState) fyne.CanvasObject {
 			topRow,
 			btn,
 			nil, nil,
-			container.NewCenter(descLabel),
+			nil,
 		)
 		return widget.NewCard("", "", cardContent)
 	}
