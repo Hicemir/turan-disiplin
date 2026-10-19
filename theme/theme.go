@@ -24,25 +24,13 @@ type ThemeInfo struct {
 	AccentColor color.Color
 }
 
-func GetAllThemes(customColors ...color.Color) []ThemeInfo {
-	customBg := color.Color(color.NRGBA{R: 30, G: 30, B: 46, A: 255})
-	customAccent := color.Color(color.NRGBA{R: 137, G: 180, B: 250, A: 255})
-	if len(customColors) >= 1 && customColors[0] != nil {
-		customBg = customColors[0]
-	}
-	if len(customColors) >= 2 && customColors[1] != nil {
-		customAccent = customColors[1]
-	}
-
+func GetAllThemes() []ThemeInfo {
 	return []ThemeInfo{
 		// 1. Koyu Turkuaz (Gece)
 		{ID: "dark_cyan", Name: "Koyu Turkuaz (Gece Modu)", BgColor: color.NRGBA{R: 4, G: 24, B: 36, A: 255}, AccentColor: color.NRGBA{R: 6, G: 182, B: 212, A: 255}},
 
 		// 2. Açık Turkuaz (Gündüz) - Arka Plan: #e2e8f0, Vurgu: #06b6d4
 		{ID: "light", Name: "Açık Turkuaz (Gündüz Modu)", BgColor: color.NRGBA{R: 226, G: 232, B: 240, A: 255}, AccentColor: color.NRGBA{R: 6, G: 182, B: 212, A: 255}},
-
-		// 3. Özel Kişiselleştirilmiş Tema
-		{ID: "custom", Name: "🎨 Özel Tema (Kişiselleştirilmiş)", BgColor: customBg, AccentColor: customAccent},
 	}
 }
 

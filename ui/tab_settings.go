@@ -33,11 +33,8 @@ func BuildSettingsView(state *AppState) fyne.CanvasObject {
 	}, nil)
 	uiRadio.SetSelected(currentUIModeLabel)
 
-	// 2. Custom Colors and Themes
-	currentCustomBg := config.HexToColor(state.Config.CustomBgColor, color.NRGBA{R: 30, G: 30, B: 46, A: 255})
-	currentCustomAccent := config.HexToColor(state.Config.CustomAccentColor, color.NRGBA{R: 137, G: 180, B: 250, A: 255})
-
-	allThemes := appTheme.GetAllThemes(currentCustomBg, currentCustomAccent)
+	// 2. Color Themes
+	allThemes := appTheme.GetAllThemes()
 	selectedThemeID := state.Config.ThemeMode
 	if selectedThemeID == "" {
 		selectedThemeID = "light"
@@ -55,7 +52,6 @@ func BuildSettingsView(state *AppState) fyne.CanvasObject {
 	var themeRows []*themeRowRefs
 
 	refreshThemeRows := func() {
-		allThemes = appTheme.GetAllThemes(currentCustomBg, currentCustomAccent)
 		for i, r := range themeRows {
 			isSelected := r.id == selectedThemeID
 			if isSelected {
@@ -121,63 +117,6 @@ func BuildSettingsView(state *AppState) fyne.CanvasObject {
 		themeContainer.Add(container.NewStack(btn, container.NewPadded(rowContent)))
 	}
 
-	// Custom Color Picker Card
-	bgHexLabel := widget.NewLabelWithStyle(config.ColorToHex(currentCustomBg), fyne.TextAlignLeading, fyne.TextStyle{Monospace: true})
-	accentHexLabel := widget.NewLabelWithStyle(config.ColorToHex(currentCustomAccent), fyne.TextAlignLeading, fyne.TextStyle{Monospace: true})
-
-	customBgPreview := canvas.NewRectangle(currentCustomBg)
-	customAccentPreview := canvas.NewRectangle(currentCustomAccent)
-
-	makeSwatchBox := func(rect *canvas.Rectangle) fyne.CanvasObject {
-		rect.SetMinSize(fyne.NewSize(26, 26))
-		rect.CornerRadius = 4.0
-		rect.StrokeColor = color.NRGBA{R: 255, G: 255, B: 255, A: 230}
-		rect.StrokeWidth = 2.0
-
-		frame := canvas.NewRectangle(color.NRGBA{R: 35, G: 35, B: 35, A: 220})
-		frame.SetMinSize(fyne.NewSize(30, 30))
-		frame.CornerRadius = 6.0
-		frame.StrokeColor = color.NRGBA{R: 120, G: 120, B: 120, A: 200}
-		frame.StrokeWidth = 1.0
-
-		return container.NewStack(frame, container.NewCenter(rect))
-	}
-
-	bgPickBtn := widget.NewButtonWithIcon("Arka Plan Rengi Seç", theme.ColorPaletteIcon(), func() {
-		ShowAdvancedColorPicker("Arka Plan Rengi Seçin", currentCustomBg, func(c color.Color) {
-			if c != nil {
-				currentCustomBg = config.HexToColor(config.ColorToHex(c), color.NRGBA{R: 30, G: 30, B: 46, A: 255})
-				customBgPreview.FillColor = currentCustomBg
-				customBgPreview.Refresh()
-				bgHexLabel.SetText(config.ColorToHex(currentCustomBg))
-				selectedThemeID = "custom"
-				allThemes = appTheme.GetAllThemes(currentCustomBg, currentCustomAccent)
-				refreshThemeRows()
-			}
-		}, state.Window)
-	})
-
-	accentPickBtn := widget.NewButtonWithIcon("Vurgu / Buton Rengi Seç", theme.ColorPaletteIcon(), func() {
-		ShowAdvancedColorPicker("Vurgu / Buton Rengi Seçin", currentCustomAccent, func(c color.Color) {
-			if c != nil {
-				currentCustomAccent = config.HexToColor(config.ColorToHex(c), color.NRGBA{R: 137, G: 180, B: 250, A: 255})
-				customAccentPreview.FillColor = currentCustomAccent
-				customAccentPreview.Refresh()
-				accentHexLabel.SetText(config.ColorToHex(currentCustomAccent))
-				selectedThemeID = "custom"
-				allThemes = appTheme.GetAllThemes(currentCustomBg, currentCustomAccent)
-				refreshThemeRows()
-			}
-		}, state.Window)
-	})
-
-	customColorBox := widget.NewCard("🎨 Özel Tema Renk Paleti", "Kendi renklerinizi seçerek özel temanızı oluşturun",
-		container.NewVBox(
-			container.NewHBox(makeSwatchBox(customBgPreview), bgHexLabel, bgPickBtn),
-			container.NewHBox(makeSwatchBox(customAccentPreview), accentHexLabel, accentPickBtn),
-		),
-	)
-
 	// 3. Font Size Selector (15pt, 17pt, 19pt)
 	sizeMap := map[string]float32{
 		"15pt": 15.0,
@@ -214,8 +153,6 @@ func BuildSettingsView(state *AppState) fyne.CanvasObject {
 		state.Config.ThemeMode = newThemeMode
 		state.Config.FontSize = newFontSize
 		state.Config.RememberYear = rememberYearCheck.Checked
-		state.Config.CustomBgColor = config.ColorToHex(currentCustomBg)
-		state.Config.CustomAccentColor = config.ColorToHex(currentCustomAccent)
 		_ = config.SaveConfig(state.Config)
 
 		state.ApplyTheme(newThemeMode, newFontSize)
@@ -244,7 +181,6 @@ func BuildSettingsView(state *AppState) fyne.CanvasObject {
 		widget.NewSeparator(),
 		widget.NewLabelWithStyle("Renk Teması (Arka Plan ve Vurgu Rengi)", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 		themeContainer,
-		customColorBox,
 		widget.NewSeparator(),
 		widget.NewLabelWithStyle("Yazı Boyutu", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 		sizeRadio,

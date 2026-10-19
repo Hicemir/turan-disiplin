@@ -53,13 +53,10 @@ func TestAcademicYearSortingAndDeduplication(t *testing.T) {
 	}
 }
 
-func TestThemesPaletteAndCustomTheme(t *testing.T) {
-	customBg := color.NRGBA{R: 20, G: 20, B: 30, A: 255}
-	customAccent := color.NRGBA{R: 255, G: 165, B: 0, A: 255}
-
-	allThemes := appTheme.GetAllThemes(customBg, customAccent)
-	if len(allThemes) != 3 { // dark_cyan + light + custom
-		t.Fatalf("expected 3 themes including custom, got %d", len(allThemes))
+func TestThemesPalette(t *testing.T) {
+	allThemes := appTheme.GetAllThemes()
+	if len(allThemes) != 2 { // dark_cyan + light
+		t.Fatalf("expected 2 themes, got %d", len(allThemes))
 	}
 
 	expectedThemes := []string{"dark_cyan", "light"}
@@ -70,14 +67,6 @@ func TestThemesPaletteAndCustomTheme(t *testing.T) {
 		if fg == nil || bg == nil {
 			t.Errorf("theme %s returned nil color", id)
 		}
-	}
-
-	// Test Custom Theme
-	thCustom := appTheme.NewTurkishTheme("custom", 15.0, customBg, customAccent)
-	customBgRes := thCustom.Color(theme.ColorNameBackground, theme.VariantDark)
-	customAccentRes := thCustom.Color(theme.ColorNamePrimary, theme.VariantDark)
-	if customBgRes == nil || customAccentRes == nil {
-		t.Errorf("custom theme returned nil colors")
 	}
 
 	// Test ColorToHex and HexToColor

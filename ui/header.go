@@ -7,11 +7,13 @@ import (
 	"strings"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
+	"turandisiplin/assets"
 	"turandisiplin/config"
 	"turandisiplin/pdf"
 	"turandisiplin/store"
@@ -33,7 +35,14 @@ func BuildHeader(state *AppState) fyne.CanvasObject {
 		yearOptions = append([]string{state.AcademicYear}, yearOptions...)
 	}
 
-	title := widget.NewLabelWithStyle("🏛️ TURANDİSİPLİN "+config.AppVersion, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	logoImg := canvas.NewImageFromResource(assets.AppIcon)
+	logoImg.SetMinSize(fyne.NewSize(32, 32))
+	logoImg.FillMode = canvas.ImageFillContain
+	logoBtn := widget.NewButton("", func() {
+		state.NavigateTo("hub")
+	})
+	logoBtn.Importance = widget.LowImportance
+	logoWidget := container.NewStack(logoBtn, container.NewCenter(logoImg))
 
 	yearSelect := NewTurkishSelect(yearOptions, func(selected string) {
 		if selected != "" && selected != state.AcademicYear {
@@ -141,7 +150,7 @@ func BuildHeader(state *AppState) fyne.CanvasObject {
 	})
 
 	leftSide := container.NewHBox(
-		title,
+		logoWidget,
 		widget.NewSeparator(),
 		widget.NewLabelWithStyle("Yıl:", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 		yearSelectContainer,

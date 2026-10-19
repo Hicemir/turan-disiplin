@@ -1,6 +1,15 @@
 package assets
 
-import _ "embed"
+import (
+	_ "embed"
+
+	"fyne.io/fyne/v2"
+)
+
+//go:embed logo.png
+var LogoPNG []byte
+
+var AppIcon = fyne.NewStaticResource("logo.png", LogoPNG)
 
 //go:embed yonetmelik.json
 var YonetmelikJSON []byte

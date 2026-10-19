@@ -9,14 +9,17 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 
+	"turandisiplin/assets"
 	"turandisiplin/config"
 	"turandisiplin/ui"
 )
 
 func main() {
 	a := app.NewWithID("com.turandisiplin.app")
+	a.SetIcon(assets.AppIcon)
 
 	w := a.NewWindow("TuranDisiplin " + config.AppVersion + " - MEB Öğrenci Disiplin ve Davranış Değerlendirme Sistemi")
+	w.SetIcon(assets.AppIcon)
 	w.Resize(fyne.NewSize(1260, 840))
 	w.CenterOnScreen()
 

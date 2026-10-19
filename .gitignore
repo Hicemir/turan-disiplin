@@ -2,3 +2,4 @@ SPEC.md
 *.tmp
 *.log
 .DS_Store
+build/
