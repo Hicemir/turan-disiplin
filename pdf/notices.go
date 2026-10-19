@@ -22,7 +22,7 @@ func GenerateCezaTebligatiOgrenci(school *model.SchoolInfo, student *model.Stude
 	noticeLaw := "Milli Eğitim Bakanlığı Ortaöğretim Kurumları Yönetmeliğinin 169. maddesi gereğince"
 	if strings.ToUpper(school.SchoolType) == "ORTAOKUL" {
 		boardName = "ÖĞRENCİ DAVRANIŞLARINI DEĞERLENDİRME"
-		noticeLaw = "Milli Eğitim Bakanlığı Okul Öncesi Eğitim ve İlköğretim Kurumları Yönetmeliğinin ilgili maddesi gereğince"
+		noticeLaw = "Milli Eğitim Bakanlığı Okul Öncesi Eğitim ve İlköğretim Kurumları Yönetmeliğinin 56. maddesi gereğince"
 	}
 
 	doc.DrawAntet(school)

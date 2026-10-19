@@ -215,21 +215,18 @@ func GenerateKurulKarari(school *model.SchoolInfo, student *model.Student, incid
 		schoolCommute = "AİLESİNİN YANINDA OKUYOR"
 	}
 
-	// Format address + phone (+ guardian name if set)
+	// Format address + phone (+ guardian name fallback if address empty)
 	addrVal := strings.TrimSpace(stGuardianAddr)
-	if strings.TrimSpace(stGuardianPhone) != "" {
+	phoneVal := strings.TrimSpace(stGuardianPhone)
+	if phoneVal != "" {
 		if addrVal != "" {
-			addrVal += "   Tel No: " + strings.TrimSpace(stGuardianPhone)
+			addrVal += "\nTel No:" + phoneVal
 		} else {
-			addrVal = "Tel No: " + strings.TrimSpace(stGuardianPhone)
+			addrVal = "Tel No:" + phoneVal
 		}
 	}
-	if effGuardian != "" {
-		if addrVal != "" {
-			addrVal = effGuardian + " - " + addrVal
-		} else {
-			addrVal = effGuardian
-		}
+	if addrVal == "" && effGuardian != "" {
+		addrVal = effGuardian
 	}
 
 	offensePlaceTime := ""
@@ -253,9 +250,9 @@ func GenerateKurulKarari(school *model.SchoolInfo, student *model.Student, incid
 		}
 		offensePlaceTime = cleanJoin(place, dt, " / ")
 
-		offenseType = strings.TrimSpace(verdict.OffenseType)
+		offenseType = toUpperTR(strings.TrimSpace(verdict.OffenseType))
 		if offenseType == "" && incident != nil {
-			offenseType = strings.TrimSpace(incident.Title)
+			offenseType = toUpperTR(strings.TrimSpace(incident.Title))
 		}
 		offenseReason = strings.TrimSpace(verdict.OffenseReason)
 		witnessText = strings.TrimSpace(verdict.WitnessStatements)
@@ -269,9 +266,9 @@ func GenerateKurulKarari(school *model.SchoolInfo, student *model.Student, incid
 		if strings.EqualFold(mit, "Herhangi bir hafifletici neden bulunmamaktadır") && agg != "" {
 			mit = ""
 		}
-		mitigatingText = cleanJoin(mit, agg, " ")
+		mitigatingText = toUpperTR(cleanJoin(mit, agg, " "))
 
-		boardOpinion = strings.TrimSpace(verdict.BoardOpinion)
+		boardOpinion = toUpperTR(strings.TrimSpace(verdict.BoardOpinion))
 
 		penLine := toUpperTR(strings.TrimSpace(verdict.PenaltyName))
 		if verdict.SuspensionDays > 0 && !strings.HasPrefix(penLine, fmt.Sprintf("%d", verdict.SuspensionDays)) {
@@ -279,7 +276,7 @@ func GenerateKurulKarari(school *model.SchoolInfo, student *model.Student, incid
 		}
 		clauseLine := strings.TrimSpace(verdict.RegClause)
 		if strings.TrimSpace(verdict.RegClauseDesc) != "" {
-			clauseLine = cleanJoin(clauseLine, strings.TrimSpace(verdict.RegClauseDesc), " ")
+			clauseLine = cleanJoin(clauseLine, "("+strings.TrimSpace(verdict.RegClauseDesc)+")", " ")
 		}
 		penaltyAndClause = cleanJoin(penLine, clauseLine, "\n")
 
@@ -287,37 +284,37 @@ func GenerateKurulKarari(school *model.SchoolInfo, student *model.Student, incid
 	}
 
 	if !isOrta {
-		// Authentic EK-1 (Lise) rows matching Frm07Karar.cs
+		// Authentic EK-1 (Lise) rows matching official scan
 		rows = []tableRow{
 			{Label: "Karar No", Value: kararNoStr},
 			{Label: "Karar Tarihi", Value: kararTarihStr},
 			{Label: "       ÖĞRENCİNİN;", IsSection: true},
 			{Label: "TC KİMLİK NO", Value: stTC},
-			{Label: "Adı Soyadı", Value: stFullName},
+			{Label: "Adı Soyadı", Value: toUpperTR(stFullName)},
 			{Label: "Doğum Tarihi ve yeri", Value: cleanJoin(stBirthDate, stBirthPlace, " - ")},
 			{Label: "Sınıfı, alanı/dalı ve okul numarası", Value: cleanJoin(stClass, stNo, " - ")},
-			{Label: "Paralı veya parasız yatılı ya da gündüzlü olduğu", Value: stBoarding},
-			{Label: "Başarı durumu", Value: academicStanding},
-			{Label: "Sağlık durumu", Value: healthStatus},
-			{Label: "Ailesinin ekonomik durumu", Value: economicStatus},
-			{Label: "Ailesi ile birlikte oturup oturmadığı", Value: livingWith},
-			{Label: "Anne-babasının sağ olup olmadığı", Value: parentsLiving},
-			{Label: "Anne-babasının öz olup olmadığı", Value: parentsBio},
-			{Label: "Ailesinin yanında okuyup okumadığı", Value: schoolCommute},
-			{Label: "Büyüyüp yetiştiği çevre", Value: envRaised},
-			{Label: "Ailesinin oturduğu yer / ikamet adresi", Value: addrVal, MinHeight: 23},
-			{Label: "Şimdiye kadar aldığı cezalar ve genel durumu", Value: priorPenalty},
+			{Label: "Paralı veya parasız yatılı ya da gündüzlü olduğu", Value: toUpperTR(stBoarding)},
+			{Label: "Başarı durumu", Value: toUpperTR(academicStanding)},
+			{Label: "Sağlık durumu", Value: toUpperTR(healthStatus)},
+			{Label: "Ailesinin ekonomik durumu", Value: toUpperTR(economicStatus)},
+			{Label: "Ailesi ile birlikte oturup oturmadığı", Value: toUpperTR(livingWith)},
+			{Label: "Anne-babasının sağ olup olmadığı", Value: toUpperTR(parentsLiving)},
+			{Label: "Anne-babasının öz olup olmadığı", Value: toUpperTR(parentsBio)},
+			{Label: "Ailesinin yanında okuyup okumadığı", Value: toUpperTR(schoolCommute)},
+			{Label: "Büyüyüp yetiştiği çevre", Value: toUpperTR(envRaised)},
+			{Label: "Ailesinin oturduğu yer / ikamet adresi", Value: addrVal, MinHeight: 22},
+			{Label: "Şimdiye kadar aldığı cezalar ve genel durumu", Value: toUpperTR(priorPenalty)},
 			{Label: "Cezayı gerektiren davranışının yapıldığı yer ve tarih", Value: offensePlaceTime},
 			{Label: "Cezayı gerektiren davranışının çeşidi", Value: offenseType},
 			{Label: "Cezayı gerektiren davranışının nedeni", Value: offenseReason},
-			{Label: "     Olayla ilgili olarak;", IsSection: true},
-			{Label: "     a) Cezalandırılan öğrencinin ifadesinin özeti", Value: defenseText, MinHeight: 22},
-			{Label: "     b) Tanıkların ifadesinin özeti", Value: witnessText, MinHeight: 22},
-			{Label: "     c) Varsa cezayı gerektiren davranışının tespitine yarayan diğer deliller", Value: evidenceText, MinHeight: 22},
-			{Label: "Cezayı hafifleten veya şiddetlendiren nedenler", Value: mitigatingText, MinHeight: 22},
-			{Label: "Okul öğrenci ödül ve disiplin kurulunun kanaati", Value: boardOpinion, MinHeight: 22},
-			{Label: "Verilen cezanın çeşidi ve dayandığı yönetmelik maddesi", Value: penaltyAndClause, MinHeight: 30},
-			{Label: "OKUL ÖĞRENCİ ÖDÜL VE DİSİPLİN KURULU KARARI", Value: decisionText, BoldValue: true, MinHeight: 50},
+			{Label: "    Olayla ilgili olarak;", IsSection: true},
+			{Label: "a) Cezalandırılan öğrencinin ifadesinin özeti", Value: defenseText, MinHeight: 18},
+			{Label: "b) Tanıkların ifadesinin özeti", Value: witnessText, MinHeight: 18},
+			{Label: "c) Varsa cezayı gerektiren davranışının tespitine yarayan diğer deliller", Value: evidenceText, MinHeight: 18},
+			{Label: "Cezayı hafifleten veya şiddetlendiren nedenler", Value: mitigatingText, MinHeight: 18},
+			{Label: "Okul öğrenci ödül ve disiplin kurulunun kanaati", Value: boardOpinion, MinHeight: 18},
+			{Label: "Verilen cezanın çeşidi ve dayandığı yönetmelik maddesi", Value: penaltyAndClause, MinHeight: 25},
+			{Label: "OKUL ÖĞRENCİ ÖDÜL VE DİSİPLİN KURULU KARARI", Value: decisionText, BoldValue: true, MinHeight: 45},
 		}
 	} else {
 		// Authentic EK-10 (Ortaokul) rows matching Frm07KararOrta.cs
@@ -591,13 +588,9 @@ func GenerateKurulKarari(school *model.SchoolInfo, student *model.Student, incid
 	effectiveChair := school.BoardChair
 	effectiveChairTitle := school.BoardChairTitle
 	effectiveM1 := school.Member1
-	effectiveM1Title := school.Member1Title
 	effectiveM2 := school.Member2
-	effectiveM2Title := school.Member2Title
 	effectiveM3 := school.Member3
-	effectiveM3Title := school.Member3Title
 	effectiveM4 := school.Member4
-	effectiveM4Title := school.Member4Title
 
 	if verdict != nil {
 		if verdict.ChairIsSubstitute && school.SubBoardChair != "" {
@@ -606,34 +599,30 @@ func GenerateKurulKarari(school *model.SchoolInfo, student *model.Student, incid
 		}
 		if verdict.M1IsSubstitute && school.SubMember1 != "" {
 			effectiveM1 = school.SubMember1
-			effectiveM1Title = school.SubMember1Title
 		}
 		if verdict.M2IsSubstitute && school.SubMember2 != "" {
 			effectiveM2 = school.SubMember2
-			effectiveM2Title = school.SubMember2Title
 		}
 		if verdict.M3IsSubstitute && school.SubMember3 != "" {
 			effectiveM3 = school.SubMember3
-			effectiveM3Title = school.SubMember3Title
 		}
 		if verdict.M4IsSubstitute && school.SubMember4 != "" {
 			effectiveM4 = school.SubMember4
-			effectiveM4Title = school.SubMember4Title
 		}
 	}
 
-	// Check if signatures + principal approval fit on the current page
+	// Check if signatures fit on current page; otherwise add new page
 	curY := doc.PDF.GetY()
-	if curY+95 > PageHeightPortrait-doc.MarginBottom {
+	if curY+70 > PageHeightPortrait-doc.MarginBottom {
 		doc.PDF.AddPage()
 		curY = doc.MarginTop + 10
 		doc.PDF.SetY(curY)
 	} else {
-		curY += 8
+		curY += 24.0 // Clear white space for physical signatures/stamps
 		doc.PDF.SetY(curY)
 	}
 
-	// 4. Authentic 5-Column Signatures Block matching Frm07Karar.cs & Frm07KararOrta.cs
+	// 4. Authentic 5-Column Signatures Block matching official scan
 	colW := doc.UsableWidth / 5.0
 	chairRoleLine := "Ödül ve Disiplin Kurulu"
 	if isOrta {
@@ -653,36 +642,35 @@ func GenerateKurulKarari(school *model.SchoolInfo, student *model.Student, incid
 		},
 		{
 			Name:  strings.TrimSpace(effectiveM1),
-			Lines: []string{"Üye", strings.TrimSpace(effectiveM1Title)},
+			Lines: []string{"Üye"},
 		},
 		{
 			Name:  strings.TrimSpace(effectiveM2),
-			Lines: []string{"Üye", strings.TrimSpace(effectiveM2Title)},
+			Lines: []string{"Üye"},
 		},
 		{
 			Name:  strings.TrimSpace(effectiveM3),
-			Lines: []string{"Üye", strings.TrimSpace(effectiveM3Title)},
+			Lines: []string{"Üye"},
 		},
 		{
 			Name:  strings.TrimSpace(effectiveM4),
-			Lines: []string{"Üye", strings.TrimSpace(effectiveM4Title)},
+			Lines: []string{"Üye"},
 		},
 	}
 
 	sigStartY := doc.PDF.GetY()
-	maxSigY := sigStartY + 36.0
 
 	for i, sc := range sigCols {
 		colX := leftX + float64(i)*colW + 2
 		yPos := sigStartY
 
 		if sc.Name != "" {
-			doc.SetBoldFont(7.0)
+			doc.SetBoldFont(7.5)
 			nameLines := doc.SplitLines(sc.Name, colW-4)
-			doc.DrawWrappedCellLines(colX, yPos, colW-4, 8.5, nameLines, gopdf.Center)
-			yPos += float64(len(nameLines)) * 8.5
+			doc.DrawWrappedCellLines(colX, yPos, colW-4, 9.0, nameLines, gopdf.Center)
+			yPos += float64(len(nameLines)) * 9.0
 		} else {
-			yPos += 8.5
+			yPos += 9.0
 		}
 
 		doc.SetRegularFont(7.0)
@@ -695,30 +683,7 @@ func GenerateKurulKarari(school *model.SchoolInfo, student *model.Student, incid
 			doc.DrawWrappedCellLines(colX, yPos, colW-4, 8.5, rLines, gopdf.Center)
 			yPos += float64(len(rLines)) * 8.5
 		}
-		if yPos > maxSigY {
-			maxSigY = yPos
-		}
 	}
-
-	// 5. Centered Principal Approval Block matching Frm07Karar.cs ("....../....../20......" + PrincipalName + "Okul Müdürü")
-	pY := maxSigY + 12.0
-	doc.SetRegularFont(8.0)
-	doc.PDF.SetX(leftX)
-	doc.PDF.SetY(pY)
-	_ = doc.PDF.CellWithOption(&gopdf.Rect{W: doc.UsableWidth, H: 10}, "....../....../20......", gopdf.CellOption{Align: gopdf.Center})
-
-	pY += 16.0
-	doc.SetBoldFont(8.0)
-	pName := strings.TrimSpace(school.PrincipalName)
-	if pName != "" {
-		doc.PDF.SetX(leftX)
-		doc.PDF.SetY(pY)
-		_ = doc.PDF.CellWithOption(&gopdf.Rect{W: doc.UsableWidth, H: 10}, pName, gopdf.CellOption{Align: gopdf.Center})
-		pY += 10.0
-	}
-	doc.PDF.SetX(leftX)
-	doc.PDF.SetY(pY)
-	_ = doc.PDF.CellWithOption(&gopdf.Rect{W: doc.UsableWidth, H: 10}, "Okul Müdürü", gopdf.CellOption{Align: gopdf.Center})
 
 	return doc.PDF.WritePdf(outputPath)
 }
