@@ -37,7 +37,7 @@ func BuildIncidentsTab(state *AppState) fyne.CanvasObject {
 	summaryEntry := NewSmartMultiLineEntry()
 	summaryEntry.SetPlaceHolder("Olayın detaylı açıklaması...")
 
-	var incStudentsList *widget.List
+	var incStudentsList *FocusableList
 	var incidentList *widget.List
 	var editStudentProfileBtn *widget.Button
 	var removeStudentFromIncBtn *widget.Button
@@ -127,7 +127,7 @@ func BuildIncidentsTab(state *AppState) fyne.CanvasObject {
 	}
 
 	// Attached Student List
-	incStudentsList = widget.NewList(
+	incStudentsList = NewFocusableList(
 		func() int {
 			return len(incidentStudents)
 		},
@@ -158,6 +158,7 @@ func BuildIncidentsTab(state *AppState) fyne.CanvasObject {
 			classLbl.SetText(is.ClassSection)
 			roleLbl.SetText(is.Role)
 		},
+		fyne.NewSize(500, 180),
 	)
 
 	// Incident List
@@ -579,6 +580,7 @@ func BuildIncidentsTab(state *AppState) fyne.CanvasObject {
 	))
 
 	incStudentsList.OnSelected = func(id widget.ListItemID) {
+		incStudentsList.isActive = true
 		if id >= 0 && id < len(incidentStudents) {
 			is := incidentStudents[id]
 			selectedIncStudent = &is
@@ -612,13 +614,9 @@ func BuildIncidentsTab(state *AppState) fyne.CanvasObject {
 		removeStudentFromIncBtn,
 	)
 
-	// Wrap students list in a fixed-height container so it displays cleanly in the vertical form
-	studentsScroll := container.NewVScroll(incStudentsList)
-	studentsScroll.SetMinSize(fyne.NewSize(500, 180))
-
-	studentsCard := widget.NewCard("Olaya Bağlı Öğrenci Listesi", "Soruşturmaya dahil edilen öğrenciler ve rolleri", container.NewVBox(
+	studentsCard := widget.NewCard("Olaya Bağlı Öğrenci Listesi", "Soruşturmaya dahil edilen öğrenciler ve rolleri (Liste içinde kaydırmak için listeye tıklayın)", container.NewVBox(
 		studentsHeader,
-		studentsScroll,
+		incStudentsList.Wrap(),
 	))
 
 	// Layout Structure: 2-Panel Layout (Left: Incidents List, Right: Incident Form & Students)
@@ -640,6 +638,7 @@ func BuildIncidentsTab(state *AppState) fyne.CanvasObject {
 	rightPanelScroll := container.NewVScroll(rightPanelContent)
 	summaryEntry.ParentScroll = rightPanelScroll
 	stInlineStatementEntry.ParentScroll = rightPanelScroll
+	incStudentsList.ParentScroll = rightPanelScroll
 
 	splitMain := container.NewHSplit(leftIncList, rightPanelScroll)
 	splitMain.SetOffset(0.28)

@@ -33,25 +33,52 @@ func BuildSummonsTab(state *AppState) fyne.CanvasObject {
 	timeEntry := NewSingleLineEntry()
 	timeEntry.SetText("10:00")
 
-	// Multi-student selection checklist
-	var studentChecks []*widget.Check
-	studentCheckContainer := container.NewVBox()
+	// Virtualized multi-student selection checklist
+	var incidentStudents []model.IncidentStudent
+	var studentChecked []bool
+
+	studentCheckList := NewFocusableList(
+		func() int {
+			return len(incidentStudents)
+		},
+		func() fyne.CanvasObject {
+			return widget.NewCheck("00000 - Öğrenci Adı Soyadı (ROL)", nil)
+		},
+		func(i widget.ListItemID, o fyne.CanvasObject) {
+			if i >= len(incidentStudents) {
+				return
+			}
+			is := incidentStudents[i]
+			chk := o.(*widget.Check)
+			chk.OnChanged = nil
+			chk.Text = fmt.Sprintf("%s - %s (%s)", is.SchoolNo, is.FullName, is.Role)
+			if i < len(studentChecked) {
+				chk.Checked = studentChecked[i]
+			}
+			chk.Refresh()
+			idx := i
+			chk.OnChanged = func(b bool) {
+				if idx < len(studentChecked) {
+					studentChecked[idx] = b
+				}
+			}
+		},
+		fyne.NewSize(400, 120),
+	)
 
 	reloadStudentChecks := func(incCode string) {
-		studentCheckContainer.Objects = nil
-		studentChecks = nil
+		incidentStudents = nil
+		studentChecked = nil
 
 		list, err := state.Store.GetIncidentStudents(state.AcademicYear, incCode)
 		if err == nil {
-			for _, is := range list {
-				currIS := is
-				chk := widget.NewCheck(fmt.Sprintf("%s - %s (%s)", currIS.SchoolNo, currIS.FullName, currIS.Role), nil)
-				chk.SetChecked(true)
-				studentChecks = append(studentChecks, chk)
-				studentCheckContainer.Add(chk)
+			incidentStudents = list
+			studentChecked = make([]bool, len(list))
+			for i := range studentChecked {
+				studentChecked[i] = true
 			}
 		}
-		studentCheckContainer.Refresh()
+		studentCheckList.Refresh()
 	}
 
 	reloadIncidents := func() {
@@ -81,16 +108,13 @@ func BuildSummonsTab(state *AppState) fyne.CanvasObject {
 		}
 	}
 
-
 	getSelectedStudents := func() []*model.Student {
 		var res []*model.Student
 		if selectedIncident == nil {
 			return res
 		}
-		incStudents, _ := state.Store.GetIncidentStudents(state.AcademicYear, selectedIncident.IncidentCode)
-		for i, chk := range studentChecks {
-			if chk.Checked && i < len(incStudents) {
-				is := incStudents[i]
+		for i, is := range incidentStudents {
+			if i < len(studentChecked) && studentChecked[i] {
 				st, _ := state.Store.GetStudentByNo(state.AcademicYear, is.SchoolNo)
 				if st == nil {
 					st = &model.Student{
@@ -210,7 +234,7 @@ func BuildSummonsTab(state *AppState) fyne.CanvasObject {
 	cardStudent := widget.NewCard("Öğrenci Savunma ve İfade Çağrı Pusulası", "Çağrı yapılacak öğrencileri seçip resmi pusulayı oluşturun", container.NewVBox(
 		stForm,
 		widget.NewLabelWithStyle("Pusula Çıkarılacak Öğrenciler:", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
-		studentCheckContainer,
+		studentCheckList.Wrap(),
 		container.NewHBox(pdfStudentSummonsBtn, pdfStudentListBtn),
 	))
 
@@ -246,6 +270,7 @@ func BuildSummonsTab(state *AppState) fyne.CanvasObject {
 	))
 
 	agendaText.ParentScroll = content
+	studentCheckList.ParentScroll = content
 
 	reloadIncidents()
 	_ = currentStudents

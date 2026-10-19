@@ -1,8 +1,6 @@
 package ui
 
 import (
-	"runtime/debug"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
@@ -15,9 +13,6 @@ func BuildMainUI(state *AppState) fyne.CanvasObject {
 
 	renderCurrentView := func() {
 		mainHolder.Objects = nil
-		defer func() {
-			go debug.FreeOSMemory()
-		}()
 
 		if state.CurrentView == "hub" || state.CurrentView == "" {
 			mainHolder.Add(BuildHubView(state))

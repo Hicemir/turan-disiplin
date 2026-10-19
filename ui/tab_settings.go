@@ -45,53 +45,81 @@ func BuildSettingsView(state *AppState) fyne.CanvasObject {
 
 	themeContainer := container.NewVBox()
 
-	var refreshThemeRows func()
-	refreshThemeRows = func() {
-		themeContainer.Objects = nil
-		for _, th := range allThemes {
-			thCopy := th
-			isSelected := thCopy.ID == selectedThemeID
-
-			var radioIcon *widget.Icon
-			if isSelected {
-				radioIcon = widget.NewIcon(theme.RadioButtonCheckedIcon())
-			} else {
-				radioIcon = widget.NewIcon(theme.RadioButtonIcon())
-			}
-
-			// Square 1: Background Color Swatch
-			bgSquare := canvas.NewRectangle(thCopy.BgColor)
-			bgSquare.SetMinSize(fyne.NewSize(20, 20))
-			bgSquare.StrokeColor = color.NRGBA{R: 160, G: 160, B: 160, A: 255}
-			bgSquare.StrokeWidth = 1.0
-			bgSquare.CornerRadius = 3.0
-
-			// Square 2: Accent / Button Color Swatch
-			accentSquare := canvas.NewRectangle(thCopy.AccentColor)
-			accentSquare.SetMinSize(fyne.NewSize(20, 20))
-			accentSquare.StrokeColor = color.NRGBA{R: 100, G: 100, B: 100, A: 200}
-			accentSquare.StrokeWidth = 1.0
-			accentSquare.CornerRadius = 3.0
-
-			swatches := container.NewHBox(bgSquare, accentSquare)
-			label := widget.NewLabelWithStyle(thCopy.Name, fyne.TextAlignLeading, fyne.TextStyle{Bold: isSelected})
-
-			rowContent := container.NewHBox(
-				radioIcon,
-				swatches,
-				label,
-			)
-
-			btn := widget.NewButton("", func() {
-				selectedThemeID = thCopy.ID
-				refreshThemeRows()
-			})
-
-			themeContainer.Add(container.NewStack(btn, container.NewPadded(rowContent)))
-		}
-		themeContainer.Refresh()
+	type themeRowRefs struct {
+		id           string
+		radioIcon    *widget.Icon
+		accentSquare *canvas.Rectangle
+		bgSquare     *canvas.Rectangle
+		label        *widget.Label
 	}
-	refreshThemeRows()
+	var themeRows []*themeRowRefs
+
+	refreshThemeRows := func() {
+		allThemes = appTheme.GetAllThemes(currentCustomBg, currentCustomAccent)
+		for i, r := range themeRows {
+			isSelected := r.id == selectedThemeID
+			if isSelected {
+				r.radioIcon.SetResource(theme.RadioButtonCheckedIcon())
+			} else {
+				r.radioIcon.SetResource(theme.RadioButtonIcon())
+			}
+			r.label.TextStyle = fyne.TextStyle{Bold: isSelected}
+			r.label.Refresh()
+			if i < len(allThemes) {
+				r.bgSquare.FillColor = allThemes[i].BgColor
+				r.bgSquare.Refresh()
+				r.accentSquare.FillColor = allThemes[i].AccentColor
+				r.accentSquare.Refresh()
+			}
+		}
+	}
+
+	for _, th := range allThemes {
+		thCopy := th
+		isSelected := thCopy.ID == selectedThemeID
+
+		var radioIcon *widget.Icon
+		if isSelected {
+			radioIcon = widget.NewIcon(theme.RadioButtonCheckedIcon())
+		} else {
+			radioIcon = widget.NewIcon(theme.RadioButtonIcon())
+		}
+
+		bgSquare := canvas.NewRectangle(thCopy.BgColor)
+		bgSquare.SetMinSize(fyne.NewSize(20, 20))
+		bgSquare.StrokeColor = color.NRGBA{R: 160, G: 160, B: 160, A: 255}
+		bgSquare.StrokeWidth = 1.0
+		bgSquare.CornerRadius = 3.0
+
+		accentSquare := canvas.NewRectangle(thCopy.AccentColor)
+		accentSquare.SetMinSize(fyne.NewSize(20, 20))
+		accentSquare.StrokeColor = color.NRGBA{R: 100, G: 100, B: 100, A: 200}
+		accentSquare.StrokeWidth = 1.0
+		accentSquare.CornerRadius = 3.0
+
+		swatches := container.NewHBox(bgSquare, accentSquare)
+		label := widget.NewLabelWithStyle(thCopy.Name, fyne.TextAlignLeading, fyne.TextStyle{Bold: isSelected})
+
+		rowContent := container.NewHBox(
+			radioIcon,
+			swatches,
+			label,
+		)
+
+		btn := widget.NewButton("", func() {
+			selectedThemeID = thCopy.ID
+			refreshThemeRows()
+		})
+
+		themeRows = append(themeRows, &themeRowRefs{
+			id:           thCopy.ID,
+			radioIcon:    radioIcon,
+			bgSquare:     bgSquare,
+			accentSquare: accentSquare,
+			label:        label,
+		})
+		themeContainer.Add(container.NewStack(btn, container.NewPadded(rowContent)))
+	}
 
 	// Custom Color Picker Card
 	bgHexLabel := widget.NewLabelWithStyle(config.ColorToHex(currentCustomBg), fyne.TextAlignLeading, fyne.TextStyle{Monospace: true})

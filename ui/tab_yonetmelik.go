@@ -253,6 +253,7 @@ func BuildYonetmelikTab(state *AppState) fyne.CanvasObject {
 		widget.NewSeparator(),
 		infoLbl,
 	))
+	descEntry.ParentScroll = rightPanel
 
 	split := container.NewHSplit(leftPanel, rightPanel)
 	split.SetOffset(0.48)

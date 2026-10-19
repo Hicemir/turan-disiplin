@@ -78,43 +78,56 @@ func BuildFormsTab(state *AppState) fyne.CanvasObject {
 	rehber4Entry := NewSmartMultiLineEntry()
 	rehber4Entry.SetPlaceHolder("4- Uygulanabilecek Yaptırım veya Rehberlik Önerileri...")
 
+	sec1Box := container.NewVBox(
+		widget.NewLabelWithStyle("İfade / Savunma Metni:", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+		statementEntry,
+	)
+	sec8Form := widget.NewForm(
+		widget.NewFormItem("Talep Edilen Ek Süre (Gün)", extraDaysEntry),
+		widget.NewFormItem("Ek Süre Talep Nedeni", extraReasonEntry),
+	)
+	sec10Form := widget.NewForm(
+		widget.NewFormItem("Uyarı Konusu", sozluKonuEntry),
+		widget.NewFormItem("Uyaran Öğretmen / Yönetici", sozluOgretmenEntry),
+		widget.NewFormItem("Açıklama / Görüşme Özeti", sozluDetayEntry),
+	)
+	sec12Form := widget.NewForm(
+		widget.NewFormItem("Görüşmeyi Yapan", veliGorusenEntry),
+		widget.NewFormItem("Görüşme Konusu", veliKonuEntry),
+		widget.NewFormItem("Görüşme Notları", veliNotlarEntry),
+		widget.NewFormItem("Alınan Kararlar", veliKararEntry),
+	)
+	sec14Form := widget.NewForm(
+		widget.NewFormItem("1. Ailevi Durumu", rehber1Entry),
+		widget.NewFormItem("2. Psikolojik ve Sosyal Özellikleri", rehber2Entry),
+		widget.NewFormItem("3. Olayın Nedenleri", rehber3Entry),
+		widget.NewFormItem("4. Rehberlik Önerileri", rehber4Entry),
+	)
+
+	extraBox.Add(sec1Box)
+	extraBox.Add(sec8Form)
+	extraBox.Add(sec10Form)
+	extraBox.Add(sec12Form)
+	extraBox.Add(sec14Form)
+
 	updateExtraInputs := func(formName string) {
-		extraBox.Objects = nil
+		sec1Box.Hide()
+		sec8Form.Hide()
+		sec10Form.Hide()
+		sec12Form.Hide()
+		sec14Form.Hide()
 		switch {
 		case strings.HasPrefix(formName, "1.") || strings.HasPrefix(formName, "2."):
-			extraBox.Add(widget.NewLabelWithStyle("İfade / Savunma Metni:", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}))
-			extraBox.Add(statementEntry)
+			sec1Box.Show()
 		case strings.HasPrefix(formName, "8."):
-			f := widget.NewForm(
-				widget.NewFormItem("Talep Edilen Ek Süre (Gün)", extraDaysEntry),
-				widget.NewFormItem("Ek Süre Talep Nedeni", extraReasonEntry),
-			)
-			extraBox.Add(f)
+			sec8Form.Show()
 		case strings.HasPrefix(formName, "10."):
-			f := widget.NewForm(
-				widget.NewFormItem("Uyarı Konusu", sozluKonuEntry),
-				widget.NewFormItem("Uyaran Öğretmen / Yönetici", sozluOgretmenEntry),
-				widget.NewFormItem("Açıklama / Görüşme Özeti", sozluDetayEntry),
-			)
-			extraBox.Add(f)
+			sec10Form.Show()
 		case strings.HasPrefix(formName, "12."):
-			f := widget.NewForm(
-				widget.NewFormItem("Görüşmeyi Yapan", veliGorusenEntry),
-				widget.NewFormItem("Görüşme Konusu", veliKonuEntry),
-				widget.NewFormItem("Görüşme Notları", veliNotlarEntry),
-				widget.NewFormItem("Alınan Kararlar", veliKararEntry),
-			)
-			extraBox.Add(f)
+			sec12Form.Show()
 		case strings.HasPrefix(formName, "14."):
-			f := widget.NewForm(
-				widget.NewFormItem("1. Ailevi Durumu", rehber1Entry),
-				widget.NewFormItem("2. Psikolojik ve Sosyal Özellikleri", rehber2Entry),
-				widget.NewFormItem("3. Olayın Nedenleri", rehber3Entry),
-				widget.NewFormItem("4. Rehberlik Önerileri", rehber4Entry),
-			)
-			extraBox.Add(f)
+			sec14Form.Show()
 		}
-		extraBox.Refresh()
 	}
 
 	docTypeSelect.OnChanged = func(s string) {
@@ -345,5 +358,15 @@ func BuildFormsTab(state *AppState) fyne.CanvasObject {
 	reloadDropdowns()
 	updateExtraInputs(docTypeSelect.Selected)
 
-	return container.NewVScroll(contentCard)
+	pageScroll := container.NewVScroll(contentCard)
+	statementEntry.ParentScroll = pageScroll
+	sozluDetayEntry.ParentScroll = pageScroll
+	veliNotlarEntry.ParentScroll = pageScroll
+	veliKararEntry.ParentScroll = pageScroll
+	rehber1Entry.ParentScroll = pageScroll
+	rehber2Entry.ParentScroll = pageScroll
+	rehber3Entry.ParentScroll = pageScroll
+	rehber4Entry.ParentScroll = pageScroll
+
+	return pageScroll
 }

@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	fyneDialog "fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
@@ -111,6 +112,119 @@ func (e *SmartMultiLineEntry) Scrolled(ev *fyne.ScrollEvent) {
 		e.ParentScroll.Scrolled(ev)
 		return
 	}
+}
+
+// FocusableList is a virtualized list that forwards mouse wheel scrolling to ParentScroll
+// unless the user has clicked/selected inside the list to activate internal scrolling.
+type FocusableList struct {
+	widget.List
+	isActive     bool
+	ParentScroll *container.Scroll
+	minSize      fyne.Size
+	overlay      *scrollInterceptOverlay
+	stack        *fyne.Container
+}
+
+type scrollInterceptOverlay struct {
+	widget.BaseWidget
+	list *FocusableList
+	rect *fyne.Container
+}
+
+func newScrollInterceptOverlay(l *FocusableList) *scrollInterceptOverlay {
+	o := &scrollInterceptOverlay{
+		list: l,
+		rect: container.NewWithoutLayout(),
+	}
+	o.ExtendBaseWidget(o)
+	return o
+}
+
+func (o *scrollInterceptOverlay) CreateRenderer() fyne.WidgetRenderer {
+	return widget.NewSimpleRenderer(o.rect)
+}
+
+func (o *scrollInterceptOverlay) Tapped(ev *fyne.PointEvent) {
+	o.list.isActive = true
+	o.Hide()
+	// Estimate which row was clicked at the current scroll offset and select it
+	if n := o.list.Length(); n > 0 {
+		tpl := o.list.CreateItem()
+		rowH := tpl.MinSize().Height + 8
+		if rowH < 24 {
+			rowH = 32
+		}
+		idx := int((ev.Position.Y + o.list.GetScrollOffset()) / rowH)
+		if idx >= 0 && idx < n {
+			o.list.Select(idx)
+		}
+	}
+}
+
+func (o *scrollInterceptOverlay) Scrolled(ev *fyne.ScrollEvent) {
+	if o.list.ParentScroll != nil {
+		o.list.ParentScroll.Scrolled(ev)
+	}
+}
+
+type hoverTrackingStack struct {
+	widget.BaseWidget
+	content *fyne.Container
+	onOut   func()
+}
+
+func newHoverTrackingStack(objects []fyne.CanvasObject, onOut func()) *hoverTrackingStack {
+	h := &hoverTrackingStack{
+		content: container.NewStack(objects...),
+		onOut:   onOut,
+	}
+	h.ExtendBaseWidget(h)
+	return h
+}
+
+func (h *hoverTrackingStack) CreateRenderer() fyne.WidgetRenderer {
+	return widget.NewSimpleRenderer(h.content)
+}
+
+func (h *hoverTrackingStack) MouseIn(_ *desktop.MouseEvent)   {}
+func (h *hoverTrackingStack) MouseMoved(_ *desktop.MouseEvent) {}
+func (h *hoverTrackingStack) MouseOut() {
+	if h.onOut != nil {
+		h.onOut()
+	}
+}
+
+func NewFocusableList(length func() int, createItem func() fyne.CanvasObject, updateItem func(widget.ListItemID, fyne.CanvasObject), minSize fyne.Size) *FocusableList {
+	l := &FocusableList{
+		minSize: minSize,
+	}
+	l.Length = length
+	l.CreateItem = createItem
+	l.UpdateItem = updateItem
+	l.ExtendBaseWidget(l)
+	l.overlay = newScrollInterceptOverlay(l)
+	return l
+}
+
+// Wrap returns a container stacking the virtualized list and its click-to-scroll shield.
+func (l *FocusableList) Wrap() fyne.CanvasObject {
+	return newHoverTrackingStack([]fyne.CanvasObject{l, l.overlay}, func() {
+		l.isActive = false
+		if l.overlay != nil {
+			l.overlay.Show()
+		}
+	})
+}
+
+func (l *FocusableList) MinSize() fyne.Size {
+	ms := l.List.MinSize()
+	if l.minSize.Width > ms.Width {
+		ms.Width = l.minSize.Width
+	}
+	if l.minSize.Height > ms.Height {
+		ms.Height = l.minSize.Height
+	}
+	return ms
 }
 
 // NewTurkishSelect creates a Select widget with Turkish default placeholder "(Seçiniz)"

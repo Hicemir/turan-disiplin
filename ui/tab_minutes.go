@@ -180,5 +180,8 @@ func BuildMinutesTab(state *AppState) fyne.CanvasObject {
 		cardDizi,
 	))
 
+	decisionsText.ParentScroll = content
+	diziEntries.ParentScroll = content
+
 	return content
 }

@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"runtime/debug"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -15,11 +14,6 @@ import (
 )
 
 func main() {
-	// Memory optimization for older school PCs: collect early and keep a soft
-	// 64MB heap target so buffers are returned to the OS aggressively.
-	debug.SetGCPercent(50)
-	debug.SetMemoryLimit(64 * 1024 * 1024)
-
 	a := app.NewWithID("com.turandisiplin.app")
 
 	w := a.NewWindow("TuranDisiplin - MEB Öğrenci Disiplin ve Davranış Değerlendirme Sistemi")
