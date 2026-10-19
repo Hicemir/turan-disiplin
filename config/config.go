@@ -13,7 +13,7 @@ import (
 	"turandisiplin/model"
 )
 
-const AppVersion = "v0.7"
+const AppVersion = "v0.70"
 
 var (
 	currentYonetmelik *model.YonetmelikData
