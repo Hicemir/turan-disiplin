@@ -1,40 +1,40 @@
-# 🏛️ TuranDisiplin - MEB Öğrenci Disiplin ve Davranış Değerlendirme Sistemi
+#  TuranDisiplin - MEB Öğrenci Disiplin ve Davranış Değerlendirme Sistemi
 
 MEB Ortaöğretim ve İlköğretim Kurumları Yönetmeliklerine tam uyumlu, modern, hızlı ve kullanımı son derece kolay masaüstü disiplin ve evrak yönetim sistemi.
 
 ---
 
-## 📥 Programı İndir (Kurulumsuz Tek Dosya)
+##  Programı İndir (Kurulumsuz Tek Dosya)
 
 Program herhangi bir kurulum sihirbazı veya harici veritabanı kurulumu gerektirmez. İndirdikten sonra doğrudan çift tıklayarak çalıştırabilirsiniz:
 
 | İşletim Sistemi | İndirme Linki | Çalıştırma |
 | :--- | :--- | :--- |
-| **🪟 Windows (10 / 11 / 8 / 7)** | [📥 **TuranDisiplin.exe İndir (Windows)**](https://github.com/Hicemir/okulevrak/releases/latest/download/TuranDisiplin.exe) | İndirdiğiniz `TuranDisiplin.exe` dosyasına çift tıklayarak hemen kullanmaya başlayabilirsiniz. Kurulum gerektirmez. |
-| **🐧 Linux (Ubuntu, Debian, Fedora vb.)** | [📥 **TuranDisiplin-Linux İndir (Linux)**](https://github.com/Hicemir/okulevrak/releases/latest/download/TuranDisiplin-Linux) | İndirdikten sonra çift tıklayın veya `./TuranDisiplin-Linux` ile çalıştırın. Kurulum gerektirmez. |
+| ** Windows (10 / 11 / 8 / 7)** | [📥 **TuranDisiplin.exe İndir (Windows)**](https://github.com/Hicemir/okulevrak/releases/latest/download/TuranDisiplin.exe) | İndirdiğiniz `TuranDisiplin.exe` dosyasına çift tıklayarak hemen kullanmaya başlayabilirsiniz. Kurulum gerektirmez. |
+| ** Linux (Ubuntu, Debian, Fedora vb.)** | [📥 **TuranDisiplin-Linux İndir (Linux)**](https://github.com/Hicemir/okulevrak/releases/latest/download/TuranDisiplin-Linux) | İndirdikten sonra çift tıklayın veya `./TuranDisiplin-Linux` ile çalıştırın. Kurulum gerektirmez. |
 
-> 💡 **Not:** İndirme bağlantılarına tıkladığınızda yalnızca seçtiğiniz işletim sistemine ait tek dosya (`.exe` veya Linux ikilisi) iner. Kaynak kod veya ek paket indirmenize gerek yoktur. Doğrudan çift tıklayarak kullanabilirsiniz.
+**Not:** İndirme bağlantılarına tıkladığınızda yalnızca seçtiğiniz işletim sistemine ait tek dosya (`.exe` veya Linux ikilisi) iner. Kaynak kod veya ek paket indirmenize gerek yoktur. Doğrudan çift tıklayarak kullanabilirsiniz.
 
 ---
 
-## ✨ Öne Çıkan Özellikler
+## Öne Çıkan Özellikler
 
-* **🎨 İki Farklı Arayüz Modu**:
+* ** İki Farklı Arayüz Modu**:
   * **Modern Arayüz**: Büyük, okunabilir kartlar ve adım adım yönlendirme.
   * **Klasik Arayüz**: Nostaljik ve pratik masaüstü kutucuk tasarımı.
-* **🌈 Tema ve Yazı Boyutu Tercihleri**:
+* ** Tema ve Yazı Boyutu Tercihleri**:
   * **Açık Tema**: Gündüz kullanımı için yüksek kontrastlı net görünüm.
   * **Sarı / Krem**: Sıcak nostaljik krem tonu.
   * **Koyu Tema**: Göz yormayan koyu gri/gece modu.
   * **Yazı Boyutları**: `15pt`, `17pt` ve `19pt` (kolay okunabilirlik).
-* **👥 e-Okul & e-Mesem Excel Aktarımı**:
+* ** e-Okul & e-Mesem Excel Aktarımı**:
   * Standart e-Okul sınıf listeleri (.xlsx / .xls)
   * e-Mesem çıraklık/stajyer listeleri
   * 3 sütunlu basit hızlı listeler
-* **⚖️ %100 Mevzuata Uygun Resmi Evrak ve Karar Hesaplama**:
+* ** %100 Mevzuata Uygun Resmi Evrak ve Karar Hesaplama**:
   * Lise için **EK-1**, Ortaokul için **EK-10** Karar Tutanakları.
   * 100 üzerinden davranış puanı düşümü, hafifletici nedenler ve ceza gerekçelendirmeleri.
-* **📄 Tek Tıkla A4 Resmi PDF Üretimi**:
+* ** Tek Tıkla A4 Resmi PDF Üretimi**:
   1. **Disiplin Kurulu Kararı (EK-1 / EK-10)** - 21/17 satırlı resmi format.
   2. **Çağrı Pusulaları** - İfade ve savunma çağrısı, tebellüğ bloğu ile.
   3. **Resmi İfade ve Savunma Tutanakları**.
@@ -45,13 +45,13 @@ Program herhangi bir kurulum sihirbazı veya harici veritabanı kurulumu gerekti
   8. **Madde 171/2 Sene Sonu Puan İade Çizelgesi** / Yaptırım Kaldırma Raporu.
   9. **Dönemlik Ceza ve Olay İstatistik Raporları**.
   10. **Madde 163/2 Yazılı Uyarı Tutanağı**.
-* **⚙️ Yönetmelik ve Şablon Düzenleyici**:
+* ** Yönetmelik ve Şablon Düzenleyici**:
   * Yeni suç ve ceza maddeleri ekleyebilme, mevcut maddeleri özelleştirebilme.
   * `os.UserConfigDir()` üzerinde kullanıcıya özel güvenli saklama.
 
 ---
 
-## 🚀 Geliştirici & Kaynak Koddan Derleme
+## Geliştirici & Kaynak Koddan Derleme
 
 Projeyi yerel makinenizde kaynak koddan derlemek isterseniz:
 
