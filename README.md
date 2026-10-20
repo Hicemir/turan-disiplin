@@ -19,7 +19,7 @@ Program herhangi bir kurulum sihirbazı veya harici veritabanı kurulumu gerekti
 
 ## Öne Çıkan Özellikler
 
-* ** İki Farklı Arayüz Modu**:
+*  İki Farklı Arayüz Modu:
   * **Modern Arayüz**: Büyük, okunabilir kartlar ve adım adım yönlendirme.
   * **Klasik Arayüz**: Nostaljik ve pratik masaüstü kutucuk tasarımı.
 * ** Tema ve Yazı Boyutu Tercihleri**:
@@ -27,25 +27,25 @@ Program herhangi bir kurulum sihirbazı veya harici veritabanı kurulumu gerekti
   * **Sarı / Krem**: Sıcak nostaljik krem tonu.
   * **Koyu Tema**: Göz yormayan koyu gri/gece modu.
   * **Yazı Boyutları**: `15pt`, `17pt` ve `19pt` (kolay okunabilirlik).
-* ** e-Okul & e-Mesem Excel Aktarımı**:
+* e-Okul & e-Mesem Excel Aktarımı:
   * Standart e-Okul sınıf listeleri (.xlsx / .xls)
   * e-Mesem çıraklık/stajyer listeleri
   * 3 sütunlu basit hızlı listeler
-* ** %100 Mevzuata Uygun Resmi Evrak ve Karar Hesaplama**:
+*  %100 Mevzuata Uygun Resmi Evrak ve Karar Hesaplama:
   * Lise için **EK-1**, Ortaokul için **EK-10** Karar Tutanakları.
   * 100 üzerinden davranış puanı düşümü, hafifletici nedenler ve ceza gerekçelendirmeleri.
-* ** Tek Tıkla A4 Resmi PDF Üretimi**:
+*  Tek Tıkla A4 Resmi PDF Üretimi**:
   1. **Disiplin Kurulu Kararı (EK-1 / EK-10)** - 21/17 satırlı resmi format.
   2. **Çağrı Pusulaları** - İfade ve savunma çağrısı, tebellüğ bloğu ile.
   3. **Resmi İfade ve Savunma Tutanakları**.
   4. **Öğrenci Ceza Tebligat Pusulası** - 5 günlük yasal itiraz hakkı metniyle.
   5. **Veli Ceza Tebligat Pusulası**.
-  6. **Sene Başı / Sene Sonu Kurul Toplantı Tutanağı**.
+  6. **Sene Başı / Sene Sonu Kurul Toplantı Tutanağı.
   7. **Soruşturma Dosyası Dizi Pusulası**.
-  8. **Madde 171/2 Sene Sonu Puan İade Çizelgesi** / Yaptırım Kaldırma Raporu.
-  9. **Dönemlik Ceza ve Olay İstatistik Raporları**.
+  8. **Madde 171/2 Sene Sonu Puan İade Çizelgesi / Yaptırım Kaldırma Raporu.
+  9. **Dönemlik Ceza ve Olay İstatistik Raporları.
   10. **Madde 163/2 Yazılı Uyarı Tutanağı**.
-* ** Yönetmelik ve Şablon Düzenleyici**:
+*  Yönetmelik ve Şablon Düzenleyici:
   * Yeni suç ve ceza maddeleri ekleyebilme, mevcut maddeleri özelleştirebilme.
   * `os.UserConfigDir()` üzerinde kullanıcıya özel güvenli saklama.
 
