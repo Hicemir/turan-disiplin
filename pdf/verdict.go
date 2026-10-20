@@ -181,7 +181,6 @@ func GenerateKurulKarari(school *model.SchoolInfo, student *model.Student, incid
 			stGuardianAddr = incStudent.GuardianAddr
 		}
 	}
-	effGuardian := model.EffectiveGuardianName(stFullName, stFather, stGuardianName)
 
 	academicStanding := ""
 	healthStatus := ""
@@ -224,9 +223,6 @@ func GenerateKurulKarari(school *model.SchoolInfo, student *model.Student, incid
 		} else {
 			addrVal = "Tel No:" + phoneVal
 		}
-	}
-	if addrVal == "" && effGuardian != "" {
-		addrVal = effGuardian
 	}
 
 	offensePlaceTime := ""

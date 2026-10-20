@@ -3,9 +3,7 @@ package pdf
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"runtime"
 	"runtime/debug"
 	"strings"
 	"time"
@@ -32,13 +30,13 @@ const (
 
 // DocWrapper wraps a gopdf.GoPdf instance with helper methods.
 type DocWrapper struct {
-	PDF         *gopdf.GoPdf
-	Landscape   bool
-	MarginLeft  float64
-	MarginRight float64
-	MarginTop   float64
+	PDF          *gopdf.GoPdf
+	Landscape    bool
+	MarginLeft   float64
+	MarginRight  float64
+	MarginTop    float64
 	MarginBottom float64
-	UsableWidth float64
+	UsableWidth  float64
 }
 
 // NewDoc creates and initializes a new PDF document with embedded Turkish fonts.
@@ -391,18 +389,7 @@ func OpenPDF(pdfPath string) error {
 		return fmt.Errorf("dosya bulunamadı: %w", err)
 	}
 
-	var cmd *exec.Cmd
-	switch runtime.GOOS {
-	case "windows":
-		cmd = exec.Command("rundll32", "url.dll,FileProtocolHandler", pdfPath)
-	case "darwin":
-		cmd = exec.Command("open", pdfPath)
-	default:
-		cmd = exec.Command("xdg-open", pdfPath)
-	}
-
-	err := cmd.Start()
-	if err != nil {
+	if err := openWithSystem(pdfPath); err != nil {
 		return fmt.Errorf("PDF açılamadı: %w", err)
 	}
 	return nil

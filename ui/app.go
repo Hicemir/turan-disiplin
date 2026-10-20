@@ -46,7 +46,7 @@ func BuildMainUI(state *AppState) fyne.CanvasObject {
 			pageTitle = "🏛️ Genel Bilgiler (Kurum ve Kurul Üyeleri)"
 			subContent = BuildSchoolInfoTab(state)
 		case "students":
-			pageTitle = "👥 Öğrenci Listesi ve Excel İçe Aktarma"
+			pageTitle = "👥 Öğrenci İşleri"
 			subContent = BuildStudentsTab(state)
 		case "incidents":
 			pageTitle = "🐞 Olay Girişi ve İnceleme Profilleri"

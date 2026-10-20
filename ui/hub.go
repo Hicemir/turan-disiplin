@@ -134,7 +134,7 @@ func buildModernHub(state *AppState) fyne.CanvasObject {
 		createNavCard("Puan İadesi / Yaptırım Kaldırma", theme.ViewRefreshIcon(), "Lise için Madde 171/2 Sene Sonu Puan İade Çizelgesi, Ortaokul için Yaptırım Kaldırma Raporu.", false, "restoration"),
 
 		// Row 2
-		createNavCard("Öğrenci İşlemleri & Excel", theme.AccountIcon(), "Öğrenci listesi, e-Okul / e-Mesem'den 3 modlu Excel aktarımı, öğrenci arama ve düzenleme.", false, "students"),
+		createNavCard("Öğrenci İşleri", theme.AccountIcon(), "Öğrenci listesi, e-Okul / e-Mesem'den 3 modlu Excel aktarımı, öğrenci arama ve düzenleme.", false, "students"),
 		createNavCard("Çağrı Pusulaları", theme.MailSendIcon(), "Öğrenci savunma ve ifade çağrı pusulaları, tebellüğ bloğu ve kurul üye toplantı çağrısı.", false, "summons"),
 		createNavCard("Ceza İstatistikleri Raporu", theme.StorageIcon(), "1. ve 2. Dönem ceza dağılımları ve okul disiplin analiz raporları.", false, "stats"),
 
