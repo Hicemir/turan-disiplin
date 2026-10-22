@@ -2,8 +2,6 @@ package ui
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -125,13 +123,7 @@ func BuildHeader(state *AppState) fyne.CanvasObject {
 
 	// Open Output Folder Button
 	openFolderBtn := widget.NewButtonWithIcon("Belgeler", theme.FolderOpenIcon(), func() {
-		home, err := os.UserHomeDir()
-		outDir := "."
-		if err == nil {
-			outDir = filepath.Join(home, "TuranDisiplin_belgeler")
-		}
-		_ = os.MkdirAll(outDir, 0755)
-		_ = pdf.OpenPDF(outDir)
+		openPDF(state, pdf.OutputDir())
 	})
 
 	// Backup Database Button
@@ -196,4 +188,13 @@ func showConfirm(w fyne.Window, title, msg string, onConfirm func()) {
 
 func formatPoints(p int) string {
 	return fmt.Sprintf("%d", p)
+}
+
+// openPDF opens a generated document (or folder) and reports failures to the
+// user instead of silently ignoring them, including the file location so it
+// can still be found manually.
+func openPDF(state *AppState, path string) {
+	if err := pdf.OpenPDF(path); err != nil {
+		showError(state.Window, fmt.Errorf("%v\n\nDosya şu konuma kaydedildi:\n%s", err, path))
+	}
 }

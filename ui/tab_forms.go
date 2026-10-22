@@ -134,38 +134,122 @@ func BuildFormsTab(state *AppState) fyne.CanvasObject {
 		updateExtraInputs(s)
 	}
 
-	reloadDropdowns := func() {
-		stList, err := state.Store.GetStudents(state.AcademicYear, "", "")
-		if err == nil {
-			currentStudents = stList
-			var opts []string
-			for _, s := range stList {
-				opts = append(opts, fmt.Sprintf("%s - %s (%s)", s.SchoolNo, s.FullName, s.ClassSection))
+	const noIncidentOption = "(Olay yok - öğrenciyi ara)"
+	const maxSearchResults = 50
+
+	// Student search box: only used when no related incident is selected.
+	studentSearch := NewSingleLineEntry()
+	studentSearch.SetPlaceHolder("Ad soyad veya okul no yazarak arayın...")
+	studentSearchItem := widget.NewFormItem("Öğrenci Ara", studentSearch)
+
+	setStudentOptions := func(list []model.Student, placeHolder string) {
+		currentStudents = list
+		selectedStudent = nil
+		var opts []string
+		for _, s := range list {
+			opts = append(opts, fmt.Sprintf("%s - %s (%s)", s.SchoolNo, s.FullName, s.ClassSection))
+		}
+		stSelect.Options = opts
+		stSelect.PlaceHolder = placeHolder
+		stSelect.ClearSelected()
+		stSelect.Refresh()
+		if len(opts) == 1 || (len(opts) > 0 && selectedIncident != nil) {
+			stSelect.SetSelectedIndex(0)
+		}
+	}
+
+	// Shows students of the selected incident, or search results when none is chosen.
+	refreshStudents := func() {
+		if selectedIncident != nil {
+			studentSearchItem.HintText = ""
+			studentSearch.Hide()
+			incStudents, err := state.Store.GetIncidentStudents(state.AcademicYear, selectedIncident.IncidentCode)
+			if err != nil {
+				setStudentOptions(nil, "(Seçiniz)")
+				return
 			}
-			stSelect.Options = opts
-			stSelect.Refresh()
-			if len(opts) > 0 {
-				stSelect.SetSelectedIndex(0)
+			all, _ := state.Store.GetStudents(state.AcademicYear, "", "")
+			byNo := make(map[string]model.Student, len(all))
+			for _, s := range all {
+				byNo[s.SchoolNo] = s
 			}
+			var list []model.Student
+			seen := map[string]bool{}
+			for _, is := range incStudents {
+				if seen[is.SchoolNo] {
+					continue
+				}
+				seen[is.SchoolNo] = true
+				if st, ok := byNo[is.SchoolNo]; ok {
+					list = append(list, st)
+				} else {
+					list = append(list, model.Student{
+						AcademicYear: is.AcademicYear, SchoolNo: is.SchoolNo, FullName: is.FullName,
+						ClassSection: is.ClassSection, Gender: is.Gender, TCNo: is.TCNo,
+						BirthPlace: is.BirthPlace, BirthDate: is.BirthDate, FatherName: is.FatherName,
+						MotherName: is.MotherName, GuardianName: is.GuardianName,
+						GuardianPhone: is.GuardianPhone, GuardianAddr: is.GuardianAddr,
+						BoardingStatus: is.BoardingStatus,
+					})
+				}
+			}
+			ph := "(Seçiniz)"
+			if len(list) == 0 {
+				ph = "(Bu olaya kayıtlı öğrenci yok)"
+			}
+			setStudentOptions(list, ph)
+			return
 		}
 
+		studentSearch.Show()
+		query := foldTR(strings.TrimSpace(studentSearch.Text))
+		if query == "" {
+			setStudentOptions(nil, "(Önce yukarıdan öğrenci arayın)")
+			return
+		}
+		all, err := state.Store.GetStudents(state.AcademicYear, "", "")
+		if err != nil {
+			setStudentOptions(nil, "(Seçiniz)")
+			return
+		}
+		var list []model.Student
+		for _, s := range all {
+			hay := foldTR(s.SchoolNo + " " + s.FullName + " " + s.ClassSection)
+			if strings.Contains(hay, query) {
+				list = append(list, s)
+				if len(list) >= maxSearchResults {
+					break
+				}
+			}
+		}
+		ph := "(Seçiniz)"
+		if len(list) == 0 {
+			ph = "(Sonuç bulunamadı)"
+		}
+		setStudentOptions(list, ph)
+	}
+
+	studentSearch.OnChanged = func(string) { refreshStudents() }
+
+	reloadDropdowns := func() {
 		incList, err := state.Store.GetIncidents(state.AcademicYear)
 		if err == nil {
 			currentIncidents = incList
-			var opts []string
+			opts := []string{noIncidentOption}
 			for _, inc := range incList {
 				opts = append(opts, fmt.Sprintf("#%s - %s", inc.IncidentCode, inc.Title))
 			}
 			incSelect.Options = opts
 			incSelect.Refresh()
-			if len(opts) > 0 {
-				incSelect.SetSelectedIndex(0)
-			}
 		}
+		selectedIncident = nil
+		incSelect.SetSelected(noIncidentOption)
+		refreshStudents()
 	}
 
 	stSelect.OnChanged = func(selected string) {
-		for _, s := range currentStudents {
+		for i := range currentStudents {
+			s := currentStudents[i]
 			if strings.HasPrefix(selected, s.SchoolNo+" - ") {
 				selectedStudent = &s
 				break
@@ -174,15 +258,17 @@ func BuildFormsTab(state *AppState) fyne.CanvasObject {
 	}
 
 	incSelect.OnChanged = func(selected string) {
-		for _, inc := range currentIncidents {
+		selectedIncident = nil
+		for i := range currentIncidents {
+			inc := currentIncidents[i]
 			prefix := fmt.Sprintf("#%s - ", inc.IncidentCode)
 			if strings.HasPrefix(selected, prefix) {
 				selectedIncident = &inc
 				break
 			}
 		}
+		refreshStudents()
 	}
-
 
 	// Big Action Button: "PDF Oluştur ve Aç"
 	pdfBtn := widget.NewButtonWithIcon("PDF OLUŞTUR VE AÇ", theme.DocumentIcon(), func() {
@@ -203,7 +289,7 @@ func BuildFormsTab(state *AppState) fyne.CanvasObject {
 				showError(state.Window, err)
 				return
 			}
-			_ = pdf.OpenPDF(outPath)
+			openPDF(state, outPath)
 
 		case strings.HasPrefix(docType, "2."): // Savunma Tutanağı
 			outPath, _ := pdf.GenerateUniquePDFPath("", fmt.Sprintf("Savunma_Tutanagi_%s_%s", stNo, stName))
@@ -212,7 +298,7 @@ func BuildFormsTab(state *AppState) fyne.CanvasObject {
 				showError(state.Window, err)
 				return
 			}
-			_ = pdf.OpenPDF(outPath)
+			openPDF(state, outPath)
 
 		case strings.HasPrefix(docType, "3."): // Bilgi Toplama - Olay
 			outPath, _ := pdf.GenerateUniquePDFPath("", fmt.Sprintf("Bilgi_Toplama_Olay_%s", stNo))
@@ -221,7 +307,7 @@ func BuildFormsTab(state *AppState) fyne.CanvasObject {
 				showError(state.Window, err)
 				return
 			}
-			_ = pdf.OpenPDF(outPath)
+			openPDF(state, outPath)
 
 		case strings.HasPrefix(docType, "4."): // Bilgi Toplama - Öğretmen
 			outPath, _ := pdf.GenerateUniquePDFPath("", fmt.Sprintf("Bilgi_Toplama_Ogretmen_%s", stNo))
@@ -230,7 +316,7 @@ func BuildFormsTab(state *AppState) fyne.CanvasObject {
 				showError(state.Window, err)
 				return
 			}
-			_ = pdf.OpenPDF(outPath)
+			openPDF(state, outPath)
 
 		case strings.HasPrefix(docType, "5."): // Bilgi Toplama - Sınıf Rehber Öğretmeni
 			outPath, _ := pdf.GenerateUniquePDFPath("", fmt.Sprintf("Bilgi_Toplama_SinifRehber_%s", stNo))
@@ -239,7 +325,7 @@ func BuildFormsTab(state *AppState) fyne.CanvasObject {
 				showError(state.Window, err)
 				return
 			}
-			_ = pdf.OpenPDF(outPath)
+			openPDF(state, outPath)
 
 		case strings.HasPrefix(docType, "6."): // Bilgi Toplama - Veli
 			outPath, _ := pdf.GenerateUniquePDFPath("", fmt.Sprintf("Bilgi_Toplama_Veli_%s", stNo))
@@ -248,7 +334,7 @@ func BuildFormsTab(state *AppState) fyne.CanvasObject {
 				showError(state.Window, err)
 				return
 			}
-			_ = pdf.OpenPDF(outPath)
+			openPDF(state, outPath)
 
 		case strings.HasPrefix(docType, "7."): // Bilgi Toplama - Öğrenci
 			outPath, _ := pdf.GenerateUniquePDFPath("", fmt.Sprintf("Bilgi_Toplama_Ogrenci_%s", stNo))
@@ -257,7 +343,7 @@ func BuildFormsTab(state *AppState) fyne.CanvasObject {
 				showError(state.Window, err)
 				return
 			}
-			_ = pdf.OpenPDF(outPath)
+			openPDF(state, outPath)
 
 		case strings.HasPrefix(docType, "8."): // Ek Süre Talep
 			days, _ := strconv.Atoi(extraDaysEntry.Text)
@@ -270,7 +356,7 @@ func BuildFormsTab(state *AppState) fyne.CanvasObject {
 				showError(state.Window, err)
 				return
 			}
-			_ = pdf.OpenPDF(outPath)
+			openPDF(state, outPath)
 
 		case strings.HasPrefix(docType, "9."): // Şikayet Formu
 			outPath, _ := pdf.GenerateUniquePDFPath("", fmt.Sprintf("Sikayet_Formu_%s", stNo))
@@ -290,7 +376,7 @@ func BuildFormsTab(state *AppState) fyne.CanvasObject {
 				showError(state.Window, err)
 				return
 			}
-			_ = pdf.OpenPDF(outPath)
+			openPDF(state, outPath)
 
 		case strings.HasPrefix(docType, "10."): // Sözlü Uyarı
 			outPath, _ := pdf.GenerateUniquePDFPath("", fmt.Sprintf("Sozlu_Uyari_%s", stNo))
@@ -299,7 +385,7 @@ func BuildFormsTab(state *AppState) fyne.CanvasObject {
 				showError(state.Window, err)
 				return
 			}
-			_ = pdf.OpenPDF(outPath)
+			openPDF(state, outPath)
 
 		case strings.HasPrefix(docType, "11."): // Öğrenci Sözleşmesi
 			outPath, _ := pdf.GenerateUniquePDFPath("", fmt.Sprintf("Ogrenci_Sozlesmesi_%s", stNo))
@@ -308,7 +394,7 @@ func BuildFormsTab(state *AppState) fyne.CanvasObject {
 				showError(state.Window, err)
 				return
 			}
-			_ = pdf.OpenPDF(outPath)
+			openPDF(state, outPath)
 
 		case strings.HasPrefix(docType, "12."): // Veli Görüşme Tutanağı
 			outPath, _ := pdf.GenerateUniquePDFPath("", fmt.Sprintf("Veli_Gorusme_Tutanagi_%s", stNo))
@@ -318,7 +404,7 @@ func BuildFormsTab(state *AppState) fyne.CanvasObject {
 				showError(state.Window, err)
 				return
 			}
-			_ = pdf.OpenPDF(outPath)
+			openPDF(state, outPath)
 
 		case strings.HasPrefix(docType, "13."): // Veli Görüşme Formu (Boş)
 			outPath, _ := pdf.GenerateUniquePDFPath("", fmt.Sprintf("Veli_Gorusme_Formu_%s", stNo))
@@ -327,7 +413,7 @@ func BuildFormsTab(state *AppState) fyne.CanvasObject {
 				showError(state.Window, err)
 				return
 			}
-			_ = pdf.OpenPDF(outPath)
+			openPDF(state, outPath)
 
 		case strings.HasPrefix(docType, "14."): // Rehberlik Görüş Formu
 			outPath, _ := pdf.GenerateUniquePDFPath("", fmt.Sprintf("Rehberlik_Gorus_Formu_%s", stNo))
@@ -337,15 +423,16 @@ func BuildFormsTab(state *AppState) fyne.CanvasObject {
 				showError(state.Window, err)
 				return
 			}
-			_ = pdf.OpenPDF(outPath)
+			openPDF(state, outPath)
 		}
 	})
 	pdfBtn.Importance = widget.SuccessImportance
 
 	mainForm := widget.NewForm(
 		widget.NewFormItem("Evrak Türü *", docTypeSelect),
-		widget.NewFormItem("Öğrenci Seçimi *", stSelect),
 		widget.NewFormItem("İlişkili Olay (Varsa)", incSelect),
+		studentSearchItem,
+		widget.NewFormItem("Öğrenci Seçimi *", stSelect),
 	)
 
 	contentCard := widget.NewCard("Resmi Tutanak ve Form Seçimi", "Oluşturmak istediğiniz resmi evrakı ve öğrenciyi seçiniz", container.NewVBox(
@@ -370,4 +457,29 @@ func BuildFormsTab(state *AppState) fyne.CanvasObject {
 	rehber4Entry.ParentScroll = pageScroll
 
 	return pageScroll
+}
+
+// foldTR lowercases text and removes Turkish diacritics so searches work
+// regardless of case or whether the user typed "ı/i", "ş/s", etc.
+func foldTR(s string) string {
+	var sb strings.Builder
+	for _, r := range s {
+		switch r {
+		case 'ı', 'İ', 'I', 'i':
+			sb.WriteRune('i')
+		case 'ğ', 'Ğ':
+			sb.WriteRune('g')
+		case 'ü', 'Ü':
+			sb.WriteRune('u')
+		case 'ş', 'Ş':
+			sb.WriteRune('s')
+		case 'ö', 'Ö':
+			sb.WriteRune('o')
+		case 'ç', 'Ç':
+			sb.WriteRune('c')
+		default:
+			sb.WriteString(strings.ToLower(string(r)))
+		}
+	}
+	return sb.String()
 }

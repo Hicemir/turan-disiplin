@@ -449,13 +449,16 @@ func ParseStudentRows(rows [][]string, schoolYear string) (students []*model.Stu
 			if len(row) == 0 {
 				continue
 			}
-			banner := extractClassBanner(row)
-			if banner != "" {
-				currentClass = banner
+			// A data row may itself contain a class cell ("9. Sınıf / A Şubesi"),
+			// so try it as a student before treating it as a section banner.
+			st := studentFromMappedRow(row, colMap, currentClass, schoolYear)
+			if st == nil {
+				if banner := extractClassBanner(row); banner != "" {
+					currentClass = banner
+				}
 				continue
 			}
-			st := studentFromMappedRow(row, colMap, currentClass, schoolYear)
-			if st != nil && st.SchoolNo != "" && !seenNo[st.SchoolNo] {
+			if st.SchoolNo != "" && !seenNo[st.SchoolNo] {
 				seenNo[st.SchoolNo] = true
 				students = append(students, st)
 			}
@@ -606,13 +609,9 @@ func parseCardBasedStudents(rows [][]string, schoolYear string) []*model.Student
 			}
 
 			// 4. Sınıfı / Şubesi
-			if strings.Contains(norm, "SINIFI/SUBESI") || strings.Contains(norm, "SINIFI") || strings.Contains(norm, "SUBESI") || strings.Contains(norm, "SINIF") {
+			if (strings.Contains(norm, "SINIF") || strings.Contains(norm, "SUBE")) && !isStaffLabel(val) {
 				if valStr != "" && len(valStr) <= 25 && !isOnlyPunctuation(valStr) {
-					cleanCls := strings.TrimSpace(valStr)
-					cleanCls = strings.ReplaceAll(cleanCls, " / ", "-")
-					cleanCls = strings.ReplaceAll(cleanCls, "/", "-")
-					cleanCls = strings.ReplaceAll(cleanCls, " ", "")
-					if current != nil && cleanCls != "" {
+					if cleanCls := normalizeClassName(valStr); cleanCls != "" && current != nil {
 						current.ClassSection = cleanCls
 					}
 				}
@@ -691,31 +690,69 @@ func extractClassBannerText(text string) string {
 	if !strings.Contains(upper, "SINIF") && !strings.Contains(upper, "ŞUBE") && !strings.Contains(upper, "SUBE") {
 		return ""
 	}
+	// Staff labels ("Sınıf Rehber Öğretmeni", "Müdür Yardımcısı"...) are never a class.
+	if isStaffLabel(text) {
+		return ""
+	}
 	lines := strings.Split(text, "\n")
 	for _, l := range lines {
 		lUpper := strings.ToUpper(l)
 		if strings.Contains(lUpper, "SINIF") || strings.Contains(lUpper, "ŞUBE") {
 			l = strings.TrimSpace(l)
-			// Remove "(ALANI YOK)" or prefixes
 			l = regexp.MustCompile(`(?i)\(alan[ıi]\s*yok\)`).ReplaceAllString(l, "")
 			l = regexp.MustCompile(`(?i)^.*-\s*`).ReplaceAllString(l, "")
-			// "Hazırlık Sınıfı / A Şubesi" -> "Hazırlık-A"
-			l = strings.ReplaceAll(l, "Sınıfı", "")
-			l = strings.ReplaceAll(l, "SINIFI", "")
-			l = strings.ReplaceAll(l, "Şubesi", "")
-			l = strings.ReplaceAll(l, "SUBESI", "")
-			l = strings.ReplaceAll(l, "/", "-")
-			l = strings.TrimSpace(l)
-			parts := strings.Split(l, "-")
-			if len(parts) >= 2 {
-				p1 := strings.TrimSpace(parts[0])
-				p2 := strings.TrimSpace(parts[1])
-				return p1 + "-" + p2
+			if c := normalizeClassName(l); c != "" {
+				return c
 			}
-			return l
 		}
 	}
 	return ""
+}
+
+var (
+	classStrictRe = regexp.MustCompile(`^(HAZIRLIK|\d{1,2})[\s\-/.]*([A-Z]{1,2})$`)
+	classLooseRe  = regexp.MustCompile(`(?:^|[^0-9A-Z])(\d{1,2})\s*[-/.]\s*([A-Z]{1,2})(?:[^0-9A-Z]|$)`)
+	classWordRe   = regexp.MustCompile(`SINIFI|SINIF|SUBESI|SUBE`)
+)
+
+// isStaffLabel reports whether text names a staff role (vice principal,
+// homeroom teacher...) rather than a class. Such cells must never be used as
+// the class/section value.
+func isStaffLabel(text string) bool {
+	n := normalizeTurkish(text)
+	for _, w := range []string{"MUDUR", "YARDIMCI", "REHBER", "OGRETMEN", "DANISMAN", "KOORDINATOR", "SAYISI", "TOPLAM"} {
+		if strings.Contains(n, w) {
+			return true
+		}
+	}
+	return false
+}
+
+// normalizeClassName converts values such as "9-A", "9/A", "9. Sınıf A Şubesi",
+// "10 / B" or "Hazırlık Sınıfı / A Şubesi" to the canonical "9-A" form.
+// It returns "" if the text does not look like a class/section at all, which
+// prevents unrelated text (e.g. a vice principal's name) from being imported.
+func normalizeClassName(text string) string {
+	n := strings.TrimSpace(normalizeTurkish(text))
+	if n == "" || isStaffLabel(text) {
+		return ""
+	}
+	n = classWordRe.ReplaceAllString(n, " ")
+	n = strings.TrimSpace(n)
+	if m := classStrictRe.FindStringSubmatch(n); m != nil {
+		return formatClass(m[1], m[2])
+	}
+	if m := classLooseRe.FindStringSubmatch(n); m != nil {
+		return formatClass(m[1], m[2])
+	}
+	return ""
+}
+
+func formatClass(level, section string) string {
+	if level == "HAZIRLIK" {
+		level = "Hazırlık"
+	}
+	return level + "-" + section
 }
 
 func detectHeaderMapping(row []string) map[string]int {
@@ -739,7 +776,12 @@ func detectHeaderMapping(row []string) map[string]int {
 		} else if c == "SOYADI" || c == "SOYAD" {
 			m["soyad"] = idx
 		} else if strings.Contains(c, "SINIF") || strings.Contains(c, "SUBE") {
-			m["sinif"] = idx
+			// Skip staff columns such as "Sınıf Rehber Öğretmeni" or
+			// "Şube Müdür Yardımcısı"; they are not the class itself.
+			// Keep the first matching column if several remain.
+			if !isStaffLabel(rawCell) && !hasKey(m, "sinif") {
+				m["sinif"] = idx
+			}
 		} else if strings.Contains(c, "BABA") {
 			m["baba"] = idx
 		} else if strings.Contains(c, "ANNE") {
@@ -826,9 +868,17 @@ func studentFromMappedRow(row []string, m map[string]int, defaultClass string, s
 
 	classStr := defaultClass
 	if idx, ok := m["sinif"]; ok {
-		val := getCell(row, idx)
-		if val != "" {
-			classStr = val
+		if c := normalizeClassName(getCell(row, idx)); c != "" {
+			classStr = c
+		}
+	}
+	if classStr == "" {
+		// Class column missing or unusable: look for a class-looking cell in the row.
+		for _, cell := range row {
+			if c := normalizeClassName(cell); c != "" {
+				classStr = c
+				break
+			}
 		}
 	}
 
@@ -889,7 +939,7 @@ func studentFromHeuristicRow(row []string, defaultClass string, schoolYear strin
 				if classCol == -1 {
 					classCol = idx
 				}
-			} else if strings.Contains(norm, "SINIF") || strings.Contains(norm, "SUBE") {
+			} else if (strings.Contains(norm, "SINIF") || strings.Contains(norm, "SUBE")) && !isStaffLabel(val) {
 				if classCol == -1 {
 					classCol = idx
 				}
@@ -923,7 +973,9 @@ func studentFromHeuristicRow(row []string, defaultClass string, schoolYear strin
 
 	classStr := defaultClass
 	if classCol != -1 {
-		classStr = strings.TrimSpace(row[classCol])
+		if c := normalizeClassName(row[classCol]); c != "" {
+			classStr = c
+		}
 	}
 
 	tc := ""

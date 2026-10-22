@@ -353,22 +353,65 @@ func (d *DocWrapper) DrawFooterAddress(school *model.SchoolInfo) {
 	}
 }
 
+// OutputDir returns the folder where generated documents are stored. It prefers
+// <home>/TuranDisiplin_belgeler but falls back to the temp directory when the
+// profile folder cannot be created or written (locked-down or redirected
+// profiles on other PCs).
+func OutputDir() string {
+	var candidates []string
+	if home, err := os.UserHomeDir(); err == nil && home != "" {
+		candidates = append(candidates, filepath.Join(home, "TuranDisiplin_belgeler"))
+	}
+	if cfg, err := os.UserConfigDir(); err == nil && cfg != "" {
+		candidates = append(candidates, filepath.Join(cfg, "TuranDisiplin", "belgeler"))
+	}
+	candidates = append(candidates, filepath.Join(os.TempDir(), "TuranDisiplin_belgeler"))
+	for _, dir := range candidates {
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			continue
+		}
+		probe := filepath.Join(dir, ".write_test")
+		if err := os.WriteFile(probe, []byte("x"), 0644); err != nil {
+			continue
+		}
+		_ = os.Remove(probe)
+		return dir
+	}
+	return "."
+}
+
+// sanitizeFileName removes characters that are illegal in Windows file names.
+func sanitizeFileName(name string) string {
+	var sb strings.Builder
+	for _, r := range name {
+		switch {
+		case r < 32, strings.ContainsRune(`<>:"/\|?*`, r):
+			sb.WriteRune('-')
+		case r == ' ':
+			sb.WriteRune('_')
+		default:
+			sb.WriteRune(r)
+		}
+	}
+	out := strings.Trim(sb.String(), ". ")
+	if out == "" {
+		out = "Belge"
+	}
+	return out
+}
+
 // GenerateUniquePDFPath returns an available file path avoiding collision.
 func GenerateUniquePDFPath(baseDir string, prefix string) (string, error) {
 	if baseDir == "" {
-		home, err := os.UserHomeDir()
-		if err != nil {
-			baseDir = "."
-		} else {
-			baseDir = filepath.Join(home, "TuranDisiplin_belgeler")
-		}
+		baseDir = OutputDir()
 	}
 
 	_ = os.MkdirAll(baseDir, 0755)
 
-	safePrefix := strings.ReplaceAll(prefix, " ", "_")
-	safePrefix = strings.ReplaceAll(safePrefix, "/", "-")
-	safePrefix = strings.ReplaceAll(safePrefix, "\\", "-")
+	safePrefix := sanitizeFileName(prefix)
+	if len(safePrefix) > 100 {
+		safePrefix = safePrefix[:100]
+	}
 
 	for i := 1; i <= 9999; i++ {
 		candidate := filepath.Join(baseDir, fmt.Sprintf("%s_%d.pdf", safePrefix, i))

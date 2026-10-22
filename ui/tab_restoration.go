@@ -165,7 +165,7 @@ func BuildRestorationTab(state *AppState) fyne.CanvasObject {
 				showError(state.Window, fmt.Errorf("PDF oluşturulamadı: %w", err))
 				return
 			}
-			_ = pdf.OpenPDF(outPath)
+			openPDF(state, outPath)
 
 		} else {
 			// Generate High School Behavior Score Refund Chart (Landscape A4)
@@ -208,7 +208,7 @@ func BuildRestorationTab(state *AppState) fyne.CanvasObject {
 				showError(state.Window, fmt.Errorf("PDF oluşturulamadı: %w", err))
 				return
 			}
-			_ = pdf.OpenPDF(outPath)
+			openPDF(state, outPath)
 		}
 	})
 	pdfBtn.Importance = widget.SuccessImportance

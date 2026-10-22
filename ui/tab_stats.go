@@ -143,7 +143,7 @@ func BuildStatsTab(state *AppState) fyne.CanvasObject {
 			return
 		}
 
-		_ = pdf.OpenPDF(outPath)
+		openPDF(state, outPath)
 	})
 	pdfRosterBtn.Importance = widget.SuccessImportance
 
@@ -175,7 +175,7 @@ func BuildStatsTab(state *AppState) fyne.CanvasObject {
 			return
 		}
 
-		_ = pdf.OpenPDF(outPath)
+		openPDF(state, outPath)
 	})
 	pdfStatsBtn.Importance = widget.SuccessImportance
 

@@ -101,7 +101,7 @@ func BuildMinutesTab(state *AppState) fyne.CanvasObject {
 			return
 		}
 
-		_ = pdf.OpenPDF(outPath)
+		openPDF(state, outPath)
 	})
 	pdfMeetingBtn.Importance = widget.SuccessImportance
 
@@ -150,7 +150,7 @@ func BuildMinutesTab(state *AppState) fyne.CanvasObject {
 			return
 		}
 
-		_ = pdf.OpenPDF(outPath)
+		openPDF(state, outPath)
 	})
 	pdfDiziBtn.Importance = widget.SuccessImportance
 

@@ -240,3 +240,27 @@ func TestReadSheetData_RealFile(t *testing.T) {
 	}
 }
 
+
+func TestParseStudentRows_StaffColumnsDoNotOverrideClass(t *testing.T) {
+	rows := [][]string{
+		{"Sıra", "Öğrenci No", "Adı Soyadı", "Sınıfı / Şubesi", "Sınıf Rehber Öğretmeni", "Müdür Yardımcısı"},
+		{"1", "101", "Ahmet Yılmaz", "9 / A", "Ayşe Hoca", "Mehmet Bey"},
+		{"2", "102", "Ayşe Demir", "Hazırlık Sınıfı / B Şubesi", "Ayşe Hoca", "Mehmet Bey"},
+	}
+	st, err := ParseStudentRows(rows, "2025 - 2026")
+	if err != nil || len(st) != 2 {
+		t.Fatalf("err=%v n=%d", err, len(st))
+	}
+	if st[0].ClassSection != "9-A" || st[1].ClassSection != "Hazırlık-B" {
+		t.Errorf("got %q, %q", st[0].ClassSection, st[1].ClassSection)
+	}
+	// Staff column listed before the class column, class column empty.
+	rows = [][]string{
+		{"Öğrenci No", "Adı Soyadı", "Müdür Yardımcısı", "Sınıf/Şube"},
+		{"103", "Can Er", "Mehmet Bey", "10A"},
+	}
+	st, _ = ParseStudentRows(rows, "x")
+	if len(st) != 1 || st[0].ClassSection != "10-A" {
+		t.Errorf("got %+v", st)
+	}
+}

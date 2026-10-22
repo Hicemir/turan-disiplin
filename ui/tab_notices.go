@@ -138,7 +138,7 @@ func BuildNoticesTab(state *AppState) fyne.CanvasObject {
 			return
 		}
 
-		_ = pdf.OpenPDF(outPath)
+		openPDF(state, outPath)
 	})
 	pdfOgrenciTebligatBtn.Importance = widget.SuccessImportance
 
@@ -204,7 +204,7 @@ func BuildNoticesTab(state *AppState) fyne.CanvasObject {
 			return
 		}
 
-		_ = pdf.OpenPDF(outPath)
+		openPDF(state, outPath)
 	})
 	pdfOgrenciTebligatBtn.Disable()
 	pdfVeliTebligatBtn.Disable()

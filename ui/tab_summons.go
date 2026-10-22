@@ -154,7 +154,7 @@ func BuildSummonsTab(state *AppState) fyne.CanvasObject {
 			return
 		}
 
-		_ = pdf.OpenPDF(outPath)
+		openPDF(state, outPath)
 	})
 	pdfStudentSummonsBtn.Importance = widget.SuccessImportance
 
@@ -177,7 +177,7 @@ func BuildSummonsTab(state *AppState) fyne.CanvasObject {
 			return
 		}
 
-		_ = pdf.OpenPDF(outPath)
+		openPDF(state, outPath)
 	})
 
 	// --- 2. Board Member Summons Controls ---
@@ -218,7 +218,7 @@ func BuildSummonsTab(state *AppState) fyne.CanvasObject {
 			return
 		}
 
-		_ = pdf.OpenPDF(outPath)
+		openPDF(state, outPath)
 	})
 	pdfMemberSummonsBtn.Importance = widget.SuccessImportance
 
