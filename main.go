@@ -174,6 +174,16 @@ StartupWMClass=com.turandisiplin.app
 		_ = os.WriteFile(df, []byte(desktopContent), 0644)
 	}
 
+	// 3. Show the app icon on the executable file itself in the file manager
+	// (Nautilus/Nemo/Caja/Thunar honour the gio "custom-icon" metadata). A raw ELF
+	// binary cannot embed an icon, so this is what replaces the grey generic icon.
+	if execPath != "" && len(assets.LogoPNG) > 0 {
+		iconPath := filepath.Join(home, ".local/share/icons/com.turandisiplin.app.png")
+		if _, statErr := os.Stat(iconPath); statErr == nil {
+			_ = exec.Command("gio", "set", execPath, "metadata::custom-icon", "file://"+iconPath).Run()
+		}
+	}
+
 	// Notify desktop database and icon cache
 	_ = exec.Command("update-desktop-database", appDir).Run()
 	_ = exec.Command("gtk-update-icon-cache", filepath.Join(home, ".local/share/icons/hicolor")).Run()
