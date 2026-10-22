@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -181,6 +182,17 @@ StartupWMClass=com.turandisiplin.app
 		iconPath := filepath.Join(home, ".local/share/icons/com.turandisiplin.app.png")
 		if _, statErr := os.Stat(iconPath); statErr == nil {
 			_ = exec.Command("gio", "set", execPath, "metadata::custom-icon", "file://"+iconPath).Run()
+
+			// KDE Dolphin ignores that metadata, so also place a launcher with the
+			// app icon next to the binary (skipped for system install locations).
+			dir := filepath.Dir(execPath)
+			if !strings.HasPrefix(dir, "/usr") && !strings.HasPrefix(dir, "/opt") && !strings.HasPrefix(dir, "/tmp") {
+				launcher := filepath.Join(dir, "TuranDisiplin.desktop")
+				content := strings.Replace(desktopContent, "Icon=com.turandisiplin.app", "Icon="+iconPath, 1)
+				if err := os.WriteFile(launcher, []byte(content), 0755); err == nil {
+					_ = exec.Command("gio", "set", launcher, "metadata::trusted", "true").Run()
+				}
+			}
 		}
 	}
 
